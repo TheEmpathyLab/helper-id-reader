@@ -1490,44 +1490,35 @@
 
     ring.classList.add('writing');
     title.textContent = 'Waiting for tag…';
-    sub.textContent   = 'Hold the NFC tag against the TOP of the back of your phone.';
+    sub.textContent   = 'Hold the NFC tag against the MIDDLE of the back of your phone.';
 
     try {
       const ndef = new NDEFReader();
-      const controller = new AbortController();
 
-      // CRITICAL: Must call scan() first to start polling.
-      // Then write() inside the reading event once tag is detected.
-      // Calling write() alone won't intercept the tag before Android OS grabs it.
-      await ndef.scan({ signal: controller.signal });
+      // write() handles both blank and previously-written NTAG215 tags.
+      // It internally polls until a tag is found, then writes immediately.
+      // The scan() + reading event pattern misses blank tags because blank
+      // NTAG215s have no NDEF records and don't reliably fire 'reading'.
+      sub.textContent = 'Hold the NFC tag against the MIDDLE of the back of your phone.';
 
-      ndef.addEventListener('reading', async () => {
-        try {
-          await ndef.write(
-            { records: [{ recordType: 'text', data: encodeProfile(profile) }] },
-            { signal: controller.signal }
-          );
-          controller.abort();
-          setSuccess();
-          if (successCb) successCb(profile);
-        } catch (writeErr) {
-          controller.abort();
-          setError(writeErr.message || 'Write failed after tag detected.');
-        }
-      }, { once: true });
-
-      ndef.addEventListener('readingerror', () => {
-        controller.abort();
-        setError('Tag detected but could not be read. Is it a valid NTAG215?');
+      await ndef.write({
+        records: [{ recordType: 'text', data: encodeProfile(profile) }]
       });
+
+      setSuccess();
+      if (successCb) successCb(profile);
 
     } catch (err) {
       if (err.name === 'NotAllowedError') {
-        setError('NFC permission denied. Please allow NFC access and try again.');
+        setError('NFC permission denied. Tap the lock icon in Chrome and allow NFC, then try again.');
       } else if (err.name === 'AbortError') {
-        // intentional abort after success — ignore
+        // intentional cancel — ignore
+      } else if (err.name === 'NetworkError') {
+        setError('Tag moved away too quickly. Hold the tag steady and try again.');
+      } else if (err.name === 'NotSupportedError') {
+        setError('This tag type is not supported. Please use an NTAG215 tag.');
       } else {
-        setError(err.message || 'NFC error. Make sure NFC is enabled.');
+        setError((err.message || 'NFC write failed.') + ' Try again.');
       }
     }
   }
