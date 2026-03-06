@@ -676,10 +676,10 @@
       mx:  ["Lisinopril 10mg", "Metformin 500mg", "Aspirin 81mg"],
       cx:  ["Type 2 Diabetes", "Hypertension"],
       ec:  [
-        { nm: "Robert Bennett", rel: "Son",      ph: "404-555-0147" },
-        { nm: "Carol Simmons",  rel: "Daughter", ph: "770-555-0293" }
+        { n: "Robert Bennett", r: "Son",      p: "4045550147" },
+        { n: "Carol Simmons",  r: "Daughter", p: "7705550293" }
       ],
-      dr:  { nm: "Dr. Patricia Osei", ph: "678-555-0411" },
+      dr:  { n: "Dr. Patricia Osei", p: "6785550411" },
       nt:  "Uses a hearing aid (right ear). Lives alone in Unit 14B. Has a medical alert button. Prefers Northside Hospital.",
       ts:  "2026-03-02"
     };
@@ -719,10 +719,10 @@
             </svg>
           </div>
           <div class="contact-info">
-            <div class="contact-name">${ec.nm}</div>
-            <div class="contact-rel">${ec.rel}</div>
+            <div class="contact-name">${ec.n || ''}</div>
+            <div class="contact-rel">${ec.r || ''}</div>
           </div>
-          <a class="contact-phone" href="tel:${ec.ph}">${ec.ph}</a>
+          <a class="contact-phone" href="tel:${ec.p}">${ec.p || ''}</a>
         </div>`;
     }
 
@@ -773,8 +773,8 @@
 
       // Physician
       if (data.dr) {
-        document.getElementById('doc-name').textContent  = data.dr.nm;
-        document.getElementById('doc-phone').textContent = data.dr.ph;
+        document.getElementById('doc-name').textContent  = data.dr.n || '';
+        document.getElementById('doc-phone').textContent = data.dr.p || '';
       }
 
       // Notes
