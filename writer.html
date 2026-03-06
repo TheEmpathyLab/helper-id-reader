@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Member Enrollment</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────── */
+    :root {
+      --bg:          #0F1117;
+      --surface:     #181C27;
+      --surface-2:   #1E2333;
+      --border:      #2A3048;
+      --border-hi:   #3D4866;
+      --ink:         #EEF0F6;
+      --ink-mid:     #8B90A8;
+      --ink-dim:     #4A5070;
+      --accent:      #4F8EF7;
+      --accent-glow: rgba(79,142,247,0.18);
+      --accent-dark: #1A3A6E;
+      --red:         #F06560;
+      --red-dim:     rgba(240,101,96,0.15);
+      --amber:       #F5A623;
+      --amber-dim:   rgba(245,166,35,0.12);
+      --green:       #3ECF8E;
+      --green-dim:   rgba(62,207,142,0.12);
+      --radius:      8px;
+      --radius-lg:   14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-mark svg { width: 18px; height: 18px; }
+
+    .logo-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .mode-btn {
+      padding: 5px 14px;
+      border-radius: 100px;
+      border: none;
+      background: transparent;
+      color: var(--ink-mid);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+      letter-spacing: 0.01em;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────── */
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+
+    /* ── STEPS ───────────────────────────────────────────── */
+    .step { display: none; animation: fadeUp 0.3s ease; }
+    .step.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── STEP HEADER ─────────────────────────────────────── */
+    .step-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .step-sub {
+      font-size: 0.92rem;
+      color: var(--ink-mid);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* ── PROGRESS BAR ────────────────────────────────────── */
+    .progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 36px;
+    }
+
+    .progress-pip {
+      height: 3px;
+      flex: 1;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+
+    .progress-pip.done  { background: var(--accent); }
+    .progress-pip.active { background: var(--accent); opacity: 0.5; }
+
+    /* ── CARDS ───────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-family: 'DM Mono', monospace;
+      color: var(--ink-mid);
+      margin-bottom: 16px;
+    }
+
+    /* ── FORM ELEMENTS ───────────────────────────────────── */
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--ink-mid);
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .field label span.req { color: var(--red); margin-left: 2px; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder { color: var(--ink-dim); }
+
+    .field select option { background: var(--surface); }
+    .field textarea { resize: vertical; min-height: 72px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Tag input for multi-value fields */
+    .tag-input-wrap {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 46px;
+      cursor: text;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .tag-input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .tag-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-hi);
+      border-radius: 100px;
+      padding: 3px 10px 3px 10px;
+      font-size: 0.8rem;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .tag-pill button {
+      background: none;
+      border: none;
+      color: var(--ink-mid);
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      padding: 0 0 0 2px;
+      display: flex;
+      align-items: center;
+    }
+
+    .tag-pill button:hover { color: var(--red); }
+
+    .tag-input-inner {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--ink);
+      min-width: 120px;
+      flex: 1;
+      padding: 2px 4px;
+    }
+
+    .tag-input-inner::placeholder { color: var(--ink-dim); }
+
+    .field-hint {
+      font-size: 0.74rem;
+      color: var(--ink-dim);
+      margin-top: 5px;
+    }
+
+    /* ── CONTACT BLOCK ───────────────────────────────────── */
+    .contact-block {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .contact-block-label {
+      font-size: 0.72rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+
+    /* ── BUTTONS ─────────────────────────────────────────── */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #6FA5FF; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--ink-mid);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: var(--border-hi); color: var(--ink); }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn-row .btn { flex: 1; }
+
+    /* ── MEMBERSHIP PLAN CARD ────────────────────────────── */
+    .plan-card {
+      background: var(--surface-2);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .plan-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top left, var(--accent-glow) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .plan-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.68rem;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+
+    .plan-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .plan-price span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--ink-mid);
+      letter-spacing: 0;
+    }
+
+    .plan-desc {
+      color: var(--ink-mid);
+      font-size: 0.85rem;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+    }
+
+    .plan-features li::before {
+      content: '✓';
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--green-dim);
+      color: var(--green);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── STRIPE ELEMENT ──────────────────────────────────── */
+    #stripe-card-element {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      transition: border-color 0.15s;
+    }
+
+    #stripe-card-element.StripeElement--focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    #stripe-error {
+      color: var(--red);
+      font-size: 0.8rem;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    /* ── NFC WRITE SCREEN ────────────────────────────────── */
+    .nfc-write-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 32px 0;
+      text-align: center;
+    }
+
+    .nfc-ring {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 2.5px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    .nfc-ring.writing {
+      animation: spin-ring 1.8s linear infinite;
+    }
+
+    @keyframes spin-ring {
+      from { border-top-color: var(--accent); border-right-color: transparent; border-bottom-color: var(--border); border-left-color: transparent; transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .nfc-ring.success {
+      border-color: var(--green);
+      animation: none;
+    }
+
+    .nfc-ring.error {
+      border-color: var(--red);
+      animation: none;
+    }
+
+    .nfc-status-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .nfc-status-sub {
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+      max-width: 260px;
+    }
+
+    /* ── SUMMARY REVIEW ──────────────────────────────────── */
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+    }
+
+    .review-cell {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .review-cell:nth-last-child(-n+2) { border-bottom: none; }
+
+    .review-label {
+      font-size: 0.68rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 3px;
+    }
+
+    .review-value {
+      font-size: 0.88rem;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .review-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+
+    .review-pill {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+      border: 1px solid var(--border-hi);
+      color: var(--ink-mid);
+    }
+
+    .review-pill.red    { border-color: var(--red);   color: var(--red); background: var(--red-dim); }
+    .review-pill.amber  { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+    .review-pill.blue   { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+    /* ── HELPER DASHBOARD ────────────────────────────────── */
+    .helper-banner {
+      background: linear-gradient(135deg, #1A2E50 0%, #0F1117 100%);
+      border: 1px solid var(--accent-dark);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .helper-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .helper-info-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .helper-info-meta {
+      font-size: 0.78rem;
+      color: var(--ink-mid);
+      font-family: 'DM Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .helper-stats {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .helper-stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .helper-stat-label {
+      font-size: 0.7rem;
+      color: var(--ink-dim);
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── MEMBER ID CARD ──────────────────────────────────── */
+    .member-card {
+      background: linear-gradient(135deg, #1A2E50 0%, #0F1835 100%);
+      border: 1px solid var(--accent-dark);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .member-card::after {
+      content: 'HELPER·ID';
+      position: absolute;
+      right: -20px; bottom: -10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.03);
+      letter-spacing: -0.02em;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .member-id-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .member-id-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+
+    .member-id-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--ink-mid);
+      letter-spacing: 0.06em;
+    }
+
+    .member-id-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .member-id-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--green);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .status-dot-green {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .member-id-exp {
+      font-size: 0.72rem;
+      color: var(--ink-mid);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── ALERT / NOTICE ──────────────────────────────────── */
+    .notice {
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 0.83rem;
+      line-height: 1.5;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .notice-amber { background: var(--amber-dim); border: 1px solid rgba(245,166,35,0.3); color: #D4870A; }
+    .notice-blue  { background: var(--accent-glow); border: 1px solid rgba(79,142,247,0.3); color: #7AADFF; }
+    .notice-green { background: var(--green-dim); border: 1px solid rgba(62,207,142,0.3); color: var(--green); }
+
+    /* ── SPINNER ─────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── HELPER LOGIN ─────────────────────────────────────── */
+    .helper-login-wrap {
+      max-width: 360px;
+      margin: 60px auto 0;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .field-row, .field-row-3 { grid-template-columns: 1fr; }
+      .review-grid { grid-template-columns: 1fr; }
+      .step-title { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ────────────────────────────────────────────────────── -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <span class="logo-name">Helper-ID</span>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-member-mode" onclick="setMode('member')">Member</button>
+      <button class="mode-btn" id="btn-helper-mode" onclick="setMode('helper')">Helper</button>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       MEMBER FLOW
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div id="member-flow">
+    <main>
+
+      <!-- Progress -->
+      <div class="progress-bar" id="member-progress">
+        <div class="progress-pip active" id="pip-1"></div>
+        <div class="progress-pip" id="pip-2"></div>
+        <div class="progress-pip" id="pip-3"></div>
+        <div class="progress-pip" id="pip-4"></div>
+        <div class="progress-pip" id="pip-5"></div>
+      </div>
+
+      <!-- ── STEP 1: Account ─────────────────────────────── -->
+      <div class="step active" id="m-step-1">
+        <div class="step-eyebrow">Step 1 of 5 · Account</div>
+        <h1 class="step-title">Create your<br>Helper-ID account</h1>
+        <p class="step-sub">Your information stays on your tag — we only use your email for account management and renewal reminders.</p>
+
+        <div class="card">
+          <div class="card-title">Account Details</div>
+          <div class="field-row">
+            <div class="field">
+              <label>First Name <span class="req">*</span></label>
+              <input type="text" id="acct-first" placeholder="Margaret" autocomplete="given-name" />
+            </div>
+            <div class="field">
+              <label>Last Name <span class="req">*</span></label>
+              <input type="text" id="acct-last" placeholder="Bennett" autocomplete="family-name" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Email Address <span class="req">*</span></label>
+            <input type="email" id="acct-email" placeholder="margaret@email.com" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label>Phone Number</label>
+            <input type="tel" id="acct-phone" placeholder="404-555-0100" autocomplete="tel" />
+            <div class="field-hint">For renewal reminders only. Never shared.</div>
+          </div>
+        </div>
+
+        <div class="notice notice-blue">
+          <span>🔒</span>
+          <span>Helper-ID never sells or shares your personal information. Your emergency data lives only on your physical tag.</span>
+        </div>
+
+        <button class="btn btn-primary" onclick="memberStep(2)">Continue →</button>
+      </div>
+
+      <!-- ── STEP 2: Membership + Payment ───────────────── -->
+      <div class="step" id="m-step-2">
+        <div class="step-eyebrow">Step 2 of 5 · Membership</div>
+        <h1 class="step-title">Choose your<br>plan</h1>
+        <p class="step-sub">One annual membership covers you, your NFC tag, and unlimited profile updates.</p>
+
+        <div class="plan-card">
+          <div class="plan-badge">Annual Membership</div>
+          <div class="plan-price">$29 <span>/ year</span></div>
+          <p class="plan-desc">Everything you need to ensure first responders and family always have your critical information — even when phones fail.</p>
+          <ul class="plan-features">
+            <li>NFC tag (card + bracelet options)</li>
+            <li>Unlimited profile updates</li>
+            <li>Emergency profile reader (shareable link)</li>
+            <li>Family access portal</li>
+            <li>Priority Helper support</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Payment Details</div>
+          <div class="field">
+            <label>Name on Card <span class="req">*</span></label>
+            <input type="text" id="card-name" placeholder="Margaret Bennett" autocomplete="cc-name" />
+          </div>
+          <div class="field">
+            <label>Card Details <span class="req">*</span></label>
+            <div id="stripe-card-element"></div>
+            <div id="stripe-error"></div>
+          </div>
+        </div>
+
+        <div class="notice notice-amber">
+          <span>🔑</span>
+          <span id="stripe-mode-notice">Using Stripe test mode. Use card <strong>4242 4242 4242 4242</strong>, any future date, any CVC.</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="memberStep(1)">← Back</button>
+          <button class="btn btn-primary" id="pay-btn" onclick="processPayment()">Pay $29/year</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: Profile Form ────────────────────────── -->
+      <div class="step" id="m-step-3">
+        <div class="step-eyebrow">Step 3 of 5 · Emergency Profile</div>
+        <h1 class="step-title">Your emergency<br>information</h1>
+        <p class="step-sub">This is what first responders will see when they scan your tag. Fill in what you're comfortable sharing.</p>
+
+        <div class="card">
+          <div class="card-title">Personal Details</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Date of Birth <span class="req">*</span></label>
+              <input type="date" id="p-dob" />
+            </div>
+            <div class="field">
+              <label>Blood Type</label>
+              <select id="p-blood">
+                <option value="">Unknown</option>
+                <option>A+</option><option>A−</option>
+                <option>B+</option><option>B−</option>
+                <option>AB+</option><option>AB−</option>
+                <option>O+</option><option>O−</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Medical Alerts</div>
+          <div class="field">
+            <label>Allergies</label>
+            <div class="tag-input-wrap" id="allergy-wrap" onclick="focusTagInput('allergy-input')">
+              <input class="tag-input-inner" id="allergy-input" placeholder="Type allergy, press Enter…" />
+            </div>
+            <div class="field-hint">Press Enter after each allergy (e.g. Penicillin, Latex, Shellfish)</div>
+          </div>
+          <div class="field">
+            <label>Current Medications</label>
+            <div class="tag-input-wrap" id="med-wrap" onclick="focusTagInput('med-input')">
+              <input class="tag-input-inner" id="med-input" placeholder="Type medication, press Enter…" />
+            </div>
+            <div class="field-hint">Include dosage if known (e.g. Metformin 500mg)</div>
+          </div>
+          <div class="field">
+            <label>Medical Conditions</label>
+            <div class="tag-input-wrap" id="cond-wrap" onclick="focusTagInput('cond-input')">
+              <input class="tag-input-inner" id="cond-input" placeholder="Type condition, press Enter…" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Emergency Contacts</div>
+          <div class="contact-block">
+            <div class="contact-block-label">Contact 1 (Primary)</div>
+            <div class="field-row">
+              <div class="field"><label>Name <span class="req">*</span></label><input type="text" id="ec1-name" placeholder="Robert Bennett" /></div>
+              <div class="field"><label>Relationship</label><input type="text" id="ec1-rel" placeholder="Son" /></div>
+            </div>
+            <div class="field"><label>Phone <span class="req">*</span></label><input type="tel" id="ec1-phone" placeholder="404-555-0147" /></div>
+          </div>
+          <div class="contact-block">
+            <div class="contact-block-label">Contact 2 (Secondary)</div>
+            <div class="field-row">
+              <div class="field"><label>Name</label><input type="text" id="ec2-name" placeholder="Carol Simmons" /></div>
+              <div class="field"><label>Relationship</label><input type="text" id="ec2-rel" placeholder="Daughter" /></div>
+            </div>
+            <div class="field"><label>Phone</label><input type="tel" id="ec2-phone" placeholder="770-555-0293" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Primary Physician</div>
+          <div class="field-row">
+            <div class="field"><label>Doctor's Name</label><input type="text" id="doc-name" placeholder="Dr. Patricia Osei" /></div>
+            <div class="field"><label>Phone</label><input type="tel" id="doc-phone" placeholder="678-555-0411" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Additional Notes</div>
+          <div class="field">
+            <label>Notes for first responders</label>
+            <textarea id="p-notes" placeholder="e.g. Uses hearing aid. Lives alone in Unit 14B. Prefers Northside Hospital."></textarea>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="memberStep(2)">← Back</button>
+          <button class="btn btn-primary" onclick="memberStep(4)">Review Profile →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 4: Review ──────────────────────────────── -->
+      <div class="step" id="m-step-4">
+        <div class="step-eyebrow">Step 4 of 5 · Review</div>
+        <h1 class="step-title">Review your<br>profile</h1>
+        <p class="step-sub">This is exactly what will be written to your NFC tag. Verify everything is correct before writing.</p>
+
+        <div class="card" id="review-card">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="notice notice-amber">
+          <span>⚠️</span>
+          <span>Once written to your tag, updates require the Helper-ID app or a Helper visit. Make sure everything looks right.</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="memberStep(3)">← Edit</button>
+          <button class="btn btn-primary" onclick="memberStep(5)">Write to NFC Tag →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 5: NFC Write ───────────────────────────── -->
+      <div class="step" id="m-step-5">
+        <div class="step-eyebrow">Step 5 of 5 · Write Tag</div>
+        <h1 class="step-title">Write your<br>Helper-ID tag</h1>
+        <p class="step-sub">Hold your NFC tag against the back of your phone when ready.</p>
+
+        <div class="card">
+          <div class="nfc-write-area">
+            <div class="nfc-ring" id="nfc-ring">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 4h-2a2 2 0 0 0-2 2v2"/>
+                <path d="M18 4h2a2 2 0 0 1 2 2v2"/>
+                <path d="M6 20h-2a2 2 0 0 1-2-2v-2"/>
+                <path d="M18 20h2a2 2 0 0 0 2-2v-2"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+            <div class="nfc-status-title" id="nfc-status-title">Ready to write</div>
+            <div class="nfc-status-sub" id="nfc-status-sub">Tap the button below, then hold your NFC tag to the back of your phone.</div>
+          </div>
+
+          <div id="no-nfc-write-note" class="notice notice-amber" style="display:none;">
+            <span>📱</span>
+            <span>Web NFC write requires Chrome on Android. On iPhone, the dedicated Helper-ID app is needed. Your profile has been saved — a Helper can write your tag at your next visit.</span>
+          </div>
+        </div>
+
+        <div class="btn-row" id="nfc-write-btns">
+          <button class="btn btn-secondary" onclick="memberStep(4)">← Back</button>
+          <button class="btn btn-primary" id="write-btn" onclick="writeNFC()">Write Tag Now</button>
+        </div>
+
+        <!-- Success state -->
+        <div id="write-success" style="display:none;">
+          <div class="member-card" id="final-member-card">
+            <div class="member-id-label">✦ Helper-ID Member</div>
+            <div class="member-id-name" id="final-name">—</div>
+            <div class="member-id-num" id="final-id">HID-000000</div>
+            <div class="member-id-footer">
+              <div class="member-id-status">
+                <div class="status-dot-green"></div>
+                Active Member
+              </div>
+              <div class="member-id-exp" id="final-exp">Renews —</div>
+            </div>
+          </div>
+
+          <div class="notice notice-green">
+            <span>✓</span>
+            <span>Tag written successfully. Your emergency profile is now stored on your Helper-ID tag. Test it by scanning with the Helper-ID reader.</span>
+          </div>
+
+          <button class="btn btn-primary" onclick="window.location.href='index.html'">View My Profile →</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       HELPER FLOW
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div id="helper-flow" style="display:none;">
+    <main>
+
+      <!-- Helper Login -->
+      <div id="helper-login">
+        <div class="helper-login-wrap">
+          <div class="step-eyebrow">Helper Portal</div>
+          <h1 class="step-title">Helper<br>Sign In</h1>
+          <p class="step-sub">Access your enrollment dashboard and member write tools.</p>
+          <div class="card">
+            <div class="field">
+              <label>Helper Code <span class="req">*</span></label>
+              <input type="text" id="helper-code-input" placeholder="HLP-XXXXXX" style="font-family:'DM Mono',monospace;letter-spacing:0.05em;" />
+              <div class="field-hint">Issued when you completed Helper onboarding</div>
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" id="helper-email-input" placeholder="you@email.com" />
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="helperLogin()">Sign In →</button>
+        </div>
+      </div>
+
+      <!-- Helper Dashboard -->
+      <div id="helper-dashboard" style="display:none;">
+
+        <div class="helper-banner">
+          <div class="helper-avatar" id="h-avatar">HJ</div>
+          <div>
+            <div class="helper-info-name" id="h-name">Helper Jordan</div>
+            <div class="helper-info-meta" id="h-code">HLP-482910 · Atlanta, GA</div>
+          </div>
+          <div class="helper-stats">
+            <div class="helper-stat-num" id="h-count">0</div>
+            <div class="helper-stat-label">Enrolled</div>
+          </div>
+        </div>
+
+        <div class="step-eyebrow">New Enrollment</div>
+        <h2 class="step-title" style="font-size:1.6rem;margin-bottom:8px;">Enroll a Member</h2>
+        <p class="step-sub">Fill this out together with the resident. You write the tag at the end.</p>
+
+        <!-- Same profile form, helper-prefilled -->
+        <div class="card">
+          <div class="card-title">Member Account</div>
+          <div class="field-row">
+            <div class="field"><label>First Name <span class="req">*</span></label><input type="text" id="h-first" placeholder="Margaret" /></div>
+            <div class="field"><label>Last Name <span class="req">*</span></label><input type="text" id="h-last" placeholder="Bennett" /></div>
+          </div>
+          <div class="field"><label>Email</label><input type="email" id="h-email" placeholder="margaret@email.com" /></div>
+          <div class="field"><label>Phone</label><input type="tel" id="h-phone" placeholder="404-555-0100" /></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Personal Details</div>
+          <div class="field-row">
+            <div class="field"><label>Date of Birth <span class="req">*</span></label><input type="date" id="h-dob" /></div>
+            <div class="field"><label>Blood Type</label>
+              <select id="h-blood">
+                <option value="">Unknown</option>
+                <option>A+</option><option>A−</option><option>B+</option><option>B−</option>
+                <option>AB+</option><option>AB−</option><option>O+</option><option>O−</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Medical Alerts</div>
+          <div class="field">
+            <label>Allergies</label>
+            <div class="tag-input-wrap" id="h-allergy-wrap" onclick="focusTagInput('h-allergy-input')">
+              <input class="tag-input-inner" id="h-allergy-input" placeholder="Type allergy, press Enter…" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Medications</label>
+            <div class="tag-input-wrap" id="h-med-wrap" onclick="focusTagInput('h-med-input')">
+              <input class="tag-input-inner" id="h-med-input" placeholder="Type medication, press Enter…" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Conditions</label>
+            <div class="tag-input-wrap" id="h-cond-wrap" onclick="focusTagInput('h-cond-input')">
+              <input class="tag-input-inner" id="h-cond-input" placeholder="Type condition, press Enter…" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Emergency Contacts</div>
+          <div class="contact-block">
+            <div class="contact-block-label">Contact 1</div>
+            <div class="field-row">
+              <div class="field"><label>Name</label><input type="text" id="h-ec1-name" placeholder="Robert Bennett" /></div>
+              <div class="field"><label>Relationship</label><input type="text" id="h-ec1-rel" placeholder="Son" /></div>
+            </div>
+            <div class="field"><label>Phone</label><input type="tel" id="h-ec1-phone" placeholder="404-555-0147" /></div>
+          </div>
+          <div class="contact-block">
+            <div class="contact-block-label">Contact 2</div>
+            <div class="field-row">
+              <div class="field"><label>Name</label><input type="text" id="h-ec2-name" /></div>
+              <div class="field"><label>Relationship</label><input type="text" id="h-ec2-rel" /></div>
+            </div>
+            <div class="field"><label>Phone</label><input type="tel" id="h-ec2-phone" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Physician</div>
+          <div class="field-row">
+            <div class="field"><label>Name</label><input type="text" id="h-doc-name" placeholder="Dr. Patricia Osei" /></div>
+            <div class="field"><label>Phone</label><input type="tel" id="h-doc-phone" placeholder="678-555-0411" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Notes</div>
+          <div class="field"><textarea id="h-notes" placeholder="e.g. Uses hearing aid. Unit 14B. Prefers Northside Hospital."></textarea></div>
+        </div>
+
+        <!-- Payment on behalf -->
+        <div class="card">
+          <div class="card-title">Membership Payment</div>
+          <div class="notice notice-blue" style="margin-bottom:12px;">
+            <span>💳</span>
+            <span>Collect payment from the member. Enter their card details below to activate their annual membership.</span>
+          </div>
+          <div class="field">
+            <label>Name on Card</label>
+            <input type="text" id="h-card-name" placeholder="Margaret Bennett" />
+          </div>
+          <div class="field">
+            <label>Card Details</label>
+            <div id="h-stripe-card-element"></div>
+            <div id="h-stripe-error"></div>
+          </div>
+        </div>
+
+        <div class="notice notice-amber">
+          <span>⚠️</span>
+          <span>Test mode: use <strong>4242 4242 4242 4242</strong>, any future date, any CVC.</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="clearHelperForm()">Clear Form</button>
+          <button class="btn btn-primary" id="h-enroll-btn" onclick="helperEnroll()">
+            Charge & Write Tag →
+          </button>
+        </div>
+
+        <!-- Helper NFC write -->
+        <div id="helper-nfc-section" style="display:none; margin-top:24px;">
+          <div class="card">
+            <div class="nfc-write-area">
+              <div class="nfc-ring" id="h-nfc-ring">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 4h-2a2 2 0 0 0-2 2v2"/><path d="M18 4h2a2 2 0 0 1 2 2v2"/>
+                  <path d="M6 20h-2a2 2 0 0 1-2-2v-2"/><path d="M18 20h2a2 2 0 0 0 2-2v-2"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </div>
+              <div class="nfc-status-title" id="h-nfc-title">Payment confirmed</div>
+              <div class="nfc-status-sub" id="h-nfc-sub">Tap Write Tag, then hold the NFC card to the back of your phone.</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="h-write-btn" onclick="helperWriteNFC()">Write Tag</button>
+          <div id="h-write-success" style="display:none;margin-top:16px;">
+            <div class="notice notice-green">
+              <span>✓</span>
+              <span id="h-success-msg">Tag written. Member enrolled successfully.</span>
+            </div>
+            <button class="btn btn-primary" style="margin-top:12px;" onclick="clearHelperForm()">Enroll Next Member →</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       JAVASCRIPT
+  ══════════════════════════════════════════════════════════════════════ -->
+  <script>
+  // ── CONFIG ─────────────────────────────────────────────────────────
+  // !! REPLACE THESE WITH YOUR REAL STRIPE TEST KEYS !!
+  const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_PUBLISHABLE_KEY_HERE';
+  const STRIPE_PRICE_ID        = 'price_YOUR_PRICE_ID_HERE';
+  const ANNUAL_AMOUNT_CENTS    = 2900; // $29.00
+
+  // ── STRIPE INIT ────────────────────────────────────────────────────
+  let stripe, cardElement, hStripe, hCardElement;
+
+  function initStripe() {
+    if (STRIPE_PUBLISHABLE_KEY.includes('YOUR')) {
+      document.getElementById('stripe-mode-notice').innerHTML =
+        '⚠️ <strong>Stripe keys not configured.</strong> Replace STRIPE_PUBLISHABLE_KEY and STRIPE_PRICE_ID in the script to enable payments.';
+      return;
+    }
+    stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+    const elements = stripe.elements({ appearance: { theme: 'night' } });
+    cardElement = elements.create('card', {
+      style: { base: { fontFamily: 'DM Sans, sans-serif', fontSize: '15px', color: '#EEF0F6', '::placeholder': { color: '#4A5070' } } }
+    });
+    cardElement.mount('#stripe-card-element');
+    cardElement.on('change', e => {
+      document.getElementById('stripe-error').textContent = e.error ? e.error.message : '';
+    });
+
+    // Helper Stripe instance
+    hStripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+    const hElements = hStripe.elements({ appearance: { theme: 'night' } });
+    hCardElement = hElements.create('card', {
+      style: { base: { fontFamily: 'DM Sans, sans-serif', fontSize: '15px', color: '#EEF0F6', '::placeholder': { color: '#4A5070' } } }
+    });
+    hCardElement.mount('#h-stripe-card-element');
+    hCardElement.on('change', e => {
+      document.getElementById('h-stripe-error').textContent = e.error ? e.error.message : '';
+    });
+  }
+
+  window.addEventListener('load', initStripe);
+
+  // ── MODE SWITCH ────────────────────────────────────────────────────
+  function setMode(mode) {
+    document.getElementById('member-flow').style.display = mode === 'member' ? 'block' : 'none';
+    document.getElementById('helper-flow').style.display  = mode === 'helper' ? 'block' : 'none';
+    document.getElementById('btn-member-mode').classList.toggle('active', mode === 'member');
+    document.getElementById('btn-helper-mode').classList.toggle('active', mode === 'helper');
+  }
+
+  // ── MEMBER STEP NAV ────────────────────────────────────────────────
+  function memberStep(n) {
+    if (n === 4) buildReview();
+    if (n === 5) setupWriteScreen();
+
+    for (let i = 1; i <= 5; i++) {
+      const s = document.getElementById(`m-step-${i}`);
+      s.classList.toggle('active', i === n);
+    }
+    // Update progress pips
+    for (let i = 1; i <= 5; i++) {
+      const pip = document.getElementById(`pip-${i}`);
+      pip.className = 'progress-pip' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── PAYMENT ────────────────────────────────────────────────────────
+  async function processPayment() {
+    const btn = document.getElementById('pay-btn');
+    const name = document.getElementById('card-name').value.trim();
+    if (!name) { alert('Please enter the name on your card.'); return; }
+
+    if (!stripe || !cardElement) {
+      // Keys not configured — skip for prototyping
+      alert('Stripe not configured. Skipping payment for prototype.');
+      memberStep(3);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Processing…';
+
+    try {
+      const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: { name }
+      });
+
+      if (error) {
+        document.getElementById('stripe-error').textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'Pay $29/year';
+        return;
+      }
+
+      // In production: send paymentMethod.id to your backend to create subscription
+      // For prototype: simulate success
+      console.log('PaymentMethod created:', paymentMethod.id);
+      btn.innerHTML = '✓ Payment confirmed';
+      setTimeout(() => memberStep(3), 800);
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Pay $29/year';
+      console.error(err);
+    }
+  }
+
+  // ── TAG INPUT ──────────────────────────────────────────────────────
+  const tagStores = {};
+
+  function focusTagInput(id) {
+    document.getElementById(id).focus();
+  }
+
+  function initTagInput(inputId, wrapId, storeKey) {
+    tagStores[storeKey] = [];
+    const input = document.getElementById(inputId);
+    const wrap  = document.getElementById(wrapId);
+
+    input.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+        e.preventDefault();
+        const val = input.value.trim().replace(/,$/, '');
+        if (val && !tagStores[storeKey].includes(val)) {
+          tagStores[storeKey].push(val);
+          renderTags(wrapId, inputId, storeKey);
+        }
+        input.value = '';
+      }
+      if (e.key === 'Backspace' && !input.value && tagStores[storeKey].length) {
+        tagStores[storeKey].pop();
+        renderTags(wrapId, inputId, storeKey);
+      }
+    });
+  }
+
+  function renderTags(wrapId, inputId, storeKey) {
+    const wrap  = document.getElementById(wrapId);
+    const input = document.getElementById(inputId);
+    // Remove old pills
+    wrap.querySelectorAll('.tag-pill').forEach(p => p.remove());
+    tagStores[storeKey].forEach((val, i) => {
+      const pill = document.createElement('div');
+      pill.className = 'tag-pill';
+      pill.innerHTML = `${val}<button onclick="removeTag('${storeKey}',${i},'${wrapId}','${inputId}')" type="button">×</button>`;
+      wrap.insertBefore(pill, input);
+    });
+  }
+
+  function removeTag(storeKey, idx, wrapId, inputId) {
+    tagStores[storeKey].splice(idx, 1);
+    renderTags(wrapId, inputId, storeKey);
+  }
+
+  // Init all tag inputs
+  window.addEventListener('load', () => {
+    initTagInput('allergy-input', 'allergy-wrap', 'allergies');
+    initTagInput('med-input',     'med-wrap',     'meds');
+    initTagInput('cond-input',    'cond-wrap',    'conds');
+    initTagInput('h-allergy-input','h-allergy-wrap','h-allergies');
+    initTagInput('h-med-input',   'h-med-wrap',   'h-meds');
+    initTagInput('h-cond-input',  'h-cond-wrap',  'h-conds');
+  });
+
+  // ── BUILD PROFILE OBJECT ───────────────────────────────────────────
+  function buildProfile(prefix = '') {
+    const g = id => document.getElementById(prefix + id)?.value?.trim() || '';
+    const firstName = g('') ; // handled separately per flow
+    const contacts = [];
+    if (g('ec1-name') || g('ec1-phone')) contacts.push({ nm: g('ec1-name'), rel: g('ec1-rel'), ph: g('ec1-phone') });
+    if (g('ec2-name') || g('ec2-phone')) contacts.push({ nm: g('ec2-name'), rel: g('ec2-rel'), ph: g('ec2-phone') });
+
+    const storePrefix = prefix === 'h-' ? 'h-' : '';
+    return {
+      v:   'h1',
+      id:  'HID-' + Math.random().toString(36).substr(2,6).toUpperCase(),
+      n:   prefix === 'h-' ? `${g('first')} ${g('last')}` : `${document.getElementById('acct-first').value.trim()} ${document.getElementById('acct-last').value.trim()}`,
+      dob:  prefix === 'h-' ? g('dob') : document.getElementById('p-dob').value,
+      bt:   prefix === 'h-' ? g('blood') : document.getElementById('p-blood').value,
+      al:   [...(tagStores[storePrefix + 'allergies'] || [])],
+      mx:   [...(tagStores[storePrefix + 'meds']      || [])],
+      cx:   [...(tagStores[storePrefix + 'conds']     || [])],
+      ec:   contacts,
+      dr:   { nm: g('doc-name'), ph: g('doc-phone') },
+      nt:   prefix === 'h-' ? g('notes') : document.getElementById('p-notes').value.trim(),
+      ts:   new Date().toISOString().split('T')[0]
+    };
+  }
+
+  // ── REVIEW SCREEN ──────────────────────────────────────────────────
+  function buildReview() {
+    const p = buildProfile();
+    const card = document.getElementById('review-card');
+
+    function pills(arr, cls) {
+      if (!arr || !arr.length) return '<span style="color:var(--ink-dim);font-size:0.82rem;">None listed</span>';
+      return arr.map(a => `<span class="review-pill ${cls}">${a}</span>`).join('');
+    }
+
+    card.innerHTML = `
+      <div class="card-title">Profile Summary</div>
+      <div class="review-grid">
+        <div class="review-cell"><div class="review-label">Name</div><div class="review-value">${p.n || '—'}</div></div>
+        <div class="review-cell"><div class="review-label">Date of Birth</div><div class="review-value">${p.dob || '—'}</div></div>
+        <div class="review-cell"><div class="review-label">Blood Type</div><div class="review-value" style="color:var(--red)">${p.bt || 'Unknown'}</div></div>
+        <div class="review-cell"><div class="review-label">Tag ID</div><div class="review-value" style="font-family:'DM Mono',monospace;font-size:0.8rem;">${p.id}</div></div>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="review-label">Allergies</div>
+        <div class="review-pills">${pills(p.al, 'red')}</div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="review-label">Medications</div>
+        <div class="review-pills">${pills(p.mx, 'blue')}</div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="review-label">Conditions</div>
+        <div class="review-pills">${pills(p.cx, 'amber')}</div>
+      </div>
+      ${p.ec.length ? `<div style="margin-top:12px;"><div class="review-label">Emergency Contacts</div>${p.ec.map(c=>`<div style="font-size:0.85rem;margin-top:4px;color:var(--ink)">${c.nm} (${c.rel}) · ${c.ph}</div>`).join('')}</div>` : ''}
+      ${p.dr.nm ? `<div style="margin-top:12px;"><div class="review-label">Physician</div><div style="font-size:0.85rem;color:var(--ink)">${p.dr.nm} · ${p.dr.ph}</div></div>` : ''}
+      ${p.nt ? `<div style="margin-top:12px;"><div class="review-label">Notes</div><div style="font-size:0.83rem;color:var(--ink-mid);line-height:1.5;">${p.nt}</div></div>` : ''}
+    `;
+    // Store for write step
+    window._pendingProfile = p;
+  }
+
+  // ── NFC WRITE ──────────────────────────────────────────────────────
+  function encodeProfile(profile) {
+    return JSON.stringify(profile);
+  }
+
+  function setupWriteScreen() {
+    if (!window._pendingProfile) buildReview();
+  }
+
+  async function writeNFC(profile, ringId, titleId, subId, successCb) {
+    profile = profile || window._pendingProfile;
+    ringId  = ringId  || 'nfc-ring';
+    titleId = titleId || 'nfc-status-title';
+    subId   = subId   || 'nfc-status-sub';
+
+    if (!('NDEFWriter' in window) && !('NDEFReader' in window)) {
+      document.getElementById('no-nfc-write-note').style.display = 'flex';
+      // Save profile to localStorage as fallback
+      localStorage.setItem('helper_id_pending_profile', encodeProfile(profile));
+      if (successCb) successCb(profile);
+      return;
+    }
+
+    const ring  = document.getElementById(ringId);
+    const title = document.getElementById(titleId);
+    const sub   = document.getElementById(subId);
+
+    ring.classList.add('writing');
+    title.textContent = 'Waiting for tag…';
+    sub.textContent   = 'Hold the NFC tag firmly against the back of your phone.';
+
+    try {
+      const ndef = new NDEFReader();
+      await ndef.write({ records: [{ recordType: 'text', data: encodeProfile(profile) }] });
+      ring.classList.remove('writing');
+      ring.classList.add('success');
+      ring.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      title.textContent = 'Tag written!';
+      sub.textContent   = 'Your Helper-ID profile has been saved to the tag.';
+      if (successCb) successCb(profile);
+    } catch (err) {
+      ring.classList.remove('writing');
+      ring.classList.add('error');
+      ring.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      title.textContent = 'Write failed';
+      sub.textContent   = err.message || 'Could not write to tag. Try again.';
+    }
+  }
+
+  // Member write
+  window.writeNFC = function() {
+    const btn = document.getElementById('write-btn');
+    btn.disabled = true;
+    writeNFC(window._pendingProfile, 'nfc-ring', 'nfc-status-title', 'nfc-status-sub', (p) => {
+      document.getElementById('nfc-write-btns').style.display = 'none';
+      document.getElementById('write-success').style.display = 'block';
+      document.getElementById('final-name').textContent = p.n;
+      document.getElementById('final-id').textContent   = p.id;
+      const exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
+      document.getElementById('final-exp').textContent = `Renews ${exp.toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;
+    });
+  };
+
+  // ── HELPER LOGIN ───────────────────────────────────────────────────
+  function helperLogin() {
+    const code  = document.getElementById('helper-code-input').value.trim();
+    const email = document.getElementById('helper-email-input').value.trim();
+    if (!code) { alert('Please enter your Helper code.'); return; }
+
+    // In production: verify against backend. For prototype: accept any HLP- code
+    if (!code.toUpperCase().startsWith('HLP-') && code !== 'demo') {
+      alert('Invalid Helper code format. Should start with HLP-');
+      return;
+    }
+
+    document.getElementById('helper-login').style.display    = 'none';
+    document.getElementById('helper-dashboard').style.display = 'block';
+
+    // Set helper display
+    const name = email ? email.split('@')[0] : 'Helper';
+    document.getElementById('h-name').textContent = 'Helper ' + capitalize(name);
+    document.getElementById('h-avatar').textContent = capitalize(name).charAt(0).toUpperCase() + (name.length > 1 ? name[1].toUpperCase() : '');
+    document.getElementById('h-code').textContent = code.toUpperCase() + ' · Atlanta, GA';
+
+    // Load enrollment count from localStorage
+    const count = parseInt(localStorage.getItem('helper_enroll_count') || '0');
+    document.getElementById('h-count').textContent = count;
+  }
+
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // ── HELPER ENROLL ──────────────────────────────────────────────────
+  async function helperEnroll() {
+    const btn = document.getElementById('h-enroll-btn');
+
+    if (!document.getElementById('h-first').value.trim() ||
+        !document.getElementById('h-last').value.trim()) {
+      alert('Please enter the member\'s first and last name.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Processing payment…';
+
+    // Process payment (same Stripe flow)
+    if (!hStripe) {
+      btn.innerHTML = '✓ Enrolled (payment skipped — keys not configured)';
+      setTimeout(showHelperNFC, 600);
+      return;
+    }
+
+    const cardName = document.getElementById('h-card-name').value.trim() ||
+      `${document.getElementById('h-first').value} ${document.getElementById('h-last').value}`;
+
+    const { paymentMethod, error } = await hStripe.createPaymentMethod({
+      type: 'card', card: hCardElement,
+      billing_details: { name: cardName }
+    });
+
+    if (error) {
+      document.getElementById('h-stripe-error').textContent = error.message;
+      btn.disabled = false;
+      btn.textContent = 'Charge & Write Tag →';
+      return;
+    }
+
+    console.log('Helper enrollment PaymentMethod:', paymentMethod.id);
+    btn.innerHTML = '✓ Payment confirmed';
+    setTimeout(showHelperNFC, 600);
+  }
+
+  function showHelperNFC() {
+    document.getElementById('helper-nfc-section').style.display = 'block';
+    window._helperProfile = buildProfile('h-');
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+
+  window.helperWriteNFC = function() {
+    const btn = document.getElementById('h-write-btn');
+    btn.disabled = true;
+    writeNFC(window._helperProfile, 'h-nfc-ring', 'h-nfc-title', 'h-nfc-sub', (p) => {
+      document.getElementById('h-write-success').style.display = 'block';
+      document.getElementById('h-success-msg').textContent =
+        `✓ Tag written. ${p.n} enrolled as HID member ${p.id}.`;
+      // Increment count
+      const count = parseInt(localStorage.getItem('helper_enroll_count') || '0') + 1;
+      localStorage.setItem('helper_enroll_count', count);
+      document.getElementById('h-count').textContent = count;
+    });
+  };
+
+  function clearHelperForm() {
+    ['h-first','h-last','h-email','h-phone','h-dob','h-blood',
+     'h-ec1-name','h-ec1-rel','h-ec1-phone','h-ec2-name','h-ec2-rel','h-ec2-phone',
+     'h-doc-name','h-doc-phone','h-notes','h-card-name'].forEach(id => {
+       const el = document.getElementById(id);
+       if (el) el.value = '';
+     });
+    ['h-allergies','h-meds','h-conds'].forEach(k => {
+      tagStores[k] = [];
+      const map = { 'h-allergies': ['h-allergy-wrap','h-allergy-input'], 'h-meds': ['h-med-wrap','h-med-input'], 'h-conds': ['h-cond-wrap','h-cond-input'] };
+      renderTags(map[k][0], map[k][1], k);
+    });
+    document.getElementById('helper-nfc-section').style.display = 'none';
+    document.getElementById('h-write-success').style.display   = 'none';
+    document.getElementById('h-enroll-btn').disabled    = false;
+    document.getElementById('h-enroll-btn').textContent = 'Charge & Write Tag →';
+    window._helperProfile = null;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  </script>
+
+</body>
+</html>
