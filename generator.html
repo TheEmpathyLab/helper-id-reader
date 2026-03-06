@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Profile Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --navy:       #1A3A5C;
+      --navy-dark:  #0F2340;
+      --navy-light: #2A5280;
+      --accent:     #4F8EF7;
+      --accent-dim: #3A6FCC;
+      --gold:       #C9A84C;
+      --green:      #166534;
+      --green-light:#DCFCE7;
+      --red:        #C0392B;
+      --red-light:  #FAE9E7;
+      --bg:         #F4F1EC;
+      --surface:    #FDFCFA;
+      --border:     #DDD9D0;
+      --ink:        #1A1714;
+      --ink-mid:    #5C5650;
+      --ink-dim:    #9C9489;
+      --radius:     8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--navy-dark);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 14px; }
+
+    .logo-mark {
+      width: 38px; height: 38px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #fff;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+
+    .header-sub {
+      font-size: 0.75rem;
+      color: #8AAFCC;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.04em;
+    }
+
+    .header-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--gold);
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    .page-intro {
+      margin-bottom: 32px;
+    }
+
+    .page-intro h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .page-intro p {
+      font-size: 0.9rem;
+      color: var(--ink-mid);
+      line-height: 1.6;
+      max-width: 560px;
+    }
+
+    /* ── FORM CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .card-header {
+      background: var(--navy);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header-icon {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .card-header-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #fff;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card-body { padding: 20px; }
+
+    /* ── FORM FIELDS ── */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .field-row.full { grid-template-columns: 1fr; }
+    .field-row.thirds { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    input, select, textarea {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+    }
+
+    textarea { resize: vertical; min-height: 72px; }
+
+    /* ── TAG INPUTS ── */
+    .tag-input-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px;
+      background: var(--bg);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      cursor: text;
+      min-height: 42px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .tag-input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+    }
+
+    .tag {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--navy);
+      color: #fff;
+      font-size: 0.78rem;
+      padding: 3px 8px 3px 10px;
+      border-radius: 20px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .tag-remove {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-size: 1rem; line-height: 1;
+      padding: 0; display: flex; align-items: center;
+      transition: color 0.1s;
+    }
+    .tag-remove:hover { color: #fff; }
+
+    .tag-input {
+      border: none !important;
+      background: transparent !important;
+      padding: 3px 4px !important;
+      font-size: 0.88rem;
+      min-width: 80px;
+      flex: 1;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .field-hint {
+      font-size: 0.72rem;
+      color: var(--ink-dim);
+      margin-top: 2px;
+    }
+
+    /* ── CONTACT BLOCKS ── */
+    .contact-block {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+      background: rgba(26,58,92,0.02);
+    }
+
+    .contact-block-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    /* ── SIZE METER ── */
+    .size-meter-wrap {
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .size-meter-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .size-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--ink-mid);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .size-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .size-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .size-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease, background 0.3s ease;
+      background: var(--green);
+    }
+
+    .size-bar-fill.warn { background: #D97706; }
+    .size-bar-fill.over { background: var(--red); }
+
+    /* ── OUTPUT ── */
+    .output-section {
+      margin-top: 8px;
+    }
+
+    .output-url-wrap {
+      background: var(--navy-dark);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .output-url {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: #8AAFCC;
+      word-break: break-all;
+      line-height: 1.6;
+      padding-right: 40px;
+    }
+
+    .output-url strong {
+      color: var(--accent);
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: #fff;
+      font-size: 0.72rem;
+      font-family: 'DM Mono', monospace;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: var(--accent-dim); }
+    .copy-btn.copied { background: var(--green); }
+
+    .output-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 13px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { background: var(--navy-light); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--navy);
+      border: 1.5px solid var(--navy);
+      border-radius: var(--radius);
+      padding: 13px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-secondary:hover { background: var(--navy); color: #fff; }
+
+    /* ── NFC INSTRUCTIONS ── */
+    .nfc-steps {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-top: 16px;
+    }
+
+    .nfc-steps-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-dim);
+      margin-bottom: 12px;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 22px; height: 22px;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 50%;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 0.85rem;
+      color: var(--ink-mid);
+      line-height: 1.5;
+    }
+
+    .step-text strong { color: var(--ink); font-weight: 600; }
+
+    /* ── EMPTY STATE ── */
+    .output-empty {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--ink-dim);
+      font-size: 0.85rem;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .output-empty .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      opacity: 0.4;
+    }
+
+    /* ── OVER LIMIT WARNING ── */
+    .over-limit {
+      background: var(--red-light);
+      border: 1px solid #FECACA;
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 0.83rem;
+      color: var(--red);
+      display: none;
+      margin-bottom: 12px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .field-row { grid-template-columns: 1fr; }
+      .field-row.thirds { grid-template-columns: 1fr 1fr; }
+      header { padding: 16px 20px; }
+      .container { padding: 20px 16px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <div class="logo-mark">HID</div>
+      <div>
+        <div class="header-title">Helper-ID</div>
+        <div class="header-sub">Profile URL Generator</div>
+      </div>
+    </div>
+    <div class="header-badge">Tag Tool</div>
+  </header>
+
+  <div class="container">
+
+    <div class="page-intro">
+      <h1>Generate a Tag URL</h1>
+      <p>Fill in the resident's emergency profile below. The generator encodes everything into a URL that gets written to the NFC tag — no data is stored anywhere.</p>
+    </div>
+
+    <!-- IDENTITY -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">👤</div>
+        <div class="card-header-title">Identity</div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Full Name *</label>
+            <input type="text" id="f-name" placeholder="Margaret Bennett" oninput="generate()" />
+          </div>
+          <div class="field">
+            <label>Member ID</label>
+            <input type="text" id="f-id" placeholder="HID-000001" oninput="generate()" />
+          </div>
+        </div>
+        <div class="field-row thirds">
+          <div class="field">
+            <label>Date of Birth</label>
+            <input type="date" id="f-dob" oninput="generate()" />
+          </div>
+          <div class="field">
+            <label>Blood Type</label>
+            <select id="f-bt" onchange="generate()">
+              <option value="">Unknown</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option>
+              <option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tag ID (auto)</label>
+            <input type="text" id="f-tagid" placeholder="Auto-generated" disabled style="opacity:0.5;" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDICAL -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">⚕️</div>
+        <div class="card-header-title">Medical</div>
+      </div>
+      <div class="card-body">
+        <div class="field-row full" style="margin-bottom:14px;">
+          <div class="field">
+            <label>Allergies</label>
+            <div class="tag-input-wrap" id="al-wrap" onclick="document.getElementById('al-input').focus()">
+              <input type="text" class="tag-input" id="al-input" placeholder="Type and press Enter…" onkeydown="tagKeydown(event,'al')" />
+            </div>
+            <div class="field-hint">Press Enter after each allergy</div>
+          </div>
+        </div>
+        <div class="field-row full" style="margin-bottom:14px;">
+          <div class="field">
+            <label>Medications</label>
+            <div class="tag-input-wrap" id="mx-wrap" onclick="document.getElementById('mx-input').focus()">
+              <input type="text" class="tag-input" id="mx-input" placeholder="Type and press Enter…" onkeydown="tagKeydown(event,'mx')" />
+            </div>
+            <div class="field-hint">Press Enter after each medication (e.g. Metformin 500mg)</div>
+          </div>
+        </div>
+        <div class="field-row full">
+          <div class="field">
+            <label>Conditions</label>
+            <div class="tag-input-wrap" id="cx-wrap" onclick="document.getElementById('cx-input').focus()">
+              <input type="text" class="tag-input" id="cx-input" placeholder="Type and press Enter…" onkeydown="tagKeydown(event,'cx')" />
+            </div>
+            <div class="field-hint">Press Enter after each condition</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">📞</div>
+        <div class="card-header-title">Emergency Contacts</div>
+      </div>
+      <div class="card-body">
+        <div class="contact-block">
+          <div class="contact-block-label">Contact 1</div>
+          <div class="field-row thirds">
+            <div class="field">
+              <label>Name</label>
+              <input type="text" id="ec1-n" placeholder="Robert Bennett" oninput="generate()" />
+            </div>
+            <div class="field">
+              <label>Relationship</label>
+              <input type="text" id="ec1-r" placeholder="Son" oninput="generate()" />
+            </div>
+            <div class="field">
+              <label>Phone</label>
+              <input type="tel" id="ec1-p" placeholder="4045550192" oninput="generate()" />
+            </div>
+          </div>
+        </div>
+        <div class="contact-block">
+          <div class="contact-block-label">Contact 2 (optional)</div>
+          <div class="field-row thirds">
+            <div class="field">
+              <label>Name</label>
+              <input type="text" id="ec2-n" placeholder="Susan Clarke" oninput="generate()" />
+            </div>
+            <div class="field">
+              <label>Relationship</label>
+              <input type="text" id="ec2-r" placeholder="Daughter" oninput="generate()" />
+            </div>
+            <div class="field">
+              <label>Phone</label>
+              <input type="tel" id="ec2-p" placeholder="4045550148" oninput="generate()" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Physician Name</label>
+            <input type="text" id="dr-n" placeholder="Dr. James Okafor" oninput="generate()" />
+          </div>
+          <div class="field">
+            <label>Physician Phone</label>
+            <input type="tel" id="dr-p" placeholder="7705550300" oninput="generate()" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">📋</div>
+        <div class="card-header-title">First Responder Notes</div>
+      </div>
+      <div class="card-body">
+        <div class="field-row full">
+          <div class="field">
+            <label>Notes</label>
+            <textarea id="f-nt" placeholder="DNR on file. Takes insulin before meals. Speaks limited English." oninput="generate()"></textarea>
+            <div class="field-hint">Keep brief — every character counts toward the 494-byte tag limit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIZE METER -->
+    <div class="size-meter-wrap">
+      <div class="size-meter-top">
+        <span class="size-label">Tag capacity used</span>
+        <span class="size-count" id="size-count">0 / 494 bytes</span>
+      </div>
+      <div class="size-bar-bg">
+        <div class="size-bar-fill" id="size-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-section">
+      <div class="over-limit" id="over-limit">
+        ⚠️ Profile is too large for the tag (<span id="over-by"></span> bytes over). Shorten notes or remove conditions to fit.
+      </div>
+
+      <div id="output-empty" class="output-empty">
+        <div class="empty-icon">🏷️</div>
+        Fill in a name to generate the tag URL
+      </div>
+
+      <div id="output-ready" style="display:none;">
+        <div class="output-url-wrap">
+          <div class="output-url" id="output-url-text"></div>
+          <button class="copy-btn" id="copy-btn" onclick="copyURL()">Copy</button>
+        </div>
+        <div class="output-actions">
+          <button class="btn-primary" onclick="copyURL()">📋 Copy URL for NFC Tools</button>
+          <button class="btn-secondary" onclick="previewProfile()">👁 Preview Profile</button>
+          <button class="btn-secondary" onclick="clearForm()">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="nfc-steps">
+        <div class="nfc-steps-title">How to write this tag</div>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">Copy the URL above using the <strong>Copy URL</strong> button</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">Open <strong>NFC Tools</strong> on your Android phone</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">Tap <strong>Write → Add a record → URL</strong> and paste the URL</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">Tap <strong>Write</strong> and hold the NTAG215 tag to the middle of the phone back</div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-text">Scan the written tag with any phone to verify the profile loads</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const BASE_URL = 'https://theempathylab.github.io/helper-id-reader/#';
+    const MAX_BYTES = 494;
+
+    // ── TAG INPUT STATE ──────────────────────────────────────────────────────
+    const tagData = { al: [], mx: [], cx: [] };
+
+    function tagKeydown(e, field) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = e.target.value.trim().replace(/,$/, '');
+        if (val) {
+          tagData[field].push(val);
+          e.target.value = '';
+          renderTags(field);
+          generate();
+        }
+      } else if (e.key === 'Backspace' && e.target.value === '') {
+        tagData[field].pop();
+        renderTags(field);
+        generate();
+      }
+    }
+
+    function removeTag(field, idx) {
+      tagData[field].splice(idx, 1);
+      renderTags(field);
+      generate();
+    }
+
+    function renderTags(field) {
+      const wrap = document.getElementById(field + '-wrap');
+      const input = document.getElementById(field + '-input');
+      // Remove existing tag pills
+      wrap.querySelectorAll('.tag').forEach(t => t.remove());
+      // Re-insert before input
+      tagData[field].forEach((val, i) => {
+        const pill = document.createElement('div');
+        pill.className = 'tag';
+        pill.innerHTML = `${val}<button class="tag-remove" onclick="removeTag('${field}',${i})">×</button>`;
+        wrap.insertBefore(pill, input);
+      });
+    }
+
+    // ── BUILD PROFILE OBJECT ─────────────────────────────────────────────────
+    function buildProfile() {
+      const name = document.getElementById('f-name').value.trim();
+      if (!name) return null;
+
+      const profile = { v: 'h1' };
+
+      const mid = document.getElementById('f-id').value.trim();
+      if (mid) profile.id = mid;
+
+      profile.n = name;
+
+      const dob = document.getElementById('f-dob').value;
+      if (dob) profile.dob = dob;
+
+      const bt = document.getElementById('f-bt').value;
+      if (bt) profile.bt = bt;
+
+      if (tagData.al.length) profile.al = tagData.al;
+      if (tagData.mx.length) profile.mx = tagData.mx;
+      if (tagData.cx.length) profile.cx = tagData.cx;
+
+      const ec = [];
+      const ec1n = document.getElementById('ec1-n').value.trim();
+      const ec1p = document.getElementById('ec1-p').value.trim().replace(/\D/g,'');
+      if (ec1n || ec1p) {
+        const c = {};
+        if (ec1n) c.n = ec1n;
+        const ec1r = document.getElementById('ec1-r').value.trim();
+        if (ec1r) c.r = ec1r;
+        if (ec1p) c.p = ec1p;
+        ec.push(c);
+      }
+      const ec2n = document.getElementById('ec2-n').value.trim();
+      const ec2p = document.getElementById('ec2-p').value.trim().replace(/\D/g,'');
+      if (ec2n || ec2p) {
+        const c = {};
+        if (ec2n) c.n = ec2n;
+        const ec2r = document.getElementById('ec2-r').value.trim();
+        if (ec2r) c.r = ec2r;
+        if (ec2p) c.p = ec2p;
+        ec.push(c);
+      }
+      if (ec.length) profile.ec = ec;
+
+      const drn = document.getElementById('dr-n').value.trim();
+      const drp = document.getElementById('dr-p').value.trim().replace(/\D/g,'');
+      if (drn || drp) {
+        profile.dr = {};
+        if (drn) profile.dr.n = drn;
+        if (drp) profile.dr.p = drp;
+      }
+
+      const nt = document.getElementById('f-nt').value.trim();
+      if (nt) profile.nt = nt;
+
+      profile.ts = new Date().toISOString().split('T')[0];
+
+      return profile;
+    }
+
+    // ── GENERATE ─────────────────────────────────────────────────────────────
+    let currentURL = '';
+
+    function generate() {
+      const profile = buildProfile();
+      const empty = document.getElementById('output-empty');
+      const ready = document.getElementById('output-ready');
+      const overLimit = document.getElementById('over-limit');
+
+      if (!profile) {
+        empty.style.display = 'block';
+        ready.style.display = 'none';
+        overLimit.style.display = 'none';
+        updateMeter(0);
+        return;
+      }
+
+      const json = JSON.stringify(profile, null, 0).replace(/\s/g, '');
+      const compact = JSON.stringify(JSON.parse(json));
+      const encoded = btoa(unescape(encodeURIComponent(compact)));
+      const url = BASE_URL + encoded;
+      const byteLen = new TextEncoder().encode(url).length;
+
+      currentURL = url;
+      updateMeter(byteLen);
+
+      // Auto-generate ID if not set
+      if (!document.getElementById('f-id').value) {
+        document.getElementById('f-tagid').value = 'Auto on write';
+      }
+
+      if (byteLen > MAX_BYTES) {
+        overLimit.style.display = 'block';
+        document.getElementById('over-by').textContent = byteLen - MAX_BYTES;
+        empty.style.display = 'none';
+        ready.style.display = 'none';
+        return;
+      }
+
+      overLimit.style.display = 'none';
+      empty.style.display = 'none';
+      ready.style.display = 'block';
+
+      // Display URL with fragment highlighted
+      const base = BASE_URL;
+      const frag = encoded;
+      document.getElementById('output-url-text').innerHTML =
+        `<strong>${base}</strong>${frag.substring(0, 40)}…${frag.substring(frag.length - 20)}`;
+    }
+
+    function updateMeter(bytes) {
+      const pct = Math.min((bytes / MAX_BYTES) * 100, 100);
+      const bar = document.getElementById('size-bar');
+      const count = document.getElementById('size-count');
+      bar.style.width = pct + '%';
+      count.textContent = `${bytes} / ${MAX_BYTES} bytes`;
+      bar.className = 'size-bar-fill' + (pct > 100 ? ' over' : pct > 85 ? ' warn' : '');
+    }
+
+    // ── COPY ─────────────────────────────────────────────────────────────────
+    function copyURL() {
+      if (!currentURL) return;
+      navigator.clipboard.writeText(currentURL).then(() => {
+        const btn = document.getElementById('copy-btn');
+        const primary = document.querySelector('.btn-primary');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        primary.textContent = '✓ Copied to clipboard';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+          primary.textContent = '📋 Copy URL for NFC Tools';
+        }, 2500);
+      });
+    }
+
+    // ── PREVIEW ──────────────────────────────────────────────────────────────
+    function previewProfile() {
+      if (!currentURL) return;
+      window.open(currentURL, '_blank');
+    }
+
+    // ── CLEAR ────────────────────────────────────────────────────────────────
+    function clearForm() {
+      document.querySelectorAll('input:not([disabled]), textarea, select').forEach(el => {
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+      });
+      tagData.al = []; tagData.mx = []; tagData.cx = [];
+      renderTags('al'); renderTags('mx'); renderTags('cx');
+      generate();
+    }
+  </script>
+
+</body>
+</html>
