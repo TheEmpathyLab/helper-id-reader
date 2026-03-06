@@ -1462,10 +1462,8 @@
     titleId = titleId || 'nfc-status-title';
     subId   = subId   || 'nfc-status-sub';
 
-    if (!('NDEFWriter' in window) && !('NDEFReader' in window)) {
+    if (!('NDEFReader' in window)) {
       document.getElementById('no-nfc-write-note').style.display = 'flex';
-      // Save profile to localStorage as fallback
-      localStorage.setItem('helper_id_pending_profile', encodeProfile(profile));
       if (successCb) successCb(profile);
       return;
     }
@@ -1474,25 +1472,63 @@
     const title = document.getElementById(titleId);
     const sub   = document.getElementById(subId);
 
-    ring.classList.add('writing');
-    title.textContent = 'Waiting for tag…';
-    sub.textContent   = 'Hold the NFC tag firmly against the back of your phone.';
-
-    try {
-      const ndef = new NDEFReader();
-      await ndef.write({ records: [{ recordType: 'text', data: encodeProfile(profile) }] });
+    const setSuccess = () => {
       ring.classList.remove('writing');
       ring.classList.add('success');
       ring.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       title.textContent = 'Tag written!';
-      sub.textContent   = 'Your Helper-ID profile has been saved to the tag.';
-      if (successCb) successCb(profile);
-    } catch (err) {
+      sub.textContent   = 'Helper-ID profile saved to tag successfully.';
+    };
+
+    const setError = (msg) => {
       ring.classList.remove('writing');
       ring.classList.add('error');
       ring.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
       title.textContent = 'Write failed';
-      sub.textContent   = err.message || 'Could not write to tag. Try again.';
+      sub.textContent   = msg || 'Could not write to tag. Try again.';
+    };
+
+    ring.classList.add('writing');
+    title.textContent = 'Waiting for tag…';
+    sub.textContent   = 'Hold the NFC tag against the TOP of the back of your phone.';
+
+    try {
+      const ndef = new NDEFReader();
+      const controller = new AbortController();
+
+      // CRITICAL: Must call scan() first to start polling.
+      // Then write() inside the reading event once tag is detected.
+      // Calling write() alone won't intercept the tag before Android OS grabs it.
+      await ndef.scan({ signal: controller.signal });
+
+      ndef.addEventListener('reading', async () => {
+        try {
+          await ndef.write(
+            { records: [{ recordType: 'text', data: encodeProfile(profile) }] },
+            { signal: controller.signal }
+          );
+          controller.abort();
+          setSuccess();
+          if (successCb) successCb(profile);
+        } catch (writeErr) {
+          controller.abort();
+          setError(writeErr.message || 'Write failed after tag detected.');
+        }
+      }, { once: true });
+
+      ndef.addEventListener('readingerror', () => {
+        controller.abort();
+        setError('Tag detected but could not be read. Is it a valid NTAG215?');
+      });
+
+    } catch (err) {
+      if (err.name === 'NotAllowedError') {
+        setError('NFC permission denied. Please allow NFC access and try again.');
+      } else if (err.name === 'AbortError') {
+        // intentional abort after success — ignore
+      } else {
+        setError(err.message || 'NFC error. Make sure NFC is enabled.');
+      }
     }
   }
 
