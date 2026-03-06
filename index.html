@@ -855,6 +855,34 @@
       }
     }
 
+    // ── URL FRAGMENT AUTO-LOAD ───────────────────────────────────────────────
+    // When a phone camera scans the NFC tag, it opens the URL directly.
+    // The profile data lives in the fragment (#) — never sent to any server.
+    // Format: index.html#BASE64ENCODEDDATA
+    function checkFragment() {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (!hash) return false;
+      try {
+        const decoded = atob(hash);
+        const data = JSON.parse(decoded);
+        if (data.v && data.v.startsWith('h')) {
+          renderProfile(data, 'NFC tag scanned');
+          return true;
+        }
+      } catch {
+        // not a valid Helper-ID fragment — ignore
+      }
+      return false;
+    }
+
+    // Check fragment on page load (camera scan opens URL directly)
+    if (!checkFragment()) {
+      // No fragment — show normal scan screen, nothing to do
+    }
+
+    // Also re-check if fragment changes (edge case: hash navigation)
+    window.addEventListener('hashchange', checkFragment);
+
     // ── EVENTS ────────────────────────────────────────────────────────────────
     document.getElementById('scan-btn').addEventListener('click', startNFCScan);
 
