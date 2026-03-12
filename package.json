@@ -1,0 +1,15 @@
+{
+  "name": "helper-id-api",
+  "version": "1.0.0",
+  "description": "Helper-ID email service — SendGrid proxy",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}

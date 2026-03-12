@@ -172,8 +172,7 @@
 
   <script src="hid-form-fields.js"></script>
   <script>
-    const SENDGRID_API_KEY = 'YOUR_SENDGRID_API_KEY';
-    const FROM_EMAIL       = 'hello@helper-id.com';
+    const API_URL = '/api/send-email';
 
     let currentProfile = null;
 
@@ -377,7 +376,7 @@
       doc.save(`helper-id-${(profile.fn || 'profile').toLowerCase()}.pdf`);
     }
 
-    // ---- Email PDF (sends preview HTML via SendGrid) ----
+    // ---- Email PDF via API ----
     async function emailPDF() {
       const email = document.getElementById('pdfEmail').value.trim();
       if (!email || !email.includes('@')) {
@@ -386,45 +385,32 @@
         return;
       }
 
-      const previewHTML = document.getElementById('pdf-preview-content').innerHTML;
-      const emailBody = `
-        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
-          <div style="background:#D0312D;padding:12px 20px;">
-            <span style="color:white;font-weight:700;font-size:1.1rem;">Helper-ID</span>
-            <span style="color:rgba(255,255,255,0.8);font-size:0.8rem;margin-left:12px;">Emergency Information</span>
-          </div>
-          <div style="padding:24px;">
-            <p style="margin-bottom:20px;">Your emergency information PDF is attached below. Print it and carry it in your wallet.</p>
-            ${previewHTML}
-            <hr style="margin:24px 0;border-color:#eee;" />
-            <p style="font-size:0.8rem;color:#999;">
-              Want a physical NFC tag? Visit <a href="https://helper-id.com" style="color:#D0312D;">helper-id.com</a>
-            </p>
-          </div>
-        </div>`;
+      const btn = event.target;
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+
+      const profileHtml = document.getElementById('pdf-preview-content').innerHTML;
 
       try {
-        const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${SENDGRID_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            personalizations: [{ to: [{ email }] }],
-            from: { email: FROM_EMAIL, name: 'Helper-ID' },
-            subject: 'Your Helper-ID Emergency Information',
-            content: [{ type: 'text/html', value: emailBody }],
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'pdf', email, profileHtml }),
         });
 
-        if (res.ok || res.status === 202) {
+        const data = await res.json();
+
+        if (res.ok && data.success) {
           document.getElementById('send-success').style.display = 'flex';
         } else {
-          alert('Email failed. Please download the PDF using the button above.');
+          alert(data.error || 'Email failed. Please download the PDF using the button above.');
+          btn.textContent = '📧 Email to Me';
+          btn.disabled = false;
         }
       } catch (e) {
         alert('Network error. Please download the PDF using the button above.');
+        btn.textContent = '📧 Email to Me';
+        btn.disabled = false;
       }
     }
 

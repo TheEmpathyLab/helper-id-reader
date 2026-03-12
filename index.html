@@ -126,7 +126,7 @@
             <li>Works on any modern smartphone</li>
             <li>No subscription ever</li>
           </ul>
-          <a href="https://buy.stripe.com/00w14n6kZe7G15q8mT9MY04" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get Started →</a>
+          <a href="https://buy.stripe.com/YOUR_DIY_LINK" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get Started →</a>
         </div>
 
         <div class="product-card">
@@ -139,7 +139,7 @@
             <li>Perfect at community events</li>
             <li>Test it before you leave</li>
           </ul>
-          <a href="https://buy.stripe.com/8x200jbFj2oYbK4gTp9MY03" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Pay &amp; Schedule →</a>
+          <a href="https://buy.stripe.com/YOUR_DWU_LINK" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Pay &amp; Schedule →</a>
         </div>
 
       </div>
@@ -192,10 +192,16 @@
   </footer>
 
   <script>
-    function captureNotify() {
+    async function captureNotify() {
       const email = document.getElementById('notify-email').value.trim();
       if (!email || !email.includes('@')) { document.getElementById('notify-email').focus(); return; }
-      console.log('CODE+PIN interest:', email);
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'notify', email }),
+        });
+      } catch(e) { /* fail silently — still show success */ }
       document.querySelector('.notify-row').style.display = 'none';
       document.getElementById('notify-ok').style.display = 'block';
     }

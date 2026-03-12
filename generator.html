@@ -113,9 +113,8 @@
 
   <script src="hid-form-fields.js"></script>
   <script>
-    // ---- SendGrid config (fill in before deploying) ----
-    const SENDGRID_API_KEY = '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';
-    const FROM_EMAIL       = 'hello@helper-id.com';
+    // ---- API endpoint (same origin, no key needed in browser) ----
+    const API_URL = '/api/send-email';
 
     // ---- Check for order ID in URL ----
     const params  = new URLSearchParams(window.location.search);
@@ -160,7 +159,7 @@
       });
     }
 
-    // ---- Send via SendGrid ----
+    // ---- Send via API ----
     async function sendEmail() {
       const email = document.getElementById('memberEmail').value.trim();
       if (!email || !email.includes('@')) {
@@ -168,51 +167,36 @@
         return;
       }
 
-      const emailBody = `
-<h2 style="color:#D0312D;">Your Helper-ID Profile is Ready</h2>
-<p>Here is your personal emergency profile URL. Copy it and follow the steps below to write it to your NFC tag.</p>
-
-<p style="background:#F4F4F4;padding:12px;border-radius:8px;word-break:break-all;font-family:monospace;font-size:13px;">
-  ${currentURL}
-</p>
-
-<h3>How to Write Your NFC Tag</h3>
-<ol>
-  <li>Purchase an <strong>NTAG215 NFC tag</strong> — available on Amazon (search "NTAG215 NFC stickers")</li>
-  <li>Download <strong>NFC Tools</strong> (free) from the Google Play Store on an Android phone</li>
-  <li>Open NFC Tools → tap <strong>Write</strong> → <strong>Add a record</strong> → <strong>URL / URI</strong></li>
-  <li>Paste your profile URL above into the field</li>
-  <li>Tap your NTAG215 tag to the back of your phone to write</li>
-  <li>Test it — tap the tag again. Your emergency profile should open in the browser</li>
-</ol>
-
-<p>Questions? Reply to this email or visit <a href="https://helper-id.com">helper-id.com</a></p>
-<p style="font-size:12px;color:#888;">Order reference: ${orderId}</p>
-      `;
+      const btn = document.querySelector('.email-confirm button');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
 
       try {
-        const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${SENDGRID_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            personalizations: [{ to: [{ email }] }],
-            from: { email: FROM_EMAIL, name: 'Helper-ID' },
-            subject: 'Your Helper-ID Profile URL + NFC Writing Instructions',
-            content: [{ type: 'text/html', value: emailBody }],
+            type:       'diy',
+            email,
+            profileUrl: currentURL,
+            orderId,
           }),
         });
 
-        if (res.ok || res.status === 202) {
+        const data = await res.json();
+
+        if (res.ok && data.success) {
           document.getElementById('send-success').style.display = 'flex';
-          document.querySelector('.email-confirm button').style.display = 'none';
+          btn.style.display = 'none';
         } else {
-          alert('Email sending failed. Please copy your URL manually above.');
+          alert(data.error || 'Email sending failed. Please copy your URL manually above.');
+          btn.textContent = 'Send My Profile URL →';
+          btn.disabled = false;
         }
       } catch (e) {
         alert('Network error. Please copy your URL manually above.');
+        btn.textContent = 'Send My Profile URL →';
+        btn.disabled = false;
       }
     }
 
