@@ -126,7 +126,7 @@
             <li>Works on any modern smartphone</li>
             <li>No subscription ever</li>
           </ul>
-          <a href="https://buy.stripe.com/YOUR_DIY_LINK" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get Started →</a>
+          <a href="#" data-stripe="diy" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get Started →</a>
         </div>
 
         <div class="product-card">
@@ -139,7 +139,7 @@
             <li>Perfect at community events</li>
             <li>Test it before you leave</li>
           </ul>
-          <a href="https://buy.stripe.com/YOUR_DWU_LINK" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Pay &amp; Schedule →</a>
+          <a href="#" data-stripe="dwu" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Pay &amp; Schedule →</a>
         </div>
 
       </div>
@@ -191,12 +191,19 @@
     <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
   </footer>
 
+  <script src="config.js"></script>
   <script>
+    // Wire Stripe links from config
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-stripe="diy"]').forEach(el => el.href = HID_CONFIG.stripe.diy);
+      document.querySelectorAll('[data-stripe="dwu"]').forEach(el => el.href = HID_CONFIG.stripe.doneWithYou);
+    });
+
     async function captureNotify() {
       const email = document.getElementById('notify-email').value.trim();
       if (!email || !email.includes('@')) { document.getElementById('notify-email').focus(); return; }
       try {
-        await fetch('/api/send-email', {
+        await fetch(HID_CONFIG.apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type: 'notify', email }),

@@ -153,8 +153,8 @@
           A Helper-ID NFC tag works without printing — anyone can tap it with their phone to see your info instantly.
         </p>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <a href="https://buy.stripe.com/YOUR_DIY_LINK" target="_blank" class="hid-btn hid-btn-outline">DIY Tag — $9</a>
-          <a href="https://buy.stripe.com/YOUR_DWU_LINK" target="_blank" class="hid-btn hid-btn-primary">Done With You — $25</a>
+          <a href="#" data-stripe="diy" target="_blank" class="hid-btn hid-btn-outline">DIY Tag — $9</a>
+          <a href="#" data-stripe="dwu" target="_blank" class="hid-btn hid-btn-primary">Done With You — $25</a>
         </div>
       </div>
 
@@ -170,7 +170,14 @@
     <p>Your data never leaves this device until you email it. &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
   </footer>
 
+  <script src="config.js"></script>
   <script src="hid-form-fields.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-stripe="diy"]').forEach(el => el.href = HID_CONFIG.stripe.diy);
+      document.querySelectorAll('[data-stripe="dwu"]').forEach(el => el.href = HID_CONFIG.stripe.doneWithYou);
+    });
+  </script>
   <script>
     const API_URL = '/api/send-email';
 
