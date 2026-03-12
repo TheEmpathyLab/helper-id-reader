@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID Admin — Tag Writer</title>
+  <link rel="stylesheet" href="../hid-style.css" />
+  <style>
+    .admin-bar {
+      background: var(--black);
+      color: white;
+      padding: 8px 24px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .admin-dot {
+      width: 8px; height: 8px;
+      background: #22C55E;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .section-title { font-family:var(--font-display); font-size:1.2rem; color:var(--black); margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid var(--red-light); }
+    .contact-block { background:var(--gray-light); border-radius:var(--radius); padding:16px; margin-bottom:12px; border:1.5px solid var(--border); }
+    .contact-block-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .contact-label { font-size:0.8rem; font-weight:700; color:var(--gray-dark); text-transform:uppercase; letter-spacing:0.08em; }
+    .remove-btn { background:none; border:none; color:var(--gray-mid); cursor:pointer; font-size:0.8rem; padding:2px 8px; border-radius:4px; }
+    .remove-btn:hover { color:var(--red); background:var(--red-light); }
+    .char-count { font-size:0.75rem; color:var(--gray-mid); text-align:right; margin-top:4px; }
+    .char-count.warning { color:#D97706; }
+    .char-count.danger { color:var(--red); }
+    .insurance-toggle { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:4px 0; }
+    .toggle-icon { font-size:0.85rem; font-weight:700; color:var(--red); white-space:nowrap; }
+    #output-section { display:none; margin-top:24px; }
+    .url-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .nfc-instructions { background:var(--black); color:var(--white); border-radius:var(--radius-lg); padding:20px; margin-top:20px; }
+    .nfc-instructions h4 { color:var(--white); font-size:0.9rem; margin-bottom:12px; }
+    .nfc-step { display:flex; gap:10px; margin-bottom:10px; font-size:0.85rem; color:#ccc; align-items:flex-start; }
+    .nfc-step-num { width:22px;height:22px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:white;flex-shrink:0;margin-top:1px; }
+    .tag-size-warning { font-size:0.78rem; color:#D97706; margin-top:8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Admin indicator -->
+  <div class="admin-bar">
+    <span class="admin-dot"></span>
+    Admin Mode — Tag Writer &nbsp;·&nbsp; Not public facing
+  </div>
+
+  <header class="hid-header">
+    <a href="../index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="../index.html">← Back to Site</a>
+    </nav>
+  </header>
+
+  <main class="hid-main">
+
+    <div class="hid-page-title">
+      <h1>Tag Writer</h1>
+      <p>Fill in the member's information, generate their profile URL, and write it to an NTAG215 tag.</p>
+    </div>
+
+    <div id="form-fields"></div>
+
+    <button class="hid-btn hid-btn-primary hid-btn-full hid-btn-lg" onclick="generateProfile()">
+      Generate Profile URL →
+    </button>
+
+    <!-- OUTPUT -->
+    <div id="output-section">
+
+      <div class="hid-card" style="border-color:var(--red);border-width:2px;margin-top:0;">
+        <div class="hid-card-title">✅ Profile URL Ready</div>
+
+        <div class="hid-alert hid-alert-success" style="margin-bottom:14px;">
+          Review the info with the member, then copy the URL and write to the tag.
+        </div>
+
+        <div class="hid-url-box" id="generated-url"></div>
+        <div class="tag-size-warning" id="size-warning" style="display:none;">
+          ⚠️ URL is long — confirm it fits on an NTAG215 (max ~492 bytes). Consider shortening notes or medications.
+        </div>
+
+        <div class="url-actions">
+          <button class="hid-btn hid-btn-primary" onclick="copyURL()">📋 Copy URL</button>
+          <a id="preview-link" href="#" target="_blank" class="hid-btn hid-btn-secondary">👁 Preview</a>
+          <button class="hid-btn hid-btn-outline" onclick="resetForm()">New Member</button>
+        </div>
+
+        <!-- NFC Write Instructions -->
+        <div class="nfc-instructions">
+          <h4>📱 Writing the Tag — Step by Step</h4>
+          <div class="nfc-step">
+            <div class="nfc-step-num">1</div>
+            <div>Tap <strong>Copy URL</strong> above.</div>
+          </div>
+          <div class="nfc-step">
+            <div class="nfc-step-num">2</div>
+            <div>Open <strong>NFC Tools</strong> on your Android phone.</div>
+          </div>
+          <div class="nfc-step">
+            <div class="nfc-step-num">3</div>
+            <div>Tap <strong>Write</strong> → <strong>Add a record</strong> → <strong>URL / URI</strong> → paste the URL.</div>
+          </div>
+          <div class="nfc-step">
+            <div class="nfc-step-num">4</div>
+            <div>Tap <strong>Write / OK</strong>, then hold the <strong>NTAG215 tag</strong> to the back of the phone.</div>
+          </div>
+          <div class="nfc-step">
+            <div class="nfc-step-num">5</div>
+            <div>Hand the tag to the member. Have them tap it with their own phone to confirm it loads. ✅</div>
+          </div>
+          <div class="nfc-step">
+            <div class="nfc-step-num">6</div>
+            <div>Collect payment if not already done. Mark as complete.</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID Admin</span>
+    </div>
+    <p>Internal use only &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
+  </footer>
+
+  <script src="../hid-form-fields.js"></script>
+  <script>
+    renderForm('form-fields');
+
+    let currentURL = '';
+
+    function generateProfile() {
+      const profile = buildProfile();
+      if (!profile.fn && !profile.ln) {
+        alert('Please enter at least a first or last name.');
+        return;
+      }
+
+      const base = window.location.href.split('/admin/')[0] + '/reader.html';
+      currentURL = encodeProfile(profile, base);
+
+      document.getElementById('generated-url').textContent = currentURL;
+      document.getElementById('preview-link').href = currentURL;
+
+      // Warn if URL is long for NTAG215 (492 bytes max)
+      const sizeWarning = document.getElementById('size-warning');
+      sizeWarning.style.display = currentURL.length > 400 ? 'block' : 'none';
+
+      const out = document.getElementById('output-section');
+      out.style.display = 'block';
+      out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window._formDirty = false;
+    }
+
+    function copyURL() {
+      navigator.clipboard.writeText(currentURL).then(() => {
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = orig, 2000);
+      });
+    }
+
+    function resetForm() {
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+      });
+      document.getElementById('output-section').style.display = 'none';
+      window._formDirty = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

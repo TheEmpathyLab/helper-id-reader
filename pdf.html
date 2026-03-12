@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Free Emergency PDF</title>
+  <link rel="stylesheet" href="hid-style.css" />
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .section-title { font-family:var(--font-display); font-size:1.2rem; color:var(--black); margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid var(--red-light); }
+    .contact-block { background:var(--gray-light); border-radius:var(--radius); padding:16px; margin-bottom:12px; border:1.5px solid var(--border); }
+    .contact-block-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .contact-label { font-size:0.8rem; font-weight:700; color:var(--gray-dark); text-transform:uppercase; letter-spacing:0.08em; }
+    .remove-btn { background:none; border:none; color:var(--gray-mid); cursor:pointer; font-size:0.8rem; padding:2px 8px; border-radius:4px; }
+    .remove-btn:hover { color:var(--red); background:var(--red-light); }
+    .char-count { font-size:0.75rem; color:var(--gray-mid); text-align:right; margin-top:4px; }
+    .char-count.warning { color:#D97706; }
+    .char-count.danger { color:var(--red); }
+    .insurance-toggle { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:4px 0; }
+    .toggle-icon { font-size:0.85rem; font-weight:700; color:var(--red); white-space:nowrap; }
+    #output-section { display:none; margin-top:24px; }
+    .pdf-preview {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      font-family: Georgia, serif;
+      line-height: 1.6;
+    }
+    .pdf-preview .pdf-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #D0312D;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .pdf-preview .pdf-logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #D0312D;
+      letter-spacing: -0.5px;
+    }
+    .pdf-preview .pdf-emergency {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #D0312D;
+    }
+    .pdf-preview h1 { font-size: 1.6rem; margin-bottom: 4px; color: #1A1A1A; }
+    .pdf-preview .pdf-meta { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
+    .pdf-preview .pdf-section { margin-bottom: 18px; }
+    .pdf-preview .pdf-section-title {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #D0312D;
+      margin-bottom: 8px; padding-bottom: 4px;
+      border-bottom: 1px solid #FDECEA;
+      font-family: sans-serif;
+    }
+    .pdf-preview .pdf-contact { margin-bottom: 8px; font-size: 0.9rem; }
+    .pdf-preview .pdf-contact strong { display: block; }
+    .pdf-preview .pill {
+      display: inline-block;
+      background: #F4F4F4;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.82rem;
+      margin: 2px;
+    }
+    .pdf-preview .pill.alert-pill { background: #FDECEA; border-color: #FCA5A5; color: #A82320; font-weight: 600; }
+    .pdf-preview .pdf-footer {
+      border-top: 1px solid #E0E0E0;
+      padding-top: 10px;
+      margin-top: 20px;
+      font-size: 0.75rem;
+      color: #999;
+      text-align: center;
+      font-family: sans-serif;
+    }
+    .action-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    #send-success { display:none; }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="index.html">Home</a>
+      <a href="pdf.html" class="active">Free PDF</a>
+      <a href="reader.html">Read a Tag</a>
+    </nav>
+  </header>
+
+  <main class="hid-main">
+
+    <div class="hid-page-title">
+      <h1>Free Emergency Information PDF</h1>
+      <p>Fill in your details below. We'll generate a printable PDF you can carry in your wallet — and email it to you for safekeeping.</p>
+    </div>
+
+    <div id="form-fields"></div>
+
+    <!-- Email field before submit -->
+    <div class="hid-card">
+      <div class="hid-card-title">Where should we send it?</div>
+      <div class="hid-form-group">
+        <label class="hid-label" for="pdfEmail">Your Email Address</label>
+        <input class="hid-input" type="email" id="pdfEmail" placeholder="you@email.com" />
+      </div>
+    </div>
+
+    <button class="hid-btn hid-btn-primary hid-btn-full hid-btn-lg" onclick="generatePDF()">
+      Generate My PDF →
+    </button>
+
+    <!-- OUTPUT -->
+    <div id="output-section">
+
+      <div class="hid-card" style="border-color:var(--red);border-width:2px;margin-top:0;">
+        <div class="hid-card-title">✅ Your Emergency PDF</div>
+        <div class="hid-alert hid-alert-success" style="margin-bottom:16px;">
+          Your PDF is shown below. Download it, print it, and carry it with you.
+        </div>
+
+        <!-- PDF PREVIEW -->
+        <div class="pdf-preview" id="pdf-preview-content">
+          <!-- rendered by JS -->
+        </div>
+
+        <div class="action-row">
+          <button class="hid-btn hid-btn-primary" onclick="downloadPDF()">⬇️ Download PDF</button>
+          <button class="hid-btn hid-btn-secondary" onclick="window.print()">🖨️ Print</button>
+          <button class="hid-btn hid-btn-outline" onclick="emailPDF()">📧 Email to Me</button>
+          <button class="hid-btn hid-btn-outline" onclick="resetForm()">Start Over</button>
+        </div>
+
+        <div id="send-success" class="hid-alert hid-alert-success" style="margin-top:14px;margin-bottom:0;">
+          ✅ Sent! Check your inbox for your emergency information PDF.
+        </div>
+      </div>
+
+      <!-- NFC upsell -->
+      <div class="hid-card" style="margin-top:16px; text-align:center;">
+        <div class="hid-card-title">Want this on a physical tag?</div>
+        <p style="font-size:0.9rem;color:var(--gray-dark);margin-bottom:16px;">
+          A Helper-ID NFC tag works without printing — anyone can tap it with their phone to see your info instantly.
+        </p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <a href="https://buy.stripe.com/YOUR_DIY_LINK" target="_blank" class="hid-btn hid-btn-outline">DIY Tag — $9</a>
+          <a href="https://buy.stripe.com/YOUR_DWU_LINK" target="_blank" class="hid-btn hid-btn-primary">Done With You — $25</a>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID</span>
+    </div>
+    <p>Your data never leaves this device until you email it. &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
+  </footer>
+
+  <script src="hid-form-fields.js"></script>
+  <script>
+    const SENDGRID_API_KEY = 'YOUR_SENDGRID_API_KEY';
+    const FROM_EMAIL       = 'hello@helper-id.com';
+
+    let currentProfile = null;
+
+    renderForm('form-fields');
+
+    // ---- Generate PDF preview ----
+    function generatePDF() {
+      const profile = buildProfile();
+      if (!profile.fn && !profile.ln) {
+        alert('Please enter at least a first or last name.');
+        return;
+      }
+      currentProfile = profile;
+
+      const age = calcAge(profile.dob);
+      const fullName = [profile.fn, profile.ln].filter(Boolean).join(' ');
+
+      const metaParts = [];
+      if (age)       metaParts.push(`Age: ${age}`);
+      if (profile.bt) metaParts.push(`Blood Type: ${profile.bt}`);
+
+      // Contacts
+      let contactsHTML = '';
+      if (profile.contacts && profile.contacts.length) {
+        contactsHTML = profile.contacts.map(c => `
+          <div class="pdf-contact">
+            <strong>${esc(c.n || '')}${c.r ? ` <span style="font-weight:400;color:#666;">— ${esc(c.r)}</span>` : ''}</strong>
+            ${c.p ? `<span>${esc(c.p)}</span>` : ''}
+          </div>`).join('');
+      } else {
+        contactsHTML = '<span style="color:#999;font-size:0.85rem;">None listed</span>';
+      }
+
+      // Pills
+      const pills = (str, alert) => str
+        ? str.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
+             .map(s => `<span class="pill${alert?' alert-pill':''}">${esc(s)}</span>`).join('')
+        : '<span style="color:#999;font-size:0.85rem;">None listed</span>';
+
+      // Insurance
+      let insHTML = '';
+      if (profile.ins) {
+        const i = profile.ins;
+        insHTML = `
+          <div class="pdf-section">
+            <div class="pdf-section-title">Health Insurance</div>
+            ${i.prov ? `<div><strong>Provider:</strong> ${esc(i.prov)}</div>` : ''}
+            ${i.mid  ? `<div><strong>Member ID:</strong> ${esc(i.mid)}</div>` : ''}
+            ${i.grp  ? `<div><strong>Group:</strong> ${esc(i.grp)}</div>` : ''}
+            ${i.ph   ? `<div><strong>Phone:</strong> ${esc(i.ph)}</div>` : ''}
+          </div>`;
+      }
+
+      document.getElementById('pdf-preview-content').innerHTML = `
+        <div class="pdf-header">
+          <div class="pdf-logo">Helper-ID</div>
+          <div class="pdf-emergency">⚡ Emergency Information</div>
+        </div>
+
+        <h1>${esc(fullName)}</h1>
+        ${metaParts.length ? `<div class="pdf-meta">${metaParts.join('&nbsp;&nbsp;·&nbsp;&nbsp;')}</div>` : ''}
+
+        <div class="pdf-section">
+          <div class="pdf-section-title">Emergency Contacts</div>
+          ${contactsHTML}
+        </div>
+
+        <div class="pdf-section">
+          <div class="pdf-section-title">⚠️ Allergies</div>
+          ${pills(profile.al, true)}
+        </div>
+
+        <div class="pdf-section">
+          <div class="pdf-section-title">💊 Medications</div>
+          ${pills(profile.med, false)}
+        </div>
+
+        <div class="pdf-section">
+          <div class="pdf-section-title">🏥 Medical Conditions</div>
+          ${pills(profile.cond, false)}
+        </div>
+
+        ${profile.doc ? `
+        <div class="pdf-section">
+          <div class="pdf-section-title">Primary Physician</div>
+          <div>🩺 ${esc(profile.doc)}</div>
+        </div>` : ''}
+
+        ${insHTML}
+
+        ${profile.notes ? `
+        <div class="pdf-section">
+          <div class="pdf-section-title">Notes</div>
+          <div style="font-size:0.88rem;">${esc(profile.notes)}</div>
+        </div>` : ''}
+
+        <div class="pdf-footer">
+          Generated by Helper-ID &nbsp;·&nbsp; helper-id.com &nbsp;·&nbsp; ${new Date().toLocaleDateString()}
+        </div>
+      `;
+
+      const out = document.getElementById('output-section');
+      out.style.display = 'block';
+      out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window._formDirty = false;
+    }
+
+    // ---- Download PDF using jsPDF ----
+    function downloadPDF() {
+      if (!currentProfile) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const profile = currentProfile;
+      const fullName = [profile.fn, profile.ln].filter(Boolean).join(' ');
+      const age = calcAge(profile.dob);
+
+      let y = 20;
+      const lm = 20; // left margin
+      const pw = 170; // page width
+
+      // Header
+      doc.setFillColor(208, 49, 45);
+      doc.rect(0, 0, 210, 14, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('HELPER-ID  —  EMERGENCY INFORMATION', lm, 9);
+
+      y = 24;
+      doc.setTextColor(26, 26, 26);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text(fullName || 'Emergency Profile', lm, y);
+      y += 7;
+
+      if (age || profile.bt) {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        const meta = [age ? `Age: ${age}` : null, profile.bt ? `Blood Type: ${profile.bt}` : null].filter(Boolean).join('   ·   ');
+        doc.text(meta, lm, y);
+        y += 8;
+      }
+
+      // Section helper
+      function section(title, lines) {
+        if (!lines || lines.length === 0) return;
+        if (y > 260) { doc.addPage(); y = 20; }
+        y += 4;
+        doc.setFillColor(253, 236, 234);
+        doc.rect(lm, y - 4, pw, 7, 'F');
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(168, 35, 32);
+        doc.text(title.toUpperCase(), lm + 2, y);
+        y += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(26, 26, 26);
+        lines.forEach(line => {
+          if (y > 270) { doc.addPage(); y = 20; }
+          const wrapped = doc.splitTextToSize(line, pw);
+          doc.text(wrapped, lm, y);
+          y += wrapped.length * 6;
+        });
+      }
+
+      // Contacts
+      const contactLines = (profile.contacts || []).map(c =>
+        `${c.n || ''}${c.r ? ` (${c.r})` : ''}${c.p ? '  —  ' + c.p : ''}`
+      );
+      section('Emergency Contacts', contactLines.length ? contactLines : ['None listed']);
+
+      const listOrNone = str => str
+        ? str.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
+        : ['None listed'];
+
+      section('Allergies', listOrNone(profile.al));
+      section('Medications', listOrNone(profile.med));
+      section('Medical Conditions', listOrNone(profile.cond));
+      if (profile.doc) section('Primary Physician', [profile.doc]);
+
+      if (profile.ins) {
+        const i = profile.ins;
+        const insLines = [
+          i.prov ? `Provider: ${i.prov}` : null,
+          i.mid  ? `Member ID: ${i.mid}` : null,
+          i.grp  ? `Group: ${i.grp}` : null,
+          i.ph   ? `Phone: ${i.ph}` : null,
+        ].filter(Boolean);
+        section('Health Insurance', insLines);
+      }
+
+      if (profile.notes) section('Additional Notes', [profile.notes]);
+
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(180, 180, 180);
+      doc.text(`Generated by Helper-ID  ·  helper-id.com  ·  ${new Date().toLocaleDateString()}`, lm, 285);
+
+      doc.save(`helper-id-${(profile.fn || 'profile').toLowerCase()}.pdf`);
+    }
+
+    // ---- Email PDF (sends preview HTML via SendGrid) ----
+    async function emailPDF() {
+      const email = document.getElementById('pdfEmail').value.trim();
+      if (!email || !email.includes('@')) {
+        alert('Please enter your email address in the form above first.');
+        document.getElementById('pdfEmail').focus();
+        return;
+      }
+
+      const previewHTML = document.getElementById('pdf-preview-content').innerHTML;
+      const emailBody = `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:12px 20px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;">Helper-ID</span>
+            <span style="color:rgba(255,255,255,0.8);font-size:0.8rem;margin-left:12px;">Emergency Information</span>
+          </div>
+          <div style="padding:24px;">
+            <p style="margin-bottom:20px;">Your emergency information PDF is attached below. Print it and carry it in your wallet.</p>
+            ${previewHTML}
+            <hr style="margin:24px 0;border-color:#eee;" />
+            <p style="font-size:0.8rem;color:#999;">
+              Want a physical NFC tag? Visit <a href="https://helper-id.com" style="color:#D0312D;">helper-id.com</a>
+            </p>
+          </div>
+        </div>`;
+
+      try {
+        const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SENDGRID_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            personalizations: [{ to: [{ email }] }],
+            from: { email: FROM_EMAIL, name: 'Helper-ID' },
+            subject: 'Your Helper-ID Emergency Information',
+            content: [{ type: 'text/html', value: emailBody }],
+          }),
+        });
+
+        if (res.ok || res.status === 202) {
+          document.getElementById('send-success').style.display = 'flex';
+        } else {
+          alert('Email failed. Please download the PDF using the button above.');
+        }
+      } catch (e) {
+        alert('Network error. Please download the PDF using the button above.');
+      }
+    }
+
+    // ---- Reset ----
+    function resetForm() {
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+      });
+      document.getElementById('output-section').style.display = 'none';
+      document.getElementById('send-success').style.display = 'none';
+      window._formDirty = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

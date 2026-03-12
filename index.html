@@ -12,171 +12,66 @@
       max-width: 640px;
       margin: 0 auto;
     }
-
-    .hero-badge {
-      display: inline-block;
-      margin-bottom: 20px;
+    .hero h1 { font-family: var(--font-display); font-size: 2.6rem; line-height: 1.15; margin-bottom: 18px; }
+    .hero h1 em { font-style: normal; color: var(--red); }
+    .hero p { font-size: 1.05rem; color: var(--gray-dark); margin-bottom: 32px; }
+    .products-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
+    .products-inner { max-width: var(--max-width); margin: 0 auto; }
+    .products-header { text-align: center; margin-bottom: 40px; }
+    .products-header h2 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 8px; }
+    .products-header p { color: var(--gray-dark); font-size: 0.95rem; }
+    .product-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .product-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 22px;
+      display: flex; flex-direction: column;
+      text-align: center; position: relative;
+      transition: box-shadow 0.15s;
     }
-
-    .hero h1 {
-      font-family: var(--font-display);
-      font-size: 2.6rem;
-      line-height: 1.15;
-      color: var(--black);
-      margin-bottom: 18px;
+    .product-card:hover { box-shadow: var(--shadow-lg); }
+    .product-card.featured { border-color: var(--red); }
+    .product-card.featured::before {
+      content: 'Most Popular';
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: var(--red); color: white;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 14px; border-radius: 999px; white-space: nowrap;
     }
-
-    .hero h1 em {
-      font-style: normal;
-      color: var(--red);
-    }
-
-    .hero p {
-      font-size: 1.1rem;
-      color: var(--gray-dark);
-      margin-bottom: 32px;
-      line-height: 1.6;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .divider-section {
-      border-top: 1.5px solid var(--border);
-      padding: 48px 24px;
-      max-width: var(--max-width);
-      margin: 0 auto;
-    }
-
-    .three-up {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 32px;
-    }
-
-    .three-up-item {
-      text-align: center;
-    }
-
-    .three-up-icon {
-      width: 52px;
-      height: 52px;
-      background: var(--red-light);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 14px;
-      font-size: 1.4rem;
-    }
-
-    .three-up-item h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: var(--black);
-    }
-
-    .three-up-item p {
-      font-size: 0.88rem;
-      color: var(--gray-dark);
-      line-height: 1.5;
-    }
-
-    .how-section {
-      background: var(--black);
-      color: var(--white);
-      padding: 48px 24px;
-    }
-
-    .how-inner {
-      max-width: var(--max-width);
-      margin: 0 auto;
-    }
-
-    .how-inner .hid-section-label {
-      color: #F87171;
-    }
-
-    .how-inner h2 {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      margin-bottom: 32px;
-      color: var(--white);
-    }
-
-    .steps-list {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-
-    .step-item {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .step-num {
-      width: 36px;
-      height: 36px;
-      background: var(--red);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--white);
-      flex-shrink: 0;
-    }
-
-    .step-item h4 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--white);
-    }
-
-    .step-item p {
-      font-size: 0.85rem;
-      color: #aaa;
-      line-height: 1.5;
-    }
-
-    .cta-section {
-      text-align: center;
-      padding: 56px 24px;
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
-    .cta-section h2 {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      margin-bottom: 14px;
-    }
-
-    .cta-section p {
-      color: var(--gray-dark);
-      font-size: 1rem;
-      margin-bottom: 28px;
-    }
-
-    @media (max-width: 600px) {
-      .hero h1 { font-size: 1.9rem; }
-      .three-up { grid-template-columns: 1fr; gap: 28px; }
-      .steps-list { grid-template-columns: 1fr; }
+    .product-icon { font-size: 2.4rem; margin-bottom: 12px; }
+    .product-name { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+    .product-price { font-family: var(--font-display); font-size: 2rem; color: var(--red); line-height: 1.1; margin-bottom: 14px; }
+    .product-price .sub { font-family: var(--font-body); font-size: 0.78rem; color: var(--gray-mid); font-weight: 400; }
+    .product-price.free-price { color: #16A34A; }
+    .product-features { list-style: none; text-align: left; margin-bottom: 20px; flex: 1; }
+    .product-features li { font-size: 0.82rem; color: var(--gray-dark); padding: 4px 0; display: flex; gap: 8px; }
+    .product-features li::before { content: '✓'; color: var(--red); font-weight: 700; flex-shrink: 0; }
+    .why-section { background: var(--black); padding: 56px 24px; color: white; }
+    .why-inner { max-width: var(--max-width); margin: 0 auto; }
+    .why-inner .hid-section-label { color: #F87171; }
+    .why-inner h2 { font-family: var(--font-display); font-size: 1.9rem; color: white; margin-bottom: 32px; }
+    .why-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+    .why-item h4 { font-size: 0.95rem; color: white; margin-bottom: 6px; }
+    .why-item p { font-size: 0.85rem; color: #aaa; line-height: 1.55; }
+    .why-icon { width:40px;height:40px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:12px; }
+    .notify-strip { background: var(--red-light); border-top: 2px solid #FCA5A5; border-bottom: 2px solid #FCA5A5; padding: 36px 24px; text-align: center; }
+    .notify-inner { max-width: 480px; margin: 0 auto; }
+    .notify-inner h3 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 6px; }
+    .notify-inner p { font-size: 0.88rem; color: var(--gray-dark); margin-bottom: 16px; }
+    .notify-row { display: flex; gap: 8px; }
+    .notify-row input { flex:1; font-family:var(--font-body); font-size:0.9rem; border:1.5px solid var(--border); border-radius:var(--radius); padding:11px 14px; outline:none; background:white; }
+    .notify-row input:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(208,49,45,0.1); }
+    #notify-ok { display:none; color:var(--red-dark); font-weight:600; font-size:0.9rem; margin-top:10px; }
+    @media(max-width:720px) {
+      .hero h1 { font-size:1.9rem; }
+      .product-grid { grid-template-columns:1fr; }
+      .why-grid { grid-template-columns:1fr; gap:20px; }
+      .notify-row { flex-direction:column; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header class="hid-header">
     <a href="index.html" class="hid-logo">
       <div class="hid-logo-mark">HID</div>
@@ -184,91 +79,126 @@
     </a>
     <nav class="hid-nav">
       <a href="index.html" class="active">Home</a>
-      <a href="generator.html">Create Tag</a>
-      <a href="reader.html">Read Tag</a>
+      <a href="pdf.html">Free PDF</a>
+      <a href="reader.html">Read a Tag</a>
     </nav>
   </header>
 
-  <!-- HERO -->
   <section class="hero">
-    <div class="hero-badge">
-      <span class="hid-badge hid-badge-red">NFC Emergency ID</span>
-    </div>
+    <span class="hid-badge hid-badge-red" style="margin-bottom:18px;display:inline-block;">NFC Emergency ID</span>
     <h1>Your emergency info,<br /><em>no phone required.</em></h1>
-    <p>Helper-ID puts your critical emergency information on a physical card or tag. First responders, neighbors, and family can access it instantly — even when your phone is dead, missing, or locked.</p>
-    <div class="hero-actions">
-      <a href="generator.html" class="hid-btn hid-btn-primary hid-btn-lg">Create Your Tag</a>
-      <a href="reader.html" class="hid-btn hid-btn-outline hid-btn-lg">Read a Tag</a>
+    <p>Helper-ID puts your critical emergency information on a physical card or tag. First responders and family can access it instantly — even when your phone is dead, locked, or missing.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="pdf.html" class="hid-btn hid-btn-outline hid-btn-lg">Get Free PDF</a>
+      <a href="#products" class="hid-btn hid-btn-primary hid-btn-lg">Get an NFC Tag →</a>
     </div>
   </section>
 
-  <!-- WHY -->
-  <section class="divider-section">
-    <div style="text-align:center; margin-bottom: 8px;">
+  <section class="products-section" id="products">
+    <div class="products-inner">
+      <div class="products-header">
+        <span class="hid-section-label">Choose Your Path</span>
+        <h2>Three ways to be ready</h2>
+        <p>Start free or get a physical tag — your choice.</p>
+      </div>
+      <div class="product-grid">
+
+        <div class="product-card">
+          <div class="product-icon">📄</div>
+          <div class="product-name">Free PDF</div>
+          <div class="product-price free-price">Free</div>
+          <ul class="product-features">
+            <li>Emergency info in a printable format</li>
+            <li>Emailed to you instantly</li>
+            <li>Print and carry in your wallet</li>
+            <li>No account required</li>
+          </ul>
+          <a href="pdf.html" class="hid-btn hid-btn-outline hid-btn-full">Create My PDF</a>
+        </div>
+
+        <div class="product-card featured">
+          <div class="product-icon">🏷️</div>
+          <div class="product-name">DIY NFC Tag</div>
+          <div class="product-price">$9 <span class="sub">one-time</span></div>
+          <ul class="product-features">
+            <li>Profile URL generated and emailed</li>
+            <li>Step-by-step guide included</li>
+            <li>Works on any modern smartphone</li>
+            <li>No subscription ever</li>
+          </ul>
+          <a href="https://buy.stripe.com/00w14n6kZe7G15q8mT9MY04" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get Started →</a>
+        </div>
+
+        <div class="product-card">
+          <div class="product-icon">🤝</div>
+          <div class="product-name">Done With You</div>
+          <div class="product-price">$25 <span class="sub">one-time</span></div>
+          <ul class="product-features">
+            <li>We program your tag on the spot</li>
+            <li>Walk away ready in minutes</li>
+            <li>Perfect at community events</li>
+            <li>Test it before you leave</li>
+          </ul>
+          <a href="https://buy.stripe.com/8x200jbFj2oYbK4gTp9MY03" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Pay &amp; Schedule →</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="notify-strip">
+    <div class="notify-inner">
+      <span class="hid-badge hid-badge-black" style="margin-bottom:10px;display:inline-block;">Coming Soon</span>
+      <h3>CODE+PIN Hosted Profile</h3>
+      <p>A backup accessible on any phone — no NFC reader needed. Get notified when it launches.</p>
+      <div class="notify-row">
+        <input type="email" id="notify-email" placeholder="your@email.com" />
+        <button class="hid-btn hid-btn-primary" onclick="captureNotify()">Notify Me</button>
+      </div>
+      <div id="notify-ok">✅ You're on the list — we'll reach out when CODE+PIN launches.</div>
+    </div>
+  </section>
+
+  <section class="why-section">
+    <div class="why-inner">
       <span class="hid-section-label">Why Helper-ID</span>
-    </div>
-    <h2 style="font-family: var(--font-display); font-size: 1.8rem; text-align:center; margin-bottom: 4px;">Built for real emergencies</h2>
-    <p style="text-align:center; color: var(--gray-dark); font-size:0.95rem;">Phones fail. Contacts go outdated. Helper-ID stays ready.</p>
-
-    <div class="three-up">
-      <div class="three-up-item">
-        <div class="three-up-icon">📵</div>
-        <h3>Works Without a Phone</h3>
-        <p>Emergency contacts stored in phones can't be accessed when the phone is dead, locked, or missing.</p>
-      </div>
-      <div class="three-up-item">
-        <div class="three-up-icon">🏷️</div>
-        <h3>Physical & Identifiable</h3>
-        <p>A card, bracelet, or keychain tag goes with you everywhere and can be found by anyone who needs it.</p>
-      </div>
-      <div class="three-up-item">
-        <div class="three-up-icon">🔒</div>
-        <h3>You Own Your Data</h3>
-        <p>With NFC tags, your information lives on the tag itself — not in a database someone else controls.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="how-section">
-    <div class="how-inner">
-      <span class="hid-section-label">How It Works</span>
-      <h2>Ready in minutes</h2>
-      <div class="steps-list">
-        <div class="step-item">
-          <div class="step-num">1</div>
-          <h4>Fill Out Your Profile</h4>
-          <p>Enter your name, emergency contacts, medications, allergies, and any important conditions.</p>
+      <h2>Built for real emergencies</h2>
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="why-icon">📵</div>
+          <h4>Works Without a Phone</h4>
+          <p>Emergency contacts stored in phones can't be accessed when the phone is dead, locked, or missing.</p>
         </div>
-        <div class="step-item">
-          <div class="step-num">2</div>
-          <h4>Generate Your Tag</h4>
-          <p>Your information is encoded and written to a small NFC chip using any Android phone.</p>
+        <div class="why-item">
+          <div class="why-icon">🏷️</div>
+          <h4>Physical &amp; Identifiable</h4>
+          <p>A card or keychain tag goes with you everywhere and can be found by anyone who needs it.</p>
         </div>
-        <div class="step-item">
-          <div class="step-num">3</div>
-          <h4>Carry It With You</h4>
-          <p>Attach your tag to a card, keychain, or bracelet. Anyone can tap it to see your info instantly.</p>
+        <div class="why-item">
+          <div class="why-icon">🔒</div>
+          <h4>You Own Your Data</h4>
+          <p>With NFC tags, your information lives on the tag itself — not in a database someone else controls.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="cta-section">
-    <h2>Get your tag made today.</h2>
-    <p>Takes less than 5 minutes. No app required to read it. Works on any modern smartphone.</p>
-    <a href="generator.html" class="hid-btn hid-btn-primary hid-btn-lg">Create Your Profile →</a>
-  </section>
-
-  <!-- FOOTER -->
   <footer class="hid-footer">
     <div class="hid-footer-logo">
       <div class="hid-logo-mark">HID</div>
       <span>Helper-ID</span>
     </div>
-    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="#">helperid.com</a></p>
+    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
   </footer>
 
+  <script>
+    function captureNotify() {
+      const email = document.getElementById('notify-email').value.trim();
+      if (!email || !email.includes('@')) { document.getElementById('notify-email').focus(); return; }
+      console.log('CODE+PIN interest:', email);
+      document.querySelector('.notify-row').style.display = 'none';
+      document.getElementById('notify-ok').style.display = 'block';
+    }
+  </script>
 </body>
 </html>
