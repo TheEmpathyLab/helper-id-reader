@@ -29,9 +29,8 @@ app.use(express.json({ limit: '1mb' }));
 const allowedOrigins = [
   'https://helper-id.com',
   'https://www.helper-id.com',
-  // Add your DO app URL here once you have it, e.g.:
-  // 'https://helper-id-xxxxx.ondigitalocean.app',
-  'http://localhost:3000', // local dev
+  'https://helper-id-v8uev.ondigitalocean.app',
+  'http://localhost:3000',
 ];
 
 app.use(cors({
