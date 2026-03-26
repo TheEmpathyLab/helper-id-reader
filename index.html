@@ -117,29 +117,42 @@
         </div>
 
         <div class="product-card featured">
-          <div class="product-icon">🏷️</div>
-          <div class="product-name">DIY NFC Tag</div>
+          <div class="product-icon">📥</div>
+          <div class="product-name">Digital Download</div>
           <div class="product-price">$9 <span class="sub">one-time</span></div>
           <ul class="product-features">
             <li>Profile URL generated and emailed</li>
-            <li>Step-by-step guide included</li>
+            <li>Step-by-step NFC writing guide included</li>
             <li>Works on any modern smartphone</li>
             <li>No subscription ever</li>
           </ul>
-          <a href="#" data-stripe="diy" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get Started →</a>
+          <a href="#" data-stripe="digitalDownload" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get Started →</a>
+        </div>
+
+        <div class="product-card">
+          <div class="product-icon">🏷️</div>
+          <div class="product-name">NFC Pack + Digital Download</div>
+          <div class="product-price">$35 <span class="sub">one-time</span></div>
+          <ul class="product-features">
+            <li>NFC tags shipped to you</li>
+            <li>Profile URL + writing guide included</li>
+            <li>Works on any modern smartphone</li>
+            <li>No subscription ever</li>
+          </ul>
+          <a href="#" data-stripe="nfcPack" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Get the Pack →</a>
         </div>
 
         <div class="product-card">
           <div class="product-icon">🤝</div>
-          <div class="product-name">Done With You</div>
-          <div class="product-price">$25 <span class="sub">one-time</span></div>
+          <div class="product-name">Full Membership</div>
+          <div class="product-price">$55 <span class="sub">per year</span></div>
           <ul class="product-features">
-            <li>We program your tag on the spot</li>
-            <li>Walk away ready in minutes</li>
-            <li>Perfect at community events</li>
-            <li>Test it before you leave</li>
+            <li>Hosted CODE+PIN profile</li>
+            <li>NFC Pack included</li>
+            <li>Ongoing support &amp; updates</li>
+            <li>Best value for families</li>
           </ul>
-          <a href="#" data-stripe="dwu" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Pay &amp; Schedule →</a>
+          <a href="#" data-stripe="fullMembership" target="_blank" class="hid-btn hid-btn-secondary hid-btn-full">Join Now →</a>
         </div>
 
       </div>
@@ -195,8 +208,9 @@
   <script>
     // Wire Stripe links from config
     document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-stripe="diy"]').forEach(el => el.href = HID_CONFIG.stripe.diy);
-      document.querySelectorAll('[data-stripe="dwu"]').forEach(el => el.href = HID_CONFIG.stripe.doneWithYou);
+      document.querySelectorAll('[data-stripe="digitalDownload"]').forEach(el => el.href = HID_CONFIG.stripe.digitalDownload);
+      document.querySelectorAll('[data-stripe="nfcPack"]').forEach(el => el.href = HID_CONFIG.stripe.nfcPack);
+      document.querySelectorAll('[data-stripe="fullMembership"]').forEach(el => el.href = HID_CONFIG.stripe.fullMembership);
     });
 
     async function captureNotify() {
