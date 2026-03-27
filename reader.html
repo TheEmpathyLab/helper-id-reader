@@ -3,32 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Helper-ID — Read a Tag</title>
+  <title>Helper-ID — Emergency Information</title>
   <link rel="stylesheet" href="hid-style.css" />
   <style>
-    /* ---- Split entry screen ---- */
+    /* ── Entry screen ── */
     .entry-screen {
-      max-width: var(--max-width);
+      max-width: 480px;
       margin: 0 auto;
       padding: 40px 24px;
     }
-
     .entry-title {
       text-align: center;
       margin-bottom: 36px;
     }
-
     .entry-title h1 {
       font-family: var(--font-display);
       font-size: 2rem;
       margin-bottom: 8px;
     }
-
     .entry-title p {
       color: var(--gray-dark);
       font-size: 0.95rem;
     }
-
     .entry-split {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -38,7 +34,6 @@
       overflow: hidden;
       box-shadow: var(--shadow);
     }
-
     .entry-panel {
       padding: 32px 28px;
       display: flex;
@@ -46,41 +41,17 @@
       align-items: center;
       text-align: center;
     }
-
     .entry-panel:first-child {
       border-right: 2px solid var(--border);
       background: var(--white);
     }
-
     .entry-panel:last-child {
       background: var(--gray-light);
     }
-
-    .entry-panel-icon {
-      font-size: 2.8rem;
-      margin-bottom: 14px;
-    }
-
-    .entry-panel h3 {
-      font-weight: 700;
-      font-size: 1.05rem;
-      margin-bottom: 8px;
-    }
-
-    .entry-panel p {
-      font-size: 0.85rem;
-      color: var(--gray-dark);
-      line-height: 1.5;
-      margin-bottom: 20px;
-    }
-
-    .pin-form {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
+    .entry-panel-icon { font-size: 2.8rem; margin-bottom: 14px; }
+    .entry-panel h3 { font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+    .entry-panel p { font-size: 0.85rem; color: var(--gray-dark); line-height: 1.5; margin-bottom: 20px; }
+    .pin-form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
     .coming-soon-badge {
       display: inline-block;
       background: var(--black);
@@ -93,7 +64,6 @@
       border-radius: 999px;
       margin-bottom: 14px;
     }
-
     .or-divider {
       display: none;
       text-align: center;
@@ -108,119 +78,224 @@
       margin: 4px 0;
     }
 
-    /* ---- Profile display ---- */
-    .profile-wrap { display: none; }
-
-    .profile-header {
-      background: var(--red);
-      color: white;
-      padding: 28px 24px;
+    /* ── Emergency banner ── */
+    .emg-banner {
+      background: var(--red-light);
+      border-bottom: 1.5px solid #FCA5A5;
+      padding: 7px 20px;
       text-align: center;
-    }
-
-    .profile-header .hid-logo-mark {
-      width: 44px; height: 44px;
-      background: white; color: var(--red);
-      font-size: 15px;
-      margin: 0 auto 12px;
-    }
-
-    .profile-header h1 {
-      font-family: var(--font-display);
-      font-size: 2rem; color: white; line-height: 1.1;
-    }
-
-    .profile-meta {
-      display: flex; gap: 10px;
-      justify-content: center; flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .profile-meta-item {
-      background: rgba(255,255,255,0.2);
-      padding: 4px 12px; border-radius: 999px;
-      font-size: 0.82rem; color: white; font-weight: 600;
-    }
-
-    .emergency-strip {
-      background: #FEF2F2;
-      border-bottom: 2px solid #FCA5A5;
-      padding: 10px 24px;
-      text-align: center;
-      font-size: 0.78rem; font-weight: 700;
-      letter-spacing: 0.1em; color: var(--red-dark);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--red-dark);
       text-transform: uppercase;
+      display: none;
     }
 
-    .profile-body {
-      max-width: 560px;
+    /* ── Page body ── */
+    .page-body {
+      max-width: 480px;
       margin: 0 auto;
-      padding: 28px 20px;
+      padding: 14px 12px 32px;
+      display: none;
     }
 
-    .profile-section { margin-bottom: 28px; }
-
-    .profile-section-title {
-      font-size: 0.68rem; font-weight: 700;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--red); margin-bottom: 10px;
-      padding-bottom: 6px; border-bottom: 1.5px solid var(--red-light);
+    /* ── Profile card ── */
+    .profile-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 10px;
     }
 
-    .contact-row {
-      display: flex; align-items: center;
-      gap: 14px; padding: 12px 0;
-      border-bottom: 1px solid var(--border);
+    /* Identity row */
+    .identity-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 16px 14px;
     }
-    .contact-row:last-child { border-bottom: none; }
-
-    .contact-avatar {
-      width: 40px; height: 40px;
-      background: var(--red-light); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; flex-shrink: 0;
+    .photo-wrap {
+      flex-shrink: 0;
+      width: 76px;
+      height: 76px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      background: #e8e8e8;
+    }
+    .photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .photo-initials {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: #aaa;
+      background: #ececec;
+    }
+    .name-block { flex: 1; padding-top: 2px; }
+    .you-helping {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #bbb;
+      margin-bottom: 3px;
+    }
+    .member-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--black);
+      line-height: 1.1;
+      margin-bottom: 5px;
+    }
+    .meta-line {
+      font-size: 12px;
+      color: var(--gray-mid);
+      line-height: 1.5;
     }
 
-    .contact-details { flex: 1; }
-    .contact-name { font-weight: 700; font-size: 1rem; }
-    .contact-rel { font-size: 0.8rem; color: var(--gray-mid); }
-
-    .contact-call {
-      background: var(--red); color: white; border: none;
-      border-radius: 8px; padding: 8px 14px;
-      font-size: 0.85rem; font-weight: 600;
-      cursor: pointer; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 4px;
-      white-space: nowrap;
+    /* Divider */
+    .prof-divider {
+      height: 1px;
+      background: #EBEBEB;
+      margin: 0 16px;
     }
 
+    /* Section */
+    .prof-section { padding: 14px 16px; }
+    .prof-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c0c0c0;
+      margin-bottom: 8px;
+    }
+
+    /* Critical fields */
+    .critical-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 3px;
+    }
+    .critical-notes {
+      font-size: 13px;
+      color: var(--gray-dark);
+      line-height: 1.55;
+    }
+    .no-info {
+      font-size: 13px;
+      color: #ccc;
+      font-style: italic;
+    }
+
+    /* Alert pills for allergies / meds when populated */
+    .alert-pill {
+      display: inline-block;
+      background: var(--red-light);
+      border: 1px solid #FCA5A5;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--red-dark);
+      margin: 3px 3px 3px 0;
+    }
     .info-pill {
       display: inline-block;
       background: var(--gray-light);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 0.88rem; color: var(--black);
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--black);
       margin: 3px 3px 3px 0;
     }
 
-    .info-pill.alert-pill {
-      background: var(--red-light);
-      border-color: #FCA5A5;
-      color: var(--red-dark);
+    /* Contacts */
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid #EBEBEB;
+    }
+    .contact-item:last-child { border-bottom: none; }
+    .contact-text { flex: 1; }
+    .contact-name-line { font-size: 14px; color: var(--black); }
+    .contact-sub { font-size: 12px; color: var(--gray-mid); margin-top: 1px; }
+    .call-btn {
+      flex-shrink: 0;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-body);
+      text-decoration: none;
+      display: inline-block;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .call-btn:hover { background: var(--red-dark); }
+    .call-btn:active { opacity: 0.85; }
+
+    /* ── Lower detail grid ── */
+    .lower-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .info-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+    .info-card-title {
+      font-size: 10px;
       font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c0c0c0;
+      margin-bottom: 8px;
     }
-
-    .notes-box {
-      font-size: 0.9rem; color: var(--gray-dark);
-      line-height: 1.6; background: var(--gray-light);
-      border-radius: var(--radius); padding: 12px 14px;
+    .info-row {
+      font-size: 12.5px;
+      color: var(--gray-dark);
+      padding: 2px 0;
+      line-height: 1.45;
     }
+    .info-row strong { color: var(--black); font-weight: 600; }
+    .info-empty { font-size: 12.5px; color: #ccc; font-style: italic; }
 
-    .ins-row { font-size: 0.9rem; color: var(--gray-dark); padding: 4px 0; }
-    .ins-row strong { color: var(--black); }
+    /* ── Footer credit ── */
+    .hid-credit {
+      text-align: center;
+      font-size: 11px;
+      color: #ccc;
+      padding: 8px 0 4px;
+    }
+    .hid-credit a { color: #ccc; text-decoration: none; }
 
-    /* ---- Error state ---- */
+    /* ── Error state ── */
     .error-state {
       text-align: center;
       padding: 64px 24px;
@@ -229,13 +304,27 @@
       display: none;
     }
     .error-state .icon { font-size: 3rem; margin-bottom: 16px; }
-    .error-state h2 { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 10px; }
-    .error-state p { color: var(--gray-dark); font-size: 0.95rem; margin-bottom: 24px; }
+    .error-state h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .error-state p {
+      color: var(--gray-dark);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
 
+    /* ── Responsive ── */
     @media (max-width: 600px) {
       .entry-split { grid-template-columns: 1fr; }
       .entry-panel:first-child { border-right: none; border-bottom: 2px solid var(--border); }
       .or-divider { display: block; }
+    }
+    @media (max-width: 400px) {
+      .page-body { padding: 10px 8px 24px; }
+      .member-name { font-size: 1.3rem; }
+      .lower-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -253,16 +342,13 @@
     </nav>
   </header>
 
-  <!-- ENTRY SCREEN (shown when no hash in URL) -->
-  <div id="entry-screen" class="entry-screen">
+  <!-- ENTRY SCREEN — shown when no hash in URL -->
+  <div id="entry-screen" class="entry-screen" style="display:none;">
     <div class="entry-title">
       <h1>Access a Profile</h1>
       <p>Tap an NFC tag to load a profile automatically, or enter a CODE and PIN.</p>
     </div>
-
     <div class="entry-split">
-
-      <!-- NFC Panel -->
       <div class="entry-panel">
         <div class="entry-panel-icon">📱</div>
         <h3>Tap NFC Tag</h3>
@@ -271,45 +357,111 @@
           Works on Android phones and iPhone (iPhone 7 or newer). No app required.
         </div>
       </div>
-
-      <!-- CODE+PIN Panel -->
       <div class="entry-panel">
         <span class="coming-soon-badge">Coming Soon</span>
         <div class="entry-panel-icon">🔢</div>
         <h3>Enter CODE + PIN</h3>
         <p>Have a Helper-ID code and PIN? Enter them below to access a hosted profile from any device.</p>
         <div class="pin-form">
-          <input class="hid-input" type="text" placeholder="CODE (e.g. HID-4829)" disabled
-            style="opacity:0.5;cursor:not-allowed;" />
-          <input class="hid-input" type="password" placeholder="PIN" disabled
-            style="opacity:0.5;cursor:not-allowed;" />
-          <button class="hid-btn hid-btn-secondary hid-btn-full" disabled
-            style="opacity:0.5;cursor:not-allowed;">
+          <input class="hid-input" type="text" placeholder="CODE (e.g. HID-4829)" disabled style="opacity:0.5;cursor:not-allowed;" />
+          <input class="hid-input" type="password" placeholder="PIN" disabled style="opacity:0.5;cursor:not-allowed;" />
+          <button class="hid-btn hid-btn-secondary hid-btn-full" disabled style="opacity:0.5;cursor:not-allowed;">
             Access Profile
           </button>
         </div>
         <p style="margin-top:12px;font-size:0.78rem;color:var(--gray-mid);">
-          CODE+PIN access is part of the hosted profile tier, launching soon.
+          CODE+PIN access launches soon.
           <a href="index.html#notify" style="color:var(--red);">Get notified →</a>
         </p>
       </div>
-
     </div>
-
     <div class="or-divider">or</div>
-
   </div>
+
+  <!-- EMERGENCY BANNER — shown with profile -->
+  <div class="emg-banner" id="emg-banner">⚡ Emergency Information — Helper-ID</div>
 
   <!-- PROFILE DISPLAY -->
-  <div class="profile-wrap" id="profile-wrap">
-    <div class="emergency-strip">⚡ Emergency Information — Helper-ID</div>
-    <div class="profile-header">
-      <div class="hid-logo-mark">HID</div>
-      <h1 id="prof-name"></h1>
-      <div class="profile-meta" id="prof-meta"></div>
+  <div class="page-body" id="page-body">
+
+    <div class="profile-card">
+
+      <!-- Identity row -->
+      <div class="identity-row">
+        <div class="photo-wrap" id="photo-wrap">
+          <!-- Populated by render() -->
+        </div>
+        <div class="name-block">
+          <div class="you-helping">You're helping:</div>
+          <div class="member-name" id="prof-name"></div>
+          <div class="meta-line" id="prof-meta"></div>
+        </div>
+      </div>
+
+      <div class="prof-divider"></div>
+
+      <!-- Medical Conditions -->
+      <div class="prof-section" id="sec-conditions">
+        <div class="prof-section-label">Medical conditions</div>
+        <div id="prof-conditions"></div>
+      </div>
+
+      <div class="prof-divider"></div>
+
+      <!-- Allergies -->
+      <div class="prof-section" id="sec-allergies">
+        <div class="prof-section-label">Allergies</div>
+        <div id="prof-allergies"></div>
+      </div>
+
+      <div class="prof-divider"></div>
+
+      <!-- Medications -->
+      <div class="prof-section" id="sec-medications">
+        <div class="prof-section-label">Medications</div>
+        <div id="prof-medications"></div>
+      </div>
+
+      <div class="prof-divider"></div>
+
+      <!-- Emergency Contacts -->
+      <div class="prof-section">
+        <div class="prof-section-label">Emergency contacts</div>
+        <div id="prof-contacts"></div>
+      </div>
+
+    </div><!-- /profile-card -->
+
+    <!-- Lower detail grid -->
+    <div class="lower-grid">
+
+      <div class="info-card">
+        <div class="info-card-title">Vitals</div>
+        <div id="vitals-body"></div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title">Medications</div>
+        <div id="meds-card-body"></div>
+      </div>
+
+      <div class="info-card" id="insurance-card" style="display:none;">
+        <div class="info-card-title">Insurance</div>
+        <div id="ins-body"></div>
+      </div>
+
+      <div class="info-card" id="physician-card" style="display:none;">
+        <div class="info-card-title">Physician</div>
+        <div id="doc-body"></div>
+      </div>
+
+    </div><!-- /lower-grid -->
+
+    <div class="hid-credit">
+      <a href="index.html">Powered by Helper-ID &nbsp;·&nbsp; helper-id.com</a>
     </div>
-    <div class="profile-body" id="prof-body"></div>
-  </div>
+
+  </div><!-- /page-body -->
 
   <!-- ERROR STATE -->
   <div class="error-state" id="error-state">
@@ -337,124 +489,142 @@
         return;
       }
 
-      // Has a hash — try to decode
+      // Decode profile
       let profile;
       try {
         const json = decodeURIComponent(escape(atob(hash)));
         profile = JSON.parse(json);
       } catch (e) {
-        document.getElementById('entry-screen').style.display = 'none';
         document.getElementById('error-state').style.display = 'block';
         return;
       }
 
-      // Show profile
-      document.getElementById('entry-screen').style.display = 'none';
-      document.getElementById('profile-wrap').style.display = 'block';
+      // Show profile UI
+      document.getElementById('emg-banner').style.display = 'block';
+      document.getElementById('page-body').style.display = 'block';
 
+      // ── Name ──
       const fullName = [profile.fn, profile.ln].filter(Boolean).join(' ') || 'Emergency Profile';
       document.getElementById('prof-name').textContent = fullName;
-      document.title = `${fullName} — Helper-ID`;
+      document.title = fullName + ' — Helper-ID';
 
-      // Meta pills
-      const age = calcAge(profile.dob);
-      const metaPills = [];
-      if (age)        metaPills.push(`Age: ${age}`);
-      if (profile.bt) metaPills.push(`Blood Type: ${profile.bt}`);
-      document.getElementById('prof-meta').innerHTML =
-        metaPills.map(p => `<span class="profile-meta-item">${p}</span>`).join('');
-
-      // Body
-      let html = '';
-
-      // Contacts
-      html += `<div class="profile-section">
-        <div class="profile-section-title">Emergency Contacts</div>`;
-      if (profile.contacts && profile.contacts.length) {
-        profile.contacts.forEach(c => {
-          html += `<div class="contact-row">
-            <div class="contact-avatar">👤</div>
-            <div class="contact-details">
-              <div class="contact-name">${esc(c.n || 'Unknown')}</div>
-              <div class="contact-rel">${esc(c.r || '')}</div>
-            </div>
-            ${c.p ? `<a href="tel:${esc(c.p)}" class="contact-call">📞 Call</a>` : ''}
-          </div>`;
-        });
+      // ── Photo: show image if profile.photo exists, else initials ──
+      const photoWrap = document.getElementById('photo-wrap');
+      if (profile.photo) {
+        const img = document.createElement('img');
+        img.src = profile.photo;
+        img.alt = fullName;
+        photoWrap.appendChild(img);
       } else {
-        html += '<p style="color:var(--gray-mid);font-size:0.9rem;">No contacts listed.</p>';
-      }
-      html += '</div>';
-
-      // Allergies
-      if (profile.al) {
-        const pills = profile.al.split(/[,\n]+/).map(a => a.trim()).filter(Boolean)
-          .map(a => `<span class="info-pill alert-pill">⚠️ ${esc(a)}</span>`).join('');
-        html += `<div class="profile-section">
-          <div class="profile-section-title">⚠️ Allergies</div>
-          <div>${pills}</div>
-        </div>`;
+        const initials = [profile.fn, profile.ln]
+          .filter(Boolean)
+          .map(n => n[0].toUpperCase())
+          .join('');
+        const div = document.createElement('div');
+        div.className = 'photo-initials';
+        div.textContent = initials || '?';
+        photoWrap.appendChild(div);
       }
 
-      // Medications
-      if (profile.med) {
-        const pills = profile.med.split(/[,\n]+/).map(m => m.trim()).filter(Boolean)
-          .map(m => `<span class="info-pill">${esc(m)}</span>`).join('');
-        html += `<div class="profile-section">
-          <div class="profile-section-title">💊 Medications</div>
-          <div>${pills}</div>
-        </div>`;
+      // ── Meta line ──
+      const age = calcAge(profile.dob);
+      const metaParts = [];
+      if (age) metaParts.push('Age ' + age);
+      if (profile.bt) metaParts.push('Blood type ' + esc(profile.bt));
+      document.getElementById('prof-meta').textContent = metaParts.join(' · ');
+
+      // ── Conditions ──
+      const condEl = document.getElementById('prof-conditions');
+      if (profile.cond && profile.cond.trim()) {
+        const items = profile.cond.split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
+        condEl.innerHTML = items.map(c =>
+          '<div class="critical-name">' + esc(c) + '</div>'
+        ).join('');
+        if (profile.notes) {
+          const n = document.createElement('div');
+          n.className = 'critical-notes';
+          n.style.marginTop = '4px';
+          n.textContent = profile.notes;
+          condEl.appendChild(n);
+        }
+      } else {
+        condEl.innerHTML = '<div class="no-info">None on record</div>';
       }
 
-      // Conditions
-      if (profile.cond) {
-        const pills = profile.cond.split(/[,\n]+/).map(c => c.trim()).filter(Boolean)
-          .map(c => `<span class="info-pill">${esc(c)}</span>`).join('');
-        html += `<div class="profile-section">
-          <div class="profile-section-title">🏥 Medical Conditions</div>
-          <div>${pills}</div>
-        </div>`;
+      // ── Allergies ──
+      const alEl = document.getElementById('prof-allergies');
+      if (profile.al && profile.al.trim()) {
+        const items = profile.al.split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
+        alEl.innerHTML = items.map(a =>
+          '<span class="alert-pill">⚠ ' + esc(a) + '</span>'
+        ).join('');
+      } else {
+        alEl.innerHTML = '<div class="no-info">None on record</div>';
       }
 
-      // Physician
-      if (profile.doc) {
-        html += `<div class="profile-section">
-          <div class="profile-section-title">Primary Physician</div>
-          <div class="notes-box">🩺 ${esc(profile.doc)}</div>
-        </div>`;
+      // ── Medications ──
+      const medEl = document.getElementById('prof-medications');
+      const medCardEl = document.getElementById('meds-card-body');
+      if (profile.med && profile.med.trim()) {
+        const items = profile.med.split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
+        medEl.innerHTML = items.map(m =>
+          '<span class="info-pill">' + esc(m) + '</span>'
+        ).join('');
+        medCardEl.innerHTML = items.map(m =>
+          '<div class="info-row">' + esc(m) + '</div>'
+        ).join('');
+      } else {
+        medEl.innerHTML = '<div class="no-info">None on record</div>';
+        medCardEl.innerHTML = '<div class="info-empty">None on record</div>';
       }
 
-      // Insurance
-      if (profile.ins) {
+      // ── Contacts ──
+      const contactsEl = document.getElementById('prof-contacts');
+      if (profile.contacts && profile.contacts.length) {
+        contactsEl.innerHTML = profile.contacts.map(c => `
+          <div class="contact-item">
+            <div class="contact-text">
+              <div class="contact-name-line">${esc(c.n || 'Unknown')}</div>
+              <div class="contact-sub">${esc(c.r || '')}${c.r && c.p ? ' · ' : ''}${esc(c.p || '')}</div>
+            </div>
+            ${c.p ? '<a href="tel:' + esc(c.p.replace(/\D/g,'')) + '" class="call-btn">Call</a>' : ''}
+          </div>
+        `).join('');
+      } else {
+        contactsEl.innerHTML = '<div class="no-info">No contacts listed.</div>';
+      }
+
+      // ── Vitals card ──
+      const vitalsEl = document.getElementById('vitals-body');
+      let vitalsHtml = '';
+      if (profile.bt) vitalsHtml += '<div class="info-row"><strong>Blood type:</strong> ' + esc(profile.bt) + '</div>';
+      if (age)        vitalsHtml += '<div class="info-row"><strong>Age:</strong> ' + age + '</div>';
+      if (!vitalsHtml) vitalsHtml = '<div class="info-empty">Not provided</div>';
+      vitalsEl.innerHTML = vitalsHtml;
+
+      // ── Insurance card ──
+      if (profile.ins && (profile.ins.prov || profile.ins.mid)) {
         const i = profile.ins;
-        html += `<div class="profile-section">
-          <div class="profile-section-title">🏥 Health Insurance</div>
-          ${i.prov ? `<div class="ins-row"><strong>Provider:</strong> ${esc(i.prov)}</div>` : ''}
-          ${i.mid  ? `<div class="ins-row"><strong>Member ID:</strong> ${esc(i.mid)}</div>` : ''}
-          ${i.grp  ? `<div class="ins-row"><strong>Group:</strong> ${esc(i.grp)}</div>` : ''}
-          ${i.ph   ? `<div class="ins-row"><strong>Phone:</strong> <a href="tel:${esc(i.ph)}" style="color:var(--red);">${esc(i.ph)}</a></div>` : ''}
-        </div>`;
+        let insHtml = '';
+        if (i.prov) insHtml += '<div class="info-row"><strong>Carrier:</strong> ' + esc(i.prov) + '</div>';
+        if (i.mid)  insHtml += '<div class="info-row"><strong>Member ID:</strong> ' + esc(i.mid) + '</div>';
+        if (i.grp)  insHtml += '<div class="info-row"><strong>Group:</strong> ' + esc(i.grp) + '</div>';
+        if (i.ph)   insHtml += '<div class="info-row"><strong>Phone:</strong> ' + esc(i.ph) + '</div>';
+        document.getElementById('ins-body').innerHTML = insHtml;
+        document.getElementById('insurance-card').style.display = 'block';
       }
 
-      // Notes
-      if (profile.notes) {
-        html += `<div class="profile-section">
-          <div class="profile-section-title">Additional Notes</div>
-          <div class="notes-box">${esc(profile.notes)}</div>
-        </div>`;
+      // ── Physician card ──
+      if (profile.doc && profile.doc.trim()) {
+        document.getElementById('doc-body').innerHTML =
+          '<div class="info-row">' + esc(profile.doc) + '</div>';
+        document.getElementById('physician-card').style.display = 'block';
       }
-
-      html += `<div style="text-align:center;margin-top:32px;">
-        <a href="index.html" style="font-size:0.8rem;color:var(--gray-mid);text-decoration:none;">
-          Powered by Helper-ID &nbsp;·&nbsp; helper-id.com
-        </a>
-      </div>`;
-
-      document.getElementById('prof-body').innerHTML = html;
     }
 
     render();
     window.addEventListener('hashchange', render);
   </script>
+
 </body>
 </html>
