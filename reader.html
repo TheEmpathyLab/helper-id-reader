@@ -94,9 +94,10 @@
 
     /* ── Page body ── */
     .page-body {
-      max-width: 480px;
+      width: 100%;
+      max-width: 640px;
       margin: 0 auto;
-      padding: 14px 12px 32px;
+      padding: 12px 12px 32px;
       display: none;
     }
 
@@ -107,6 +108,7 @@
       overflow: hidden;
       box-shadow: var(--shadow);
       margin-bottom: 10px;
+      width: 100%;
     }
 
     /* Identity row */
@@ -262,6 +264,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-bottom: 10px;
+      width: 100%;
     }
     .info-card {
       background: var(--white);
@@ -321,10 +324,15 @@
       .entry-panel:first-child { border-right: none; border-bottom: 2px solid var(--border); }
       .or-divider { display: block; }
     }
+    @media (max-width: 480px) {
+      .page-body { padding: 8px 8px 24px; }
+      .profile-card { border-radius: 12px; }
+    }
     @media (max-width: 400px) {
-      .page-body { padding: 10px 8px 24px; }
+      .page-body { padding: 6px 6px 20px; }
       .member-name { font-size: 1.3rem; }
       .lower-grid { grid-template-columns: 1fr; }
+      .profile-card { border-radius: 10px; }
     }
   </style>
 </head>
