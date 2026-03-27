@@ -75,3 +75,46 @@ Provenance Label v1.0
 - Human Roles: Design direction, layout critique, feature gating decisions, product framing, architecture question origination
 - AI Roles: Live repo fetch (reader.html, hid-style.css), screenshot capture of Bubble legacy design, prototype construction (v4, v5, reader_v2.html), base64 photo embedding, NFC capacity calculations, bearer token architecture explanation
 ```
+
+---
+---
+
+## Update — 2026-03-27 — commit-ready reader.html with responsive layout
+
+#### Additional decisions
+
+- **`reader.html` is the commit target, not a second prototype.** The v2 layout was wired directly to the existing Base64 decode/render engine rather than staying as a static file. All fields from the live schema are bound. Drop-in replacement — no other repo files need to change.
+- **No hardcoded max-width on mobile.** `width: 100%; max-width: 640px` replaces the previous `max-width: 480px`. Profile card fills the phone screen with 6–8px side padding only. Photo stays 76×76px fixed.
+- **Session log continuation pattern adopted.** Going forward, same-day work appends a dated update block to the existing file rather than rewriting it. Original review is preserved as a record of state at first capture.
+
+#### Additional artifacts
+
+- **`reader.html` (commit-ready)** — fully dynamic, wired to `hid-form-fields.js` schema. Photo fallback logic built in (`profile.photo` → `<img>`, else initials derived from `fn` + `ln`). Responsive breakpoints at 640px max-width, 480px, and 400px. Lower detail grid (Vitals / Medications / Insurance / Physician) only renders cards when data is present. Call buttons are `<a href="tel:...">` — functional on device. Drop-in replacement for current repo file.
+
+#### Resolved this update
+
+- **Graceful degradation for NFC profiles without photo** — built into `reader.html` render logic. Closed.
+- **Update `reader.html` layout to match `reader_v2.html`** — complete. Identity row, section order, color restraint, Call button pattern all implemented. Closed.
+- **Add photo fallback logic to `reader.html`** — complete. Both states (photo present / initials fallback) implemented and verified. Closed.
+
+#### Revised next steps
+
+1. **Commit `reader.html` to repo root** — drop-in replacement for current file. Done when live deployment at `helper-id-v8uev.ondigitalocean.app/reader.html` renders the new layout.
+2. **Commit `reader_v2.html` to `sessions/` folder** — demo artifact for Lifestyle Director conversations. Done when file appears in repo.
+3. **Update `SESSION_REVIEW_INSTRUCTIONS.md` in repo** — add the continuation block pattern (section text provided in session — paste and commit). Done when the instructions file reflects the new pattern.
+4. **Design token-based NFC architecture for Tier 1** — define token format, issuance, storage, revocation. Done when a one-page spec exists.
+5. **Add photo upload step to `writer.html`** — gated to paid tier. Done when a paid member can upload a headshot at enrollment and it appears on their hosted profile.
+
+---
+
+## Provenance label — continuation
+
+```
+Provenance Label v1.0
+- Human Contribution: 50%
+- AI Contribution: 50%
+- Collaboration Method: Human identified responsive layout problem on device; AI diagnosed root cause from live screenshot, applied fixes, and delivered commit-ready file. Human directed session log pattern change; AI rebuilt file to apply it retroactively.
+- AI Tool(s): Claude Sonnet 4.6 (Anthropic)
+- Human Roles: Bug report (layout constrained on phone), pattern direction (append vs. rewrite), final approval
+- AI Roles: Browser screenshot at 390px, CSS diagnosis, responsive fix implementation, commit-ready file delivery, session log retroactive restructure
+```

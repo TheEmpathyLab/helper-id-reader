@@ -170,6 +170,46 @@ When any of these phrases appear, produce the full session review Markdown file 
 
 ---
 
+## When a session continues past the initial review
+
+If work continues after a session review has already been written, **do not rewrite the existing file**. Instead, append a continuation block to the bottom of the same file using this format:
+
+---
+
+### Update — YYYY-MM-DD — {short description of what continued}
+
+#### Additional decisions
+- {Decision}
+
+#### Additional artifacts
+- {Artifact name and what it does}
+
+#### Resolved this update
+- {Item from open questions that is now closed}
+
+#### Revised next steps
+1. {Updated action} — {what "done" looks like}
+
+#### Provenance label — continuation
+\`\`\`
+Provenance Label v1.0
+- Human Contribution: X%
+- AI Contribution: Y%
+- Collaboration Method: {description}
+- AI Tool(s): Claude Sonnet 4.6 (Anthropic)
+- Human Roles: {specific actions}
+- AI Roles: {specific actions}
+\`\`\`
+
+---
+
+**Rules for continuation blocks:**
+- Same filename, same date slug — no new file for same-day continuations
+- Only include sections where something actually changed — omit empty sections
+- "Resolved this update" explicitly closes items from the open questions table above
+- Update the header's **Next session entry point** line to reflect the new state
+- The original review above the `---` separator is permanent — never edit it
+
 ## Re-feeding a session review into a new session
 
 When Shelton drops a past session review into the project context, treat it as ground truth:
