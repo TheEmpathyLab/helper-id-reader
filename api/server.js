@@ -411,7 +411,7 @@ async function handleCheckoutCompleted(session) {
 
   // Generate signed setup link — PIN is embedded in the token payload
   const token    = generateSetupToken(member.id, rawPin);
-  const setupUrl = `${SITE_URL}/setup?token=${token}`;
+  const setupUrl = `${SITE_URL}/setup.html?token=${token}`;
 
   // Send welcome email
   await sendWelcomeEmail({ email, code, pin: rawPin, setupUrl, plan });
