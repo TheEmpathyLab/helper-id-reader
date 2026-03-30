@@ -366,21 +366,17 @@
         </div>
       </div>
       <div class="entry-panel">
-        <span class="coming-soon-badge">Coming Soon</span>
         <div class="entry-panel-icon">🔢</div>
         <h3>Enter CODE + PIN</h3>
         <p>Have a Helper-ID code and PIN? Enter them below to access a hosted profile from any device.</p>
         <div class="pin-form">
-          <input class="hid-input" type="text" placeholder="CODE (e.g. HID-4829)" disabled style="opacity:0.5;cursor:not-allowed;" />
-          <input class="hid-input" type="password" placeholder="PIN" disabled style="opacity:0.5;cursor:not-allowed;" />
-          <button class="hid-btn hid-btn-secondary hid-btn-full" disabled style="opacity:0.5;cursor:not-allowed;">
+          <input class="hid-input" type="text" id="cp-code" placeholder="CODE (e.g. A3BX7K)" autocomplete="off" autocapitalize="characters" />
+          <input class="hid-input" type="password" id="cp-pin" placeholder="PIN (e.g. 482-931)" autocomplete="off" />
+          <button class="hid-btn hid-btn-primary hid-btn-full" id="cp-btn" onclick="lookupProfile()">
             Access Profile
           </button>
         </div>
-        <p style="margin-top:12px;font-size:0.78rem;color:var(--gray-mid);">
-          CODE+PIN access launches soon.
-          <a href="index.html#notify" style="color:var(--red);">Get notified →</a>
-        </p>
+        <p id="cp-error" style="display:none;margin-top:10px;font-size:0.82rem;color:var(--red);"></p>
       </div>
     </div>
     <div class="or-divider">or</div>
@@ -402,6 +398,7 @@
         <div class="name-block">
           <div class="you-helping">You're helping:</div>
           <div class="member-name" id="prof-name"></div>
+          <div class="preferred-name" id="prof-pref" style="display:none;font-size:0.85rem;color:var(--gray-dark);margin-top:2px;"></div>
           <div class="meta-line" id="prof-meta"></div>
         </div>
       </div>
@@ -497,7 +494,7 @@
         return;
       }
 
-      // Decode profile
+      // Decode profile from NFC URL fragment
       let profile;
       try {
         const json = decodeURIComponent(escape(atob(hash)));
@@ -507,14 +504,24 @@
         return;
       }
 
-      // Show profile UI
-      document.getElementById('emg-banner').style.display = 'block';
-      document.getElementById('page-body').style.display = 'block';
+      document.getElementById('entry-screen').style.display = 'none';
+      document.getElementById('emg-banner').style.display   = 'block';
+      document.getElementById('page-body').style.display    = 'block';
+      renderProfile(profile);
+    }
 
+    function renderProfile(profile) {
       // ── Name ──
       const fullName = [profile.fn, profile.ln].filter(Boolean).join(' ') || 'Emergency Profile';
       document.getElementById('prof-name').textContent = fullName;
       document.title = fullName + ' — Helper-ID';
+
+      // ── Preferred name ──
+      if (profile.pn && profile.pn.trim()) {
+        const prefEl = document.getElementById('prof-pref');
+        prefEl.textContent = 'Goes by: ' + profile.pn.trim();
+        prefEl.style.display = 'block';
+      }
 
       // ── Photo: show image if profile.photo exists, else initials ──
       const photoWrap = document.getElementById('photo-wrap');
@@ -632,6 +639,81 @@
 
     render();
     window.addEventListener('hashchange', render);
+
+    // ── CODE+PIN lookup ──────────────────────────────────────────────
+
+    // Normalize a Supabase profile row into the same shape the renderer expects
+    function normalizeSupabaseProfile(p) {
+      const contacts = [];
+      if (p.ec1_name || p.ec1_phone) contacts.push({ n: p.ec1_name || '', r: p.ec1_relationship || '', p: p.ec1_phone || '' });
+      if (p.ec2_name || p.ec2_phone) contacts.push({ n: p.ec2_name || '', r: p.ec2_relationship || '', p: p.ec2_phone || '' });
+
+      return {
+        fn:       p.first_name       || '',
+        ln:       p.last_name        || '',
+        pn:       p.preferred_name   || '',
+        dob:      p.date_of_birth    || '',
+        bt:       p.blood_type       || '',
+        al:       p.allergies        || '',
+        med:      p.medications      || '',
+        cond:     p.conditions       || '',
+        contacts,
+        doc:      p.primary_physician || '',
+        notes:    p.advance_directives || '',
+        ins:      (p.insurance_provider || p.insurance_id)
+                    ? { prov: p.insurance_provider || '', mid: p.insurance_id || '' }
+                    : null,
+        photo:    p.headshot_url     || null,
+      };
+    }
+
+    async function lookupProfile() {
+      const code    = document.getElementById('cp-code').value.trim().toUpperCase();
+      const pin     = document.getElementById('cp-pin').value.trim();
+      const errEl   = document.getElementById('cp-error');
+      const btn     = document.getElementById('cp-btn');
+
+      errEl.style.display = 'none';
+
+      if (!code || !pin) {
+        errEl.textContent = 'Please enter both a CODE and PIN.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      btn.textContent = 'Looking up…';
+      btn.disabled = true;
+
+      try {
+        const res  = await fetch('/api/lookup', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ code, pin }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          errEl.textContent = res.status === 401 ? 'Incorrect PIN.' : res.status === 404 ? 'CODE not found.' : 'Something went wrong. Please try again.';
+          errEl.style.display = 'block';
+          btn.textContent = 'Access Profile';
+          btn.disabled = false;
+          return;
+        }
+
+        // Normalize and render
+        const profile = normalizeSupabaseProfile(data.profile);
+        document.getElementById('entry-screen').style.display = 'none';
+        document.getElementById('emg-banner').style.display   = 'block';
+        document.getElementById('page-body').style.display    = 'block';
+        renderProfile(profile);
+
+      } catch (e) {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Access Profile';
+        btn.disabled = false;
+      }
+    }
   </script>
 
 </body>

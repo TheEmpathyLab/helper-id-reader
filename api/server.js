@@ -479,6 +479,50 @@ async function sendWelcomeEmail({ email, code, pin, setupUrl, plan }) {
   }
 }
 
+// ============================================================
+// ---- POST /lookup ----
+// ============================================================
+// Accepts CODE + PIN, verifies credentials, returns profile.
+// Also writes an access_log entry on every successful lookup.
+// Used by reader.html for the CODE+PIN access path.
+
+app.post('/lookup', async (req, res) => {
+  const { code, pin } = req.body;
+
+  if (!code || !pin) {
+    return res.status(400).json({ error: 'Missing code or pin' });
+  }
+
+  // Find active profile by code
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('code', code.trim().toUpperCase())
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (error || !profile) {
+    return res.status(404).json({ error: 'Profile not found' });
+  }
+
+  // Verify PIN — stored hash was generated from the XXX-XXX formatted string
+  const pinValid = await bcrypt.compare(pin.trim(), profile.pin_hash);
+  if (!pinValid) {
+    return res.status(401).json({ error: 'Invalid PIN' });
+  }
+
+  // Write access log
+  await supabase.from('access_logs').insert({
+    profile_id:    profile.id,
+    access_method: 'cp',
+    ip_address:    req.headers['x-forwarded-for'] || req.ip || null,
+  });
+
+  // Return sanitized profile — never expose pin_hash
+  const { pin_hash, ...safeProfile } = profile;
+  return res.json({ profile: safeProfile });
+});
+
 // ---- 404 catch-all ----
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
