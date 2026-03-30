@@ -1,7 +1,29 @@
 # Helper-ID — End-to-End Member Flow
 **Session date:** 2026-03-30
-**Status:** Decision log — amended after second session block
-**Next session entry point:** Bubble member migration — 10 existing members need CODE+PIN credentials and profile data moved into Supabase. Manual or bulk import TBD.
+**Status:** Decision log — amended after third session block
+**Next session entry point:** Add family members via /admin/provision curl (wife, daughter, son — 4 total including Shelton). Then link all 4 to a household record when Issue #15 is built. After that, migrate 10 paying Bubble members.
+
+---
+
+## Amendment — Session block 3 (same date)
+
+### What was built
+- **`server.js` — `/admin/provision` endpoint** — manually provisions a member + profile without a Stripe webhook. Supports: existing CODE+PIN (Bubble migration), generated credentials (fresh), pre-populated profile data, demo profiles (`skipEmail: true`), and migration email (dashboard login link vs. setup flow). Protected by `x-admin-secret` header matching `ADMIN_SECRET` env var.
+
+### What was done
+- Forest Gump demo profile provisioned: CODE `323232` / PIN `323232` — verified working in reader.html
+- Shelton provisioned: CODE `123456` / PIN `123456` — existing test record required manual PIN hash update via `node -e bcryptjs` — verified working
+- `ADMIN_SECRET` added to DO app-level env vars
+
+### What was decided
+- Bubble member migration will use `/admin/provision` with existing CODE+PIN + pre-populated profile data
+- Family (4 members: Shelton, wife, daughter, son) will be provisioned as individual accounts first, then linked to a household record when Issue #15 is built — no data lost
+- PIN updates for existing records require generating a bcrypt hash locally: `cd api && node -e "const b = require('bcryptjs'); b.hash('YOUR_PIN', 10).then(h => console.log(h))"`
+
+### Next session entry points
+1. Run `/admin/provision` curls for wife, daughter, son (have their names, emails, existing Bubble CODEs + PINs ready)
+2. Build Issue #15 household plan + link the 4 family records
+3. Migrate 10 paying Bubble members
 
 ---
 
