@@ -493,6 +493,7 @@
     const API = '/api';
     let _token   = '';
     let _code    = '';
+    let _pin     = '';
     let _photoUrl = null;
 
     // ── On load: validate token ──────────────────────────────────────
@@ -524,6 +525,7 @@
         }
 
         _code = data.code;
+        _pin  = data.pin;
         document.getElementById('reveal-code').textContent = data.code;
         document.getElementById('reveal-pin').textContent  = data.pin;
         showScreen('screen-1');
@@ -708,9 +710,10 @@
         if (!res.ok) throw new Error('Activation failed');
 
         showScreen('screen-success');
-        // Link to their profile via CODE+PIN reader
         const viewLink = document.querySelector('#screen-success a');
-        if (viewLink && _code) viewLink.href = `reader.html`;
+        if (viewLink && _code && _pin) {
+          viewLink.href = `reader.html?code=${encodeURIComponent(_code)}&pin=${encodeURIComponent(_pin)}`;
+        }
 
       } catch (e) {
         errEl.textContent = 'Could not activate your profile. Please try again.';

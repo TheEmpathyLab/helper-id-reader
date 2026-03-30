@@ -640,6 +640,18 @@
     render();
     window.addEventListener('hashchange', render);
 
+    // Auto-submit CODE+PIN if passed as URL params (from setup.html success screen)
+    (function autoLookup() {
+      const params = new URLSearchParams(window.location.search);
+      const code   = params.get('code');
+      const pin    = params.get('pin');
+      if (code && pin && !window.location.hash) {
+        document.getElementById('cp-code').value = code;
+        document.getElementById('cp-pin').value  = pin;
+        lookupProfile();
+      }
+    })();
+
     // ── CODE+PIN lookup ──────────────────────────────────────────────
 
     // Normalize a Supabase profile row into the same shape the renderer expects
