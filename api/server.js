@@ -308,6 +308,25 @@ function validateSetupToken(token) {
   return data;
 }
 
+// Session token: HMAC-signed, 30-day expiry
+// Used for member dashboard authentication (Option B — custom session)
+function generateSessionToken(memberId, email) {
+  const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+  const payload   = Buffer.from(JSON.stringify({ memberId, email, expiresAt })).toString('base64url');
+  const sig       = crypto.createHmac('sha256', SETUP_LINK_SECRET).update(payload).digest('hex');
+  return `${payload}.${sig}`;
+}
+
+function validateSessionToken(token) {
+  const [payload, sig] = token.split('.');
+  if (!payload || !sig) throw new Error('Malformed token');
+  const expected = crypto.createHmac('sha256', SETUP_LINK_SECRET).update(payload).digest('hex');
+  if (sig !== expected) throw new Error('Invalid signature');
+  const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
+  if (Date.now() > data.expiresAt) throw new Error('Session expired');
+  return data;
+}
+
 // ---- Webhook handler ----
 
 app.post('/stripe-webhook', async (req, res) => {
@@ -745,6 +764,182 @@ app.post('/upload-photo', upload.single('photo'), async (req, res) => {
   if (signErr) return res.status(500).json({ error: 'Could not generate photo URL' });
 
   return res.json({ url: signedData.signedUrl });
+});
+
+// ============================================================
+// ---- POST /request-login ----
+// ============================================================
+// Validates member email, generates a 30-day session token,
+// and sends a login link via SendGrid.
+
+app.post('/request-login', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Missing email' });
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, email, status')
+    .eq('email', email.toLowerCase().trim())
+    .maybeSingle();
+
+  // Always return success to prevent email enumeration
+  if (!member || member.status !== 'active') {
+    return res.json({ success: true });
+  }
+
+  const token    = generateSessionToken(member.id, member.email);
+  const loginUrl = `${SITE_URL}/dashboard.html?session=${token}`;
+
+  const msg = {
+    to:      member.email,
+    from:    { email: FROM_EMAIL, name: 'Helper-ID' },
+    subject: 'Your Helper-ID login link',
+    html: `
+      <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+        <div style="background:#D0312D;padding:14px 24px;">
+          <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+        </div>
+        <div style="padding:28px 24px;">
+          <h2 style="font-size:1.3rem;margin-bottom:8px;">Your login link</h2>
+          <p style="color:#666;margin-bottom:24px;">Click below to access your Helper-ID dashboard. This link is valid for 30 days.</p>
+          <a href="${loginUrl}"
+             style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+            Open My Dashboard →
+          </a>
+          <p style="margin-top:24px;font-size:0.8rem;color:#999;">
+            Didn't request this? Ignore this email — your account is safe.
+          </p>
+        </div>
+        <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+          <p style="color:#999;font-size:0.75rem;margin:0;">
+            Helper-ID &nbsp;·&nbsp;
+            <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a>
+          </p>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    await sgMail.send(msg);
+  } catch (err) {
+    console.error('Login email failed:', err.response?.body || err.message);
+  }
+
+  return res.json({ success: true });
+});
+
+// ============================================================
+// ---- POST /member-data ----
+// ============================================================
+// Returns member + profile data for the authenticated member.
+
+app.post('/member-data', async (req, res) => {
+  const { session } = req.body;
+  if (!session) return res.status(401).json({ error: 'Missing session' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, email, plan, status, created_at')
+    .eq('id', payload.memberId)
+    .maybeSingle();
+
+  if (!member) return res.status(404).json({ error: 'Member not found' });
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('member_id', payload.memberId);
+
+  const { data: logs } = await supabase
+    .from('access_logs')
+    .select('access_method, ip_address, accessed_at, profile_id')
+    .in('profile_id', (profiles || []).map(p => p.id))
+    .order('accessed_at', { ascending: false })
+    .limit(10);
+
+  const sanitized = (profiles || []).map(({ pin_hash, ...p }) => p);
+
+  return res.json({ member, profiles: sanitized, logs: logs || [] });
+});
+
+// ============================================================
+// ---- POST /update-profile ----
+// ============================================================
+// Updates profile fields for an authenticated member.
+
+app.post('/update-profile', async (req, res) => {
+  const { session, profileId, fields } = req.body;
+  if (!session || !profileId || !fields) return res.status(400).json({ error: 'Missing required fields' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  // Confirm this profile belongs to this member
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', profileId)
+    .eq('member_id', payload.memberId)
+    .maybeSingle();
+
+  if (!profile) return res.status(403).json({ error: 'Profile not found or access denied' });
+
+  const allowed = [
+    'first_name', 'last_name', 'preferred_name', 'date_of_birth', 'blood_type',
+    'ec1_name', 'ec1_relationship', 'ec1_phone',
+    'ec2_name', 'ec2_relationship', 'ec2_phone',
+    'allergies', 'medications', 'conditions', 'primary_physician',
+    'insurance_provider', 'insurance_id',
+    'advance_directives', 'headshot_url',
+  ];
+
+  const update = {};
+  for (const key of allowed) {
+    if (fields[key] !== undefined) update[key] = fields[key];
+  }
+
+  const { error } = await supabase.from('profiles').update(update).eq('id', profileId);
+  if (error) return res.status(500).json({ error: 'Update failed' });
+
+  return res.json({ success: true });
+});
+
+// ============================================================
+// ---- POST /regenerate-pin ----
+// ============================================================
+// Generates a new PIN for a profile, updates the hash.
+// Returns the raw PIN once — member must write it down.
+
+app.post('/regenerate-pin', async (req, res) => {
+  const { session, profileId } = req.body;
+  if (!session || !profileId) return res.status(400).json({ error: 'Missing required fields' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', profileId)
+    .eq('member_id', payload.memberId)
+    .maybeSingle();
+
+  if (!profile) return res.status(403).json({ error: 'Profile not found or access denied' });
+
+  const rawPin  = generatePin();
+  const pinHash = await bcrypt.hash(rawPin, 10);
+
+  const { error } = await supabase.from('profiles').update({ pin_hash: pinHash }).eq('id', profileId);
+  if (error) return res.status(500).json({ error: 'PIN regeneration failed' });
+
+  return res.json({ pin: rawPin });
 });
 
 // ---- 404 catch-all ----

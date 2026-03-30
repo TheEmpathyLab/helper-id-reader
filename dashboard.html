@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — My Dashboard</title>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    .dash-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Login ── */
+    .login-box {
+      max-width: 420px;
+      margin: 60px auto 0;
+      text-align: center;
+    }
+    .login-box .hid-logo {
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .login-box h1 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .login-box p {
+      color: var(--gray-dark);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+    .login-sent {
+      background: var(--gray-light);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-top: 20px;
+    }
+    .login-sent .sent-icon { font-size: 2.4rem; margin-bottom: 12px; }
+    .login-sent p { color: var(--gray-dark); margin: 0; font-size: 0.9rem; }
+
+    /* ── Dashboard header ── */
+    .dash-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .dash-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--gray-light);
+      flex-shrink: 0;
+      border: 2px solid var(--border);
+    }
+    .dash-avatar-placeholder {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gray-light);
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: var(--gray-mid);
+    }
+    .dash-name {
+      flex: 1;
+    }
+    .dash-name h2 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      margin-bottom: 2px;
+    }
+    .dash-name .dash-email {
+      font-size: 0.85rem;
+      color: var(--gray-mid);
+    }
+    .dash-name .dash-status {
+      display: inline-block;
+      margin-top: 6px;
+      background: #D1FAE5;
+      color: #065F46;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* ── Credential card ── */
+    .credential-card {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .credential-row {
+      margin-bottom: 16px;
+    }
+    .credential-row:last-child { margin-bottom: 0; }
+    .credential-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 4px;
+    }
+    .credential-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--black);
+    }
+
+    /* ── PIN regen ── */
+    .pin-section {
+      background: var(--red-light);
+      border: 1px solid #FCA5A5;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .pin-section p {
+      font-size: 0.85rem;
+      color: var(--gray-dark);
+      margin-bottom: 12px;
+    }
+    .pin-new-reveal {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+
+    /* ── Section cards ── */
+    .section-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray-mid);
+      margin-bottom: 16px;
+    }
+
+    /* ── Edit form ── */
+    .field-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .field-group.full { grid-template-columns: 1fr; }
+    .field-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gray-dark);
+      margin-bottom: 4px;
+    }
+    .field-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      font-family: var(--font-body);
+      color: var(--black);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field-input:focus { border-color: var(--red); }
+    .field-input[readonly] {
+      background: var(--gray-light);
+      color: var(--gray-mid);
+      cursor: not-allowed;
+    }
+    textarea.field-input { resize: vertical; min-height: 72px; }
+
+    /* ── Access log ── */
+    .log-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .log-row:last-child { border-bottom: none; }
+    .log-method {
+      font-weight: 600;
+      color: var(--black);
+    }
+    .log-meta {
+      color: var(--gray-mid);
+      font-size: 0.78rem;
+    }
+    .log-empty {
+      color: var(--gray-mid);
+      font-size: 0.88rem;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: inline-block;
+      background: var(--red);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 13px 28px;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-primary:hover { background: var(--red-dark); }
+    .btn-primary:disabled { background: var(--gray-mid); cursor: not-allowed; }
+    .btn-secondary {
+      display: inline-block;
+      background: transparent;
+      color: var(--black);
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 11px 24px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.2s;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-secondary:hover { border-color: var(--gray-mid); }
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 9px 20px;
+      border: 1.5px solid var(--red);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-danger:hover { background: var(--red); color: white; }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* ── Misc ── */
+    .err-msg {
+      color: var(--red);
+      font-size: 0.85rem;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+    .success-msg {
+      color: #065F46;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    .divider {
+      border: none;
+      border-top: 1.5px solid var(--border);
+      margin: 28px 0;
+    }
+    .logout-link {
+      display: block;
+      text-align: center;
+      font-size: 0.83rem;
+      color: var(--gray-mid);
+      cursor: pointer;
+      margin-top: 32px;
+      text-decoration: underline;
+    }
+    .logout-link:hover { color: var(--red); }
+
+    @media (max-width: 480px) {
+      .field-group { grid-template-columns: 1fr; }
+      .credential-value { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="/" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper-ID</span>
+    </a>
+  </header>
+
+  <!-- ── LOGIN SCREEN ── -->
+  <div id="screen-login" class="screen active">
+    <div class="login-box">
+      <h1>Member Login</h1>
+      <p>Enter your email address and we'll send you a secure login link. No password needed.</p>
+
+      <div id="login-form-wrap">
+        <div class="field-group full">
+          <label class="field-label" for="login-email">Email address</label>
+          <input class="field-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="err-msg" id="login-err"></div>
+        <div class="btn-row">
+          <button class="btn-primary" id="login-btn" onclick="requestLogin()">Send Login Link</button>
+        </div>
+      </div>
+
+      <div id="login-sent-wrap" class="login-sent" style="display:none;">
+        <div class="sent-icon">📬</div>
+        <p><strong>Check your inbox.</strong> A login link is on its way to your email. The link is valid for 30 days.</p>
+        <p style="margin-top:10px;font-size:0.8rem;color:var(--gray-mid);">Don't see it? Check your spam folder.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD SCREEN ── -->
+  <div id="screen-dash" class="screen">
+    <div class="dash-wrap">
+
+      <!-- Profile header -->
+      <div class="dash-header">
+        <div id="dash-avatar-wrap">
+          <div class="dash-avatar-placeholder">👤</div>
+        </div>
+        <div class="dash-name">
+          <h2 id="dash-fullname">—</h2>
+          <div class="dash-email" id="dash-email">—</div>
+          <span class="dash-status">Active Member</span>
+        </div>
+      </div>
+
+      <!-- Credentials -->
+      <div class="credential-card">
+        <div class="credential-row">
+          <div class="credential-label">Your CODE</div>
+          <div class="credential-value" id="dash-code">—</div>
+        </div>
+        <div class="credential-row">
+          <div class="credential-label">PIN</div>
+          <div style="font-size:0.85rem;color:var(--gray-dark);">
+            Your PIN is not stored — only a secure hash is kept. Use <strong>Regenerate PIN</strong> below if you've lost it.
+          </div>
+        </div>
+      </div>
+
+      <!-- PIN regeneration -->
+      <div class="section-card">
+        <div class="section-title">PIN Management</div>
+        <p style="font-size:0.88rem;color:var(--gray-dark);margin-bottom:14px;">
+          If you've lost your PIN, you can generate a new one. Write it down immediately — it won't be shown again.
+        </p>
+        <div id="pin-new-wrap" style="display:none;">
+          <div class="credential-label">Your new PIN</div>
+          <div class="pin-new-reveal" id="pin-new-value">—</div>
+          <p style="font-size:0.8rem;color:var(--gray-dark);margin-bottom:12px;">Write this down now. It will not be shown again.</p>
+        </div>
+        <div class="err-msg" id="pin-err"></div>
+        <button class="btn-danger" onclick="regeneratePin()">Regenerate PIN</button>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Edit profile -->
+      <div class="section-card">
+        <div class="section-title">Your Profile</div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">First Name</div>
+            <input class="field-input" type="text" id="f-fn" />
+          </div>
+          <div>
+            <div class="field-label">Last Name</div>
+            <input class="field-input" type="text" id="f-ln" />
+          </div>
+        </div>
+
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Preferred Name</div>
+            <input class="field-input" type="text" id="f-pref" placeholder="Optional — shown at top of reader" />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Date of Birth</div>
+            <input class="field-input" type="text" id="f-dob" placeholder="MM/DD/YYYY" />
+          </div>
+          <div>
+            <div class="field-label">Blood Type</div>
+            <input class="field-input" type="text" id="f-bt" placeholder="e.g. O+" />
+          </div>
+        </div>
+
+        <hr class="divider" style="margin:16px 0;" />
+        <div class="section-title" style="margin-bottom:12px;">Emergency Contact 1</div>
+        <div class="field-group">
+          <div>
+            <div class="field-label">Name</div>
+            <input class="field-input" type="text" id="f-ec1n" />
+          </div>
+          <div>
+            <div class="field-label">Relationship</div>
+            <input class="field-input" type="text" id="f-ec1r" />
+          </div>
+        </div>
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Phone</div>
+            <input class="field-input" type="tel" id="f-ec1p" />
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-bottom:12px;">Emergency Contact 2</div>
+        <div class="field-group">
+          <div>
+            <div class="field-label">Name</div>
+            <input class="field-input" type="text" id="f-ec2n" />
+          </div>
+          <div>
+            <div class="field-label">Relationship</div>
+            <input class="field-input" type="text" id="f-ec2r" />
+          </div>
+        </div>
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Phone</div>
+            <input class="field-input" type="tel" id="f-ec2p" />
+          </div>
+        </div>
+
+        <hr class="divider" style="margin:16px 0;" />
+        <div class="section-title" style="margin-bottom:12px;">Medical</div>
+
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Allergies</div>
+            <textarea class="field-input" id="f-al" placeholder="Separate with commas"></textarea>
+          </div>
+        </div>
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Medications</div>
+            <textarea class="field-input" id="f-med" placeholder="Separate with commas"></textarea>
+          </div>
+        </div>
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Conditions</div>
+            <textarea class="field-input" id="f-cond" placeholder="Separate with commas"></textarea>
+          </div>
+        </div>
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Primary Physician</div>
+            <input class="field-input" type="text" id="f-doc" placeholder="Name · Phone" />
+          </div>
+        </div>
+        <div class="field-group full" style="margin-bottom:12px;">
+          <div>
+            <div class="field-label">Advance Directives / Notes</div>
+            <textarea class="field-input" id="f-notes" placeholder="DNR, organ donor, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="err-msg" id="profile-err"></div>
+        <div class="success-msg" id="profile-ok" style="display:none;">Profile saved.</div>
+        <div class="btn-row">
+          <button class="btn-primary" id="save-btn" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- Access log -->
+      <div class="section-card">
+        <div class="section-title">Recent Access Log</div>
+        <div id="log-list"><div class="log-empty">No access events yet.</div></div>
+      </div>
+
+      <a class="logout-link" onclick="logout()">Log out</a>
+
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // State
+    // ============================================================
+    const API = '/api';
+    let _session  = null;
+    let _profileId = null;
+
+    // ============================================================
+    // Init — check for ?session= in URL
+    // ============================================================
+    (async function init() {
+      const params  = new URLSearchParams(window.location.search);
+      const session = params.get('session');
+      if (!session) return; // stay on login screen
+
+      _session = session;
+      // Strip session token from URL bar (avoid bookmarking with token)
+      history.replaceState({}, '', window.location.pathname);
+      await loadDashboard();
+    })();
+
+    // ============================================================
+    // Login
+    // ============================================================
+    async function requestLogin() {
+      const email  = document.getElementById('login-email').value.trim();
+      const errEl  = document.getElementById('login-err');
+      const btn    = document.getElementById('login-btn');
+      errEl.textContent = '';
+
+      if (!email) { errEl.textContent = 'Please enter your email address.'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        await fetch(`${API}/request-login`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email }),
+        });
+        // Always show sent message (prevent enumeration)
+        document.getElementById('login-form-wrap').style.display = 'none';
+        document.getElementById('login-sent-wrap').style.display = 'block';
+      } catch {
+        errEl.textContent = 'Something went wrong. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Send Login Link';
+      }
+    }
+
+    // Enter key submits login
+    document.getElementById('login-email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') requestLogin();
+    });
+
+    // ============================================================
+    // Load dashboard
+    // ============================================================
+    async function loadDashboard() {
+      let data;
+      try {
+        const res = await fetch(`${API}/member-data`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session }),
+        });
+        if (!res.ok) throw new Error('Session invalid or expired.');
+        data = await res.json();
+      } catch (err) {
+        // Session bad — fall back to login with message
+        document.getElementById('login-err').textContent = 'Your session has expired. Please log in again.';
+        return;
+      }
+
+      const { member, profiles, logs } = data;
+      const profile = profiles && profiles[0];
+
+      // Switch screens
+      show('screen-dash');
+
+      // Header
+      const fn = profile?.first_name || '';
+      const ln = profile?.last_name  || '';
+      document.getElementById('dash-fullname').textContent =
+        [fn, ln].filter(Boolean).join(' ') || member.email;
+      document.getElementById('dash-email').textContent = member.email;
+
+      // Avatar
+      if (profile?.headshot_url) {
+        const img = document.createElement('img');
+        img.src       = profile.headshot_url;
+        img.className = 'dash-avatar';
+        img.alt       = 'Profile photo';
+        document.getElementById('dash-avatar-wrap').replaceChildren(img);
+      }
+
+      // CODE
+      document.getElementById('dash-code').textContent = profile?.code || '—';
+      _profileId = profile?.id || null;
+
+      // Populate edit form
+      if (profile) {
+        setVal('f-fn',    profile.first_name        || '');
+        setVal('f-ln',    profile.last_name         || '');
+        setVal('f-pref',  profile.preferred_name    || '');
+        setVal('f-dob',   profile.date_of_birth     || '');
+        setVal('f-bt',    profile.blood_type        || '');
+        setVal('f-ec1n',  profile.ec1_name          || '');
+        setVal('f-ec1r',  profile.ec1_relationship  || '');
+        setVal('f-ec1p',  profile.ec1_phone         || '');
+        setVal('f-ec2n',  profile.ec2_name          || '');
+        setVal('f-ec2r',  profile.ec2_relationship  || '');
+        setVal('f-ec2p',  profile.ec2_phone         || '');
+        setVal('f-al',    profile.allergies         || '');
+        setVal('f-med',   profile.medications       || '');
+        setVal('f-cond',  profile.conditions        || '');
+        setVal('f-doc',   profile.primary_physician || '');
+        setVal('f-notes', profile.advance_directives || '');
+      }
+
+      // Access log
+      renderLog(logs);
+    }
+
+    // ============================================================
+    // Save profile
+    // ============================================================
+    async function saveProfile() {
+      const errEl = document.getElementById('profile-err');
+      const okEl  = document.getElementById('profile-ok');
+      const btn   = document.getElementById('save-btn');
+      errEl.textContent = '';
+      okEl.style.display = 'none';
+
+      if (!_profileId) { errEl.textContent = 'No profile found.'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      const fields = {
+        first_name:         getVal('f-fn'),
+        last_name:          getVal('f-ln'),
+        preferred_name:     getVal('f-pref'),
+        date_of_birth:      getVal('f-dob'),
+        blood_type:         getVal('f-bt'),
+        ec1_name:           getVal('f-ec1n'),
+        ec1_relationship:   getVal('f-ec1r'),
+        ec1_phone:          getVal('f-ec1p'),
+        ec2_name:           getVal('f-ec2n'),
+        ec2_relationship:   getVal('f-ec2r'),
+        ec2_phone:          getVal('f-ec2p'),
+        allergies:          getVal('f-al'),
+        medications:        getVal('f-med'),
+        conditions:         getVal('f-cond'),
+        primary_physician:  getVal('f-doc'),
+        advance_directives: getVal('f-notes'),
+      };
+
+      try {
+        const res = await fetch(`${API}/update-profile`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, profileId: _profileId, fields }),
+        });
+        if (!res.ok) {
+          const body = await res.json();
+          throw new Error(body.error || 'Update failed');
+        }
+        okEl.style.display = 'block';
+        // Update header name
+        const fn = fields.first_name;
+        const ln = fields.last_name;
+        if (fn || ln) document.getElementById('dash-fullname').textContent = [fn, ln].filter(Boolean).join(' ');
+      } catch (err) {
+        errEl.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
+    }
+
+    // ============================================================
+    // Regenerate PIN
+    // ============================================================
+    async function regeneratePin() {
+      if (!confirm('Generate a new PIN? Your old PIN will stop working immediately.')) return;
+
+      const errEl = document.getElementById('pin-err');
+      errEl.textContent = '';
+
+      if (!_profileId) { errEl.textContent = 'No profile found.'; return; }
+
+      try {
+        const res = await fetch(`${API}/regenerate-pin`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, profileId: _profileId }),
+        });
+        if (!res.ok) {
+          const body = await res.json();
+          throw new Error(body.error || 'Failed to regenerate PIN');
+        }
+        const { pin } = await res.json();
+        document.getElementById('pin-new-value').textContent = pin;
+        document.getElementById('pin-new-wrap').style.display = 'block';
+      } catch (err) {
+        errEl.textContent = err.message;
+      }
+    }
+
+    // ============================================================
+    // Access log
+    // ============================================================
+    function renderLog(logs) {
+      const el = document.getElementById('log-list');
+      if (!logs || !logs.length) {
+        el.innerHTML = '<div class="log-empty">No access events yet.</div>';
+        return;
+      }
+      el.innerHTML = logs.map(log => {
+        const method = log.access_method === 'nfc' ? 'NFC Tap' :
+                       log.access_method === 'code_pin' ? 'CODE + PIN' : log.access_method;
+        const date   = new Date(log.accessed_at).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric',
+        });
+        const time   = new Date(log.accessed_at).toLocaleTimeString('en-US', {
+          hour: 'numeric', minute: '2-digit',
+        });
+        const ip     = log.ip_address ? ` · ${log.ip_address}` : '';
+        return `
+          <div class="log-row">
+            <span class="log-method">${method}</span>
+            <span class="log-meta">${date} at ${time}${ip}</span>
+          </div>`;
+      }).join('');
+    }
+
+    // ============================================================
+    // Logout
+    // ============================================================
+    function logout() {
+      _session   = null;
+      _profileId = null;
+      show('screen-login');
+      document.getElementById('login-form-wrap').style.display = 'block';
+      document.getElementById('login-sent-wrap').style.display = 'none';
+      document.getElementById('login-email').value = '';
+    }
+
+    // ============================================================
+    // Helpers
+    // ============================================================
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    function getVal(id) { return document.getElementById(id).value.trim(); }
+    function setVal(id, val) { document.getElementById(id).value = val; }
+  </script>
+
+</body>
+</html>
