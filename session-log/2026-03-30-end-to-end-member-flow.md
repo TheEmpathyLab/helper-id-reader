@@ -1,7 +1,36 @@
 # Helper-ID — End-to-End Member Flow
 **Session date:** 2026-03-30
-**Status:** Decision log — ready for repo commit
-**Next session entry point:** Build Bubble member migration path — existing members need CODE+PIN credentials and a way to transfer their profile data into Supabase.
+**Status:** Decision log — amended after second session block
+**Next session entry point:** Bubble member migration — 10 existing members need CODE+PIN credentials and profile data moved into Supabase. Manual or bulk import TBD.
+
+---
+
+## Amendment — Session block 2 (same date)
+
+### What was built
+- **`dashboard.html`** — member-facing dashboard. Two screens:
+  - **Login screen:** email input → calls `/api/request-login` → "check your inbox" message (always returns success to prevent email enumeration)
+  - **Dashboard screen:** loaded from `?session=` URL param (token stripped from URL bar on load). Shows profile photo, full name, email, Active badge, CODE in monospace, PIN management, full profile edit form, last 10 access log entries, and logout.
+- **`server.js` — dashboard endpoints:**
+  - `generateSessionToken(memberId, email)` — HMAC-signed, 30-day expiry
+  - `validateSessionToken(token)` — same pattern as setup token
+  - `POST /request-login` — validates member active, sends magic login link via SendGrid
+  - `POST /member-data` — validates session, returns member + profiles (pin_hash stripped) + last 10 access_logs
+  - `POST /update-profile` — validates session + ownership, updates allowed profile fields
+  - `POST /regenerate-pin` — validates session + ownership, generates new PIN, updates hash, returns raw PIN once
+
+### What was decided
+- **Magic link auth (Option B custom session token)** chosen over Supabase Auth — simpler, no dependency, can upgrade post-launch. Session token uses same SETUP_LINK_SECRET + HMAC pattern as setup tokens.
+- **PIN is never shown in the dashboard** — only the hash exists in the DB. Members use Regenerate PIN if they've lost it.
+- **Share feature (Issue #23) should use a separate share token**, not CODE+PIN directly in URL — CODE+PIN are emergency credentials, not share tokens.
+
+### GitHub issues created this block
+- **Issue #20** — Print profile (full page + wallet card)
+- **Issue #21** — Write NFC tag from dashboard (DIY, pre-filled from hosted profile)
+- **Issue #22** — Order NFC tags
+- **Issue #23** — Share profile (read-only link, share token preferred over CODE+PIN in URL)
+- **Issue #24** — Household dashboard (view/manage all member profiles under household)
+- **Issue #25** — Billing status + Stripe Customer Portal link
 
 ---
 
@@ -68,10 +97,13 @@
 ## Next steps
 
 1. **Build Bubble migration path** — define how existing Bubble members get CODE+PIN credentials and their profile data moved to Supabase. Done when a Bubble member can access their profile via CODE+PIN in the new system.
-2. **Build `confirm.html`** — post-purchase landing page (Issue #17). Done when Stripe $55 checkout redirects to a Helper-ID branded page telling members to check their email.
-3. **Fix setup success screen** — link to profile after activation (Issue #18). Done when member lands on or is directed to their active profile after completing setup.
-4. **Fix Stripe branding** — "Helper-ID" on checkout (Issue #14). Done when Stripe checkout reads "Helper-ID" — required before any community outreach.
-5. **Build member dashboard** — Issue #5. Done when a logged-in member can view/edit their profile and see access logs.
+2. **Fix Stripe branding** — "Helper-ID" on checkout (Issue #14). Done when Stripe checkout reads "Helper-ID" — required before any community outreach. BLOCKER.
+3. **Set confirm.html as Stripe redirect** — Stripe dashboard action: set post-purchase redirect to `confirm.html` (Issue #17). Code already done.
+4. **Fix setup success screen** — link to member profile after activation (Issue #18). Code already done.
+
+### Completed this session
+- ~~**Build `confirm.html`**~~ — done (Issue #17 code complete, Stripe dashboard redirect pending)
+- ~~**Build member dashboard**~~ — done (Issue #5, `dashboard.html` + server endpoints)
 
 ---
 
@@ -83,6 +115,6 @@ Provenance Label v1.0
 - AI Contribution: 65%
 - Collaboration Method: Human directed priorities, tested each flow end-to-end, caught bugs and edge cases in real browser; AI built all server endpoints, setup.html, reader.html CP path, writer.html schema alignment, and GitHub issues
 - AI Tool(s): Claude Sonnet 4.6 (Anthropic)
-- Human Roles: Priority direction, real-device testing, bug discovery (wrong Stripe product, missing env vars, line break in URL, component-level env var conflict), product decisions (PIN in token, tier gating, household pricing)
-- AI Roles: All code (server.js endpoints, setup.html, reader.html updates, writer.html schema fix), debugging (SendGrid key mismatch, component-level DO env var, Stripe metadata guard), GitHub issue creation, session log
+- Human Roles: Priority direction, real-device testing, bug discovery (wrong Stripe product, missing env vars, line break in URL, component-level env var conflict), product decisions (PIN in token, tier gating, household pricing, magic link auth, share token preference)
+- AI Roles: All code (server.js endpoints, setup.html, reader.html updates, writer.html schema fix, dashboard.html, dashboard server endpoints), debugging (SendGrid key mismatch, component-level DO env var, Stripe metadata guard), GitHub issue creation (#15–#25), session log
 ```
