@@ -325,9 +325,17 @@ app.post('/stripe-webhook', async (req, res) => {
 });
 
 async function handleCheckoutCompleted(session) {
+  const plan = session.metadata?.plan;
+
+  // Only provision members for the $55 hosted plan.
+  // $9 and $35 purchases are handled by /send-email and store no member data.
+  if (plan !== 'individual' && plan !== 'household') {
+    console.log('Webhook: skipping provisioning — no hosted plan metadata on session', session.id);
+    return;
+  }
+
   const email      = session.customer_details?.email || session.customer_email;
   const customerId = session.customer;
-  const plan       = session.metadata?.plan || 'individual';
 
   if (!email) {
     console.error('Webhook: no email found on session', session.id);

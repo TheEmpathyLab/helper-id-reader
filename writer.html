@@ -1387,25 +1387,28 @@
   // ── BUILD PROFILE OBJECT ───────────────────────────────────────────
   function buildProfile(prefix = '') {
     const g = id => document.getElementById(prefix + id)?.value?.trim() || '';
-    const firstName = g('') ; // handled separately per flow
     const contacts = [];
-    if (g('ec1-name') || g('ec1-phone')) contacts.push({ nm: g('ec1-name'), rel: g('ec1-rel'), ph: g('ec1-phone') });
-    if (g('ec2-name') || g('ec2-phone')) contacts.push({ nm: g('ec2-name'), rel: g('ec2-rel'), ph: g('ec2-phone') });
+    if (g('ec1-name') || g('ec1-phone')) contacts.push({ n: g('ec1-name'), r: g('ec1-rel'), p: g('ec1-phone') });
+    if (g('ec2-name') || g('ec2-phone')) contacts.push({ n: g('ec2-name'), r: g('ec2-rel'), p: g('ec2-phone') });
 
     const storePrefix = prefix === 'h-' ? 'h-' : '';
+    const fn = prefix === 'h-' ? g('first') : document.getElementById('acct-first').value.trim();
+    const ln = prefix === 'h-' ? g('last')  : document.getElementById('acct-last').value.trim();
+    const docName  = g('doc-name');
+    const docPhone = g('doc-phone');
+
     return {
-      v:   'h1',
-      id:  'HID-' + Math.random().toString(36).substr(2,6).toUpperCase(),
-      n:   prefix === 'h-' ? `${g('first')} ${g('last')}` : `${document.getElementById('acct-first').value.trim()} ${document.getElementById('acct-last').value.trim()}`,
+      fn,
+      ln,
       dob:  prefix === 'h-' ? g('dob') : document.getElementById('p-dob').value,
       bt:   prefix === 'h-' ? g('blood') : document.getElementById('p-blood').value,
-      al:   [...(tagStores[storePrefix + 'allergies'] || [])],
-      mx:   [...(tagStores[storePrefix + 'meds']      || [])],
-      cx:   [...(tagStores[storePrefix + 'conds']     || [])],
-      ec:   contacts,
-      dr:   { nm: g('doc-name'), ph: g('doc-phone') },
-      nt:   prefix === 'h-' ? g('notes') : document.getElementById('p-notes').value.trim(),
-      ts:   new Date().toISOString().split('T')[0]
+      al:   (tagStores[storePrefix + 'allergies'] || []).join(', '),
+      med:  (tagStores[storePrefix + 'meds']      || []).join(', '),
+      cond: (tagStores[storePrefix + 'conds']     || []).join(', '),
+      contacts,
+      doc:  [docName, docPhone].filter(Boolean).join(' · '),
+      notes: prefix === 'h-' ? g('notes') : document.getElementById('p-notes').value.trim(),
+      tier: 'nfc_only',
     };
   }
 
@@ -1414,18 +1417,18 @@
     const p = buildProfile();
     const card = document.getElementById('review-card');
 
-    function pills(arr, cls) {
-      if (!arr || !arr.length) return '<span style="color:var(--ink-dim);font-size:0.82rem;">None listed</span>';
+    function pills(val, cls) {
+      const arr = Array.isArray(val) ? val : (val || '').split(',').map(s => s.trim()).filter(Boolean);
+      if (!arr.length) return '<span style="color:var(--ink-dim);font-size:0.82rem;">None listed</span>';
       return arr.map(a => `<span class="review-pill ${cls}">${a}</span>`).join('');
     }
 
     card.innerHTML = `
       <div class="card-title">Profile Summary</div>
       <div class="review-grid">
-        <div class="review-cell"><div class="review-label">Name</div><div class="review-value">${p.n || '—'}</div></div>
+        <div class="review-cell"><div class="review-label">Name</div><div class="review-value">${[p.fn, p.ln].filter(Boolean).join(' ') || '—'}</div></div>
         <div class="review-cell"><div class="review-label">Date of Birth</div><div class="review-value">${p.dob || '—'}</div></div>
         <div class="review-cell"><div class="review-label">Blood Type</div><div class="review-value" style="color:var(--red)">${p.bt || 'Unknown'}</div></div>
-        <div class="review-cell"><div class="review-label">Tag ID</div><div class="review-value" style="font-family:'DM Mono',monospace;font-size:0.8rem;">${p.id}</div></div>
       </div>
       <div style="margin-top:14px;">
         <div class="review-label">Allergies</div>
@@ -1433,15 +1436,15 @@
       </div>
       <div style="margin-top:12px;">
         <div class="review-label">Medications</div>
-        <div class="review-pills">${pills(p.mx, 'blue')}</div>
+        <div class="review-pills">${pills(p.med, 'blue')}</div>
       </div>
       <div style="margin-top:12px;">
         <div class="review-label">Conditions</div>
-        <div class="review-pills">${pills(p.cx, 'amber')}</div>
+        <div class="review-pills">${pills(p.cond, 'amber')}</div>
       </div>
-      ${p.ec.length ? `<div style="margin-top:12px;"><div class="review-label">Emergency Contacts</div>${p.ec.map(c=>`<div style="font-size:0.85rem;margin-top:4px;color:var(--ink)">${c.nm} (${c.rel}) · ${c.ph}</div>`).join('')}</div>` : ''}
-      ${p.dr.nm ? `<div style="margin-top:12px;"><div class="review-label">Physician</div><div style="font-size:0.85rem;color:var(--ink)">${p.dr.nm} · ${p.dr.ph}</div></div>` : ''}
-      ${p.nt ? `<div style="margin-top:12px;"><div class="review-label">Notes</div><div style="font-size:0.83rem;color:var(--ink-mid);line-height:1.5;">${p.nt}</div></div>` : ''}
+      ${p.contacts.length ? `<div style="margin-top:12px;"><div class="review-label">Emergency Contacts</div>${p.contacts.map(c=>`<div style="font-size:0.85rem;margin-top:4px;color:var(--ink)">${c.n}${c.r ? ' (' + c.r + ')' : ''} · ${c.p}</div>`).join('')}</div>` : ''}
+      ${p.doc ? `<div style="margin-top:12px;"><div class="review-label">Physician</div><div style="font-size:0.85rem;color:var(--ink)">${p.doc}</div></div>` : ''}
+      ${p.notes ? `<div style="margin-top:12px;"><div class="review-label">Notes</div><div style="font-size:0.83rem;color:var(--ink-mid);line-height:1.5;">${p.notes}</div></div>` : ''}
     `;
     // Store for write step
     window._pendingProfile = p;
@@ -1530,8 +1533,8 @@
     writeNFC(window._pendingProfile, 'nfc-ring', 'nfc-status-title', 'nfc-status-sub', (p) => {
       document.getElementById('nfc-write-btns').style.display = 'none';
       document.getElementById('write-success').style.display = 'block';
-      document.getElementById('final-name').textContent = p.n;
-      document.getElementById('final-id').textContent   = p.id;
+      document.getElementById('final-name').textContent = [p.fn, p.ln].filter(Boolean).join(' ');
+      document.getElementById('final-id').textContent   = 'HID-' + Math.random().toString(36).substr(2,6).toUpperCase();
       const exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
       document.getElementById('final-exp').textContent = `Renews ${exp.toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;
     });
@@ -1617,7 +1620,7 @@
     writeNFC(window._helperProfile, 'h-nfc-ring', 'h-nfc-title', 'h-nfc-sub', (p) => {
       document.getElementById('h-write-success').style.display = 'block';
       document.getElementById('h-success-msg').textContent =
-        `✓ Tag written. ${p.n} enrolled as HID member ${p.id}.`;
+        `✓ Tag written. ${[p.fn, p.ln].filter(Boolean).join(' ')} enrolled as HID member.`;
       // Increment count
       const count = parseInt(localStorage.getItem('helper_enroll_count') || '0') + 1;
       localStorage.setItem('helper_enroll_count', count);
