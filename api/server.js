@@ -942,6 +942,193 @@ app.post('/regenerate-pin', async (req, res) => {
   return res.json({ pin: rawPin });
 });
 
+// ============================================================
+// ---- POST /admin/provision ----
+// ============================================================
+// Manually provisions a member + profile without a Stripe webhook.
+// Used for: Bubble member migration, demo/test profiles, comped accounts.
+//
+// Protected by x-admin-secret header (must match ADMIN_SECRET env var).
+//
+// Body:
+//   email       {string}  required
+//   code        {string}  optional — uses provided CODE (Bubble migration) or generates one
+//   pin         {string}  optional — hashes provided PIN or generates one
+//   profile     {object}  optional — pre-populates profile fields, sets status: active
+//   skipEmail   {boolean} optional — if true, no email is sent (demo/test profiles)
+//   plan        {string}  optional — defaults to 'individual'
+//
+// Returns: { memberId, profileId, code, pin }
+// The raw pin is returned once for record-keeping. Never log it.
+
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+
+app.post('/admin/provision', async (req, res) => {
+  // Auth check
+  const secret = req.headers['x-admin-secret'];
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { email, code: providedCode, pin: providedPin, profile = {}, skipEmail = false, plan = 'individual' } = req.body;
+  if (!email) return res.status(400).json({ error: 'Missing email' });
+
+  // Duplicate check by email
+  const { data: existing } = await supabase
+    .from('members')
+    .select('id')
+    .eq('email', email.toLowerCase().trim())
+    .maybeSingle();
+
+  if (existing) {
+    return res.status(409).json({ error: `Member already exists for ${email}` });
+  }
+
+  // CODE — use provided or generate
+  let code;
+  if (providedCode) {
+    // Verify uniqueness
+    const { data: taken } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('code', providedCode.toUpperCase().trim())
+      .maybeSingle();
+    if (taken) return res.status(409).json({ error: `CODE ${providedCode} is already in use` });
+    code = providedCode.toUpperCase().trim();
+  } else {
+    code = await generateCode();
+  }
+
+  // PIN — use provided or generate
+  const rawPin  = providedPin ? String(providedPin).trim() : generatePin();
+  const pinHash = await bcrypt.hash(rawPin, 10);
+
+  // Profile data provided → provision as active immediately
+  const hasProfileData = Object.keys(profile).length > 0;
+  const memberStatus   = hasProfileData ? 'active'  : 'pending';
+  const profileStatus  = hasProfileData ? 'active'  : 'pending';
+
+  // Insert member
+  const { data: member, error: memberErr } = await supabase
+    .from('members')
+    .insert({
+      email:  email.toLowerCase().trim(),
+      plan,
+      status: memberStatus,
+    })
+    .select('id')
+    .single();
+
+  if (memberErr) {
+    console.error('/admin/provision: member insert failed:', memberErr.message);
+    return res.status(500).json({ error: 'Failed to create member' });
+  }
+
+  // Insert profile — merge provided data with required fields
+  const profileRow = {
+    member_id:   member.id,
+    code,
+    pin_hash:    pinHash,
+    access_tier: 'cp_only',
+    status:      profileStatus,
+    first_name:  profile.first_name  || '',
+    last_name:   profile.last_name   || '',
+    ...(profile.preferred_name    && { preferred_name:    profile.preferred_name    }),
+    ...(profile.date_of_birth     && { date_of_birth:     profile.date_of_birth     }),
+    ...(profile.blood_type        && { blood_type:        profile.blood_type        }),
+    ...(profile.ec1_name          && { ec1_name:          profile.ec1_name          }),
+    ...(profile.ec1_relationship  && { ec1_relationship:  profile.ec1_relationship  }),
+    ...(profile.ec1_phone         && { ec1_phone:         profile.ec1_phone         }),
+    ...(profile.ec2_name          && { ec2_name:          profile.ec2_name          }),
+    ...(profile.ec2_relationship  && { ec2_relationship:  profile.ec2_relationship  }),
+    ...(profile.ec2_phone         && { ec2_phone:         profile.ec2_phone         }),
+    ...(profile.allergies         && { allergies:         profile.allergies         }),
+    ...(profile.medications       && { medications:       profile.medications       }),
+    ...(profile.conditions        && { conditions:        profile.conditions        }),
+    ...(profile.primary_physician && { primary_physician: profile.primary_physician }),
+    ...(profile.advance_directives && { advance_directives: profile.advance_directives }),
+  };
+
+  const { data: newProfile, error: profileErr } = await supabase
+    .from('profiles')
+    .insert(profileRow)
+    .select('id')
+    .single();
+
+  if (profileErr) {
+    console.error('/admin/provision: profile insert failed:', profileErr.message);
+    // Clean up the member row to avoid orphans
+    await supabase.from('members').delete().eq('id', member.id);
+    return res.status(500).json({ error: 'Failed to create profile' });
+  }
+
+  console.log(`/admin/provision: provisioned ${email} — CODE: ${code} — status: ${memberStatus}`);
+
+  // Email
+  if (!skipEmail) {
+    if (hasProfileData) {
+      // Migration path — member already knows their CODE+PIN
+      // Send a dashboard login link so they can review and update their profile
+      const token    = generateSessionToken(member.id, email.toLowerCase().trim());
+      const loginUrl = `${SITE_URL}/dashboard.html?session=${token}`;
+      const msg = {
+        to:      email,
+        from:    { email: FROM_EMAIL, name: 'Helper-ID' },
+        subject: 'Your Helper-ID profile is ready',
+        html: `
+          <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+            <div style="background:#D0312D;padding:14px 24px;">
+              <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+            </div>
+            <div style="padding:28px 24px;">
+              <h2 style="font-size:1.3rem;margin-bottom:8px;">Your profile has been moved over.</h2>
+              <p style="color:#666;margin-bottom:16px;">
+                Your Helper-ID profile is live on our new platform. Your CODE and PIN are unchanged —
+                first responders can still access your profile the same way.
+              </p>
+              <div style="background:#F4F4F4;border:1.5px solid #E0E0E0;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+                <div style="margin-bottom:12px;">
+                  <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#D0312D;margin-bottom:4px;">Your CODE</div>
+                  <div style="font-family:monospace;font-size:1.8rem;font-weight:700;letter-spacing:0.15em;">${code}</div>
+                </div>
+                <div>
+                  <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#D0312D;margin-bottom:4px;">Your PIN</div>
+                  <div style="font-family:monospace;font-size:1.8rem;font-weight:700;letter-spacing:0.15em;">${rawPin}</div>
+                </div>
+              </div>
+              <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">
+                Click below to open your dashboard — review your profile, update any information, and see who has accessed it.
+              </p>
+              <a href="${loginUrl}"
+                 style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+                Open My Dashboard →
+              </a>
+              <p style="margin-top:24px;font-size:0.8rem;color:#999;">
+                This login link is valid for 30 days. Questions? Reply to this email.
+              </p>
+            </div>
+            <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+              <p style="color:#999;font-size:0.75rem;margin:0;">
+                Helper-ID &nbsp;·&nbsp;
+                <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a>
+              </p>
+            </div>
+          </div>
+        `,
+      };
+      try { await sgMail.send(msg); }
+      catch (err) { console.error('Migration email failed:', err.response?.body || err.message); }
+    } else {
+      // Fresh provision — send standard setup email
+      const token    = generateSetupToken(member.id, rawPin);
+      const setupUrl = `${SITE_URL}/setup.html?token=${token}`;
+      await sendWelcomeEmail({ email, code, pin: rawPin, setupUrl, plan });
+    }
+  }
+
+  return res.json({ memberId: member.id, profileId: newProfile.id, code, pin: rawPin });
+});
+
 // ---- 404 catch-all ----
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
