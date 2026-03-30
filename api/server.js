@@ -417,7 +417,6 @@ async function handleCheckoutCompleted(session) {
   await sendWelcomeEmail({ email, code, pin: rawPin, setupUrl, plan });
 
   console.log(`Webhook: provisioned member ${member.id} (${plan}) — CODE: ${code}`);
-  console.log(`Webhook: setup URL — ${setupUrl}`);
 }
 
 async function sendWelcomeEmail({ email, code, pin, setupUrl, plan }) {
@@ -552,8 +551,7 @@ app.post('/validate-token', async (req, res) => {
   try {
     payload = validateSetupToken(token);
   } catch (err) {
-    console.error('validate-token error:', err.message, '| token length:', token.length, '| secret set:', !!SETUP_LINK_SECRET);
-    const expired = err.message === 'Token expired';
+const expired = err.message === 'Token expired';
     return res.status(expired ? 410 : 400).json({ error: err.message, expired });
   }
 
