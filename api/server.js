@@ -31,7 +31,6 @@ if (!SENDGRID_API_KEY) {
 }
 
 sgMail.setApiKey(SENDGRID_API_KEY);
-console.log('SG key check — length:', SENDGRID_API_KEY.length, '| starts with:', SENDGRID_API_KEY.slice(0, 5));
 
 
 const stripe   = Stripe(STRIPE_SECRET_KEY);
