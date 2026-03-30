@@ -6,6 +6,7 @@
 
 const express          = require('express');
 const cors             = require('cors');
+const multer           = require('multer');
 const sgMail           = require('@sendgrid/mail');
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt           = require('bcryptjs');
@@ -287,11 +288,24 @@ function generatePin() {
 
 // Setup link: HMAC-signed token, 48-hour expiry
 // Token structure: base64url(payload).hmac_hex
-function generateSetupToken(memberId) {
+// PIN is included in the payload so it can be shown on the setup screen
+// without ever being stored in the database.
+function generateSetupToken(memberId, pin) {
   const expiresAt = Date.now() + 48 * 60 * 60 * 1000;
-  const payload   = Buffer.from(JSON.stringify({ memberId, expiresAt })).toString('base64url');
+  const payload   = Buffer.from(JSON.stringify({ memberId, pin, expiresAt })).toString('base64url');
   const sig       = crypto.createHmac('sha256', SETUP_LINK_SECRET).update(payload).digest('hex');
   return `${payload}.${sig}`;
+}
+
+// Validate a setup token — returns decoded payload or throws
+function validateSetupToken(token) {
+  const [payload, sig] = token.split('.');
+  if (!payload || !sig) throw new Error('Malformed token');
+  const expected = crypto.createHmac('sha256', SETUP_LINK_SECRET).update(payload).digest('hex');
+  if (sig !== expected) throw new Error('Invalid signature');
+  const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
+  if (Date.now() > data.expiresAt) throw new Error('Token expired');
+  return data;
 }
 
 // ---- Webhook handler ----
@@ -395,8 +409,8 @@ async function handleCheckoutCompleted(session) {
     return;
   }
 
-  // Generate signed setup link
-  const token    = generateSetupToken(member.id);
+  // Generate signed setup link — PIN is embedded in the token payload
+  const token    = generateSetupToken(member.id, rawPin);
   const setupUrl = `${SITE_URL}/setup?token=${token}`;
 
   // Send welcome email
@@ -521,6 +535,216 @@ app.post('/lookup', async (req, res) => {
   // Return sanitized profile — never expose pin_hash
   const { pin_hash, ...safeProfile } = profile;
   return res.json({ profile: safeProfile });
+});
+
+// ============================================================
+// ---- POST /validate-token ----
+// ============================================================
+// Validates a setup token from the welcome email.
+// Returns { code, pin, email } so setup.html can show Screen 1.
+
+app.post('/validate-token', async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Missing token' });
+
+  let payload;
+  try {
+    payload = validateSetupToken(token);
+  } catch (err) {
+    const expired = err.message === 'Token expired';
+    return res.status(expired ? 410 : 400).json({ error: err.message, expired });
+  }
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, email, status')
+    .eq('id', payload.memberId)
+    .maybeSingle();
+
+  if (!member) return res.status(404).json({ error: 'Member not found' });
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('code, status')
+    .eq('member_id', member.id)
+    .maybeSingle();
+
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+  return res.json({
+    memberId: member.id,
+    email:    member.email,
+    code:     profile.code,
+    pin:      payload.pin,
+    status:   member.status,
+  });
+});
+
+// ============================================================
+// ---- POST /resend-setup ----
+// ============================================================
+// Generates a new setup token and resends the welcome email.
+// Called when a member's setup link has expired.
+
+app.post('/resend-setup', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Missing email' });
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, email, status')
+    .eq('email', email.toLowerCase().trim())
+    .eq('status', 'pending')
+    .maybeSingle();
+
+  if (!member) return res.status(404).json({ error: 'No pending account found for that email' });
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('code, pin_hash')
+    .eq('member_id', member.id)
+    .maybeSingle();
+
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+  // Generate a new PIN, update the hash, resend with new token
+  const rawPin  = generatePin();
+  const pinHash = await bcrypt.hash(rawPin, 10);
+
+  await supabase.from('profiles').update({ pin_hash: pinHash }).eq('member_id', member.id);
+
+  const token    = generateSetupToken(member.id, rawPin);
+  const setupUrl = `${SITE_URL}/setup.html?token=${token}`;
+
+  await sendWelcomeEmail({ email: member.email, code: profile.code, pin: rawPin, setupUrl, plan: 'individual' });
+
+  return res.json({ success: true });
+});
+
+// ============================================================
+// ---- POST /save-profile ----
+// ============================================================
+// Saves profile fields as a draft. Profile stays pending.
+// Called on each step save in setup.html.
+
+app.post('/save-profile', async (req, res) => {
+  const { token, fields } = req.body;
+  if (!token || !fields) return res.status(400).json({ error: 'Missing token or fields' });
+
+  let payload;
+  try {
+    payload = validateSetupToken(token);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+
+  const allowed = [
+    'first_name', 'last_name', 'preferred_name', 'date_of_birth', 'blood_type',
+    'ec1_name', 'ec1_relationship', 'ec1_phone',
+    'ec2_name', 'ec2_relationship', 'ec2_phone',
+    'allergies', 'medications', 'conditions', 'primary_physician',
+    'insurance_provider', 'insurance_id',
+    'advance_directives', 'headshot_url',
+  ];
+
+  const update = {};
+  for (const key of allowed) {
+    if (fields[key] !== undefined) update[key] = fields[key];
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(update)
+    .eq('member_id', payload.memberId);
+
+  if (error) return res.status(500).json({ error: 'Failed to save profile' });
+
+  return res.json({ success: true });
+});
+
+// ============================================================
+// ---- POST /activate-profile ----
+// ============================================================
+// Flips profile and member status to active.
+// Called when member confirms their profile on the review screen.
+
+app.post('/activate-profile', async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Missing token' });
+
+  let payload;
+  try {
+    payload = validateSetupToken(token);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+
+  const { error: profileErr } = await supabase
+    .from('profiles')
+    .update({ status: 'active' })
+    .eq('member_id', payload.memberId);
+
+  if (profileErr) return res.status(500).json({ error: 'Failed to activate profile' });
+
+  const { error: memberErr } = await supabase
+    .from('members')
+    .update({ status: 'active' })
+    .eq('id', payload.memberId);
+
+  if (memberErr) return res.status(500).json({ error: 'Failed to activate member' });
+
+  return res.json({ success: true });
+});
+
+// ============================================================
+// ---- POST /upload-photo ----
+// ============================================================
+// Accepts a photo file upload, stores it in Supabase Storage
+// (headshots bucket), and returns the signed URL.
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits:  { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
+});
+
+app.post('/upload-photo', upload.single('photo'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file provided' });
+  if (!req.body.token) return res.status(400).json({ error: 'Missing token' });
+
+  let payload;
+  try {
+    payload = validateSetupToken(req.body.token);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+
+  const ext      = req.file.mimetype.split('/')[1] || 'jpg';
+  const filename = `${payload.memberId}.${ext}`;
+
+  const { error: uploadErr } = await supabase.storage
+    .from('headshots')
+    .upload(filename, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: true,
+    });
+
+  if (uploadErr) {
+    console.error('Photo upload error:', uploadErr.message);
+    return res.status(500).json({ error: 'Upload failed' });
+  }
+
+  // Generate a signed URL valid for 10 years (photos are semi-permanent)
+  const { data: signedData, error: signErr } = await supabase.storage
+    .from('headshots')
+    .createSignedUrl(filename, 60 * 60 * 24 * 365 * 10);
+
+  if (signErr) return res.status(500).json({ error: 'Could not generate photo URL' });
+
+  return res.json({ url: signedData.signedUrl });
 });
 
 // ---- 404 catch-all ----
