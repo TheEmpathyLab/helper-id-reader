@@ -552,6 +552,7 @@ app.post('/validate-token', async (req, res) => {
   try {
     payload = validateSetupToken(token);
   } catch (err) {
+    console.error('validate-token error:', err.message, '| token length:', token.length, '| secret set:', !!SETUP_LINK_SECRET);
     const expired = err.message === 'Token expired';
     return res.status(expired ? 410 : 400).json({ error: err.message, expired });
   }
