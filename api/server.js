@@ -417,6 +417,7 @@ async function handleCheckoutCompleted(session) {
   await sendWelcomeEmail({ email, code, pin: rawPin, setupUrl, plan });
 
   console.log(`Webhook: provisioned member ${member.id} (${plan}) — CODE: ${code}`);
+  console.log(`Webhook: setup URL — ${setupUrl}`);
 }
 
 async function sendWelcomeEmail({ email, code, pin, setupUrl, plan }) {
