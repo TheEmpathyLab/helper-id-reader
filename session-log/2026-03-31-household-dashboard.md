@@ -76,15 +76,37 @@
 
 ---
 
-## Open questions / next steps
+## Open questions / next steps (updated after UI session)
 
 | Priority | Task | Notes |
 |----------|------|-------|
 | 1 | Migrate 10 paying Bubble members | 3 are households — use scripts/ |
 | 2 | Fix Stripe branding (Issue #14) | BLOCKER before outreach |
-| 3 | Member Login button in nav (Issue #27) | Quick win |
+| 3 | DNS flip helper-id.com → DO (Issue #19) | /api/ calls fail on Bubble DNS |
 | 4 | Build household plan + billing (Issue #15, #25) | After migration |
 | 5 | Guardian dashboard — manage household members (Issue #24/#26) | Dashboard phase 2 |
+
+---
+
+---
+
+## UI overhaul — continuation session (same date)
+
+### Product restructure & nav overhaul (commit 95dceb3)
+- **Product grid** reduced to 3 cards: $9 Digital Download, $35 NFC Pack + Digital Download, $55 Full Membership (annual). Free PDF demoted to a text link below the grid.
+- **"Most Popular" badge** moved to $55 Full Membership (was on $9).
+- **New `products.html`** — standalone products page with same 3-card grid + "Why Helper-ID" dark section.
+- **Nav updated on all pages** — Products · Read a Tag · Free PDF + Member Login button (outline style). Applied to index.html, products.html, pdf.html, generator.html.
+- **Notify strip removed** from index.html (was "Coming Soon CODE+PIN" — no longer needed).
+
+### Index.html hero redesign — Issue #28 (commit df7a580)
+- **Old hero**: centered, max-width 640px, brand-focused, squished on mobile.
+- **New hero**: two-column grid layout at `var(--max-width)` (~860px).
+  - Left: responder-first copy — "Found someone's Helper-ID tag?" headline + description + secondary "Get Your Own Tag →" CTA.
+  - Right: white card with CODE + PIN inputs, "Access Profile" button, divider + "Open Tag Reader" fallback link.
+- **`heroLookup()`** validates CODE presence, redirects to `reader.html?code=X&pin=Y` — reader handles the API call.
+- **Mobile** (`≤720px`): stacks to single column, full-width, comfortable padding.
+- Confirmed pushed to DO and deploying.
 
 ---
 
