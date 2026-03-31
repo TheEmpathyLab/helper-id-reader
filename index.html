@@ -6,16 +6,40 @@
   <title>Helper-ID — Emergency Information, Always Ready</title>
   <link rel="stylesheet" href="hid-style.css" />
   <style>
+    /* ---- Hero ---- */
     .hero {
-      text-align: center;
-      padding: 64px 24px 48px;
-      max-width: 640px;
+      padding: 56px 24px 48px;
+      max-width: var(--max-width);
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 48px;
+      align-items: center;
     }
-    .hero h1 { font-family: var(--font-display); font-size: 2.6rem; line-height: 1.15; margin-bottom: 18px; }
+.hero-eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 14px; }
+    .hero h1 { font-family: var(--font-display); font-size: 2.4rem; line-height: 1.15; margin-bottom: 16px; }
     .hero h1 em { font-style: normal; color: var(--red); }
-    .hero p { font-size: 1.05rem; color: var(--gray-dark); margin-bottom: 32px; }
+    .hero-desc { font-size: 1rem; color: var(--gray-dark); margin-bottom: 28px; line-height: 1.6; }
+    .hero-cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    /* CODE+PIN card */
+    .hero-form-card {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-form-card h3 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 6px; }
+    .hero-form-card p { font-size: 0.83rem; color: var(--gray-dark); margin-bottom: 18px; line-height: 1.5; }
+    .hero-form-card .hid-input { margin-bottom: 10px; font-size: 1rem; }
+    #hero-error { display:none; margin-top:8px; font-size:0.82rem; color:var(--red); }
+    .hero-divider { display: flex; align-items: center; gap: 10px; margin: 20px 0; color: var(--gray-mid); font-size: 0.78rem; }
+    .hero-divider::before, .hero-divider::after { content:''; flex:1; height:1px; background:var(--border); }
     .products-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
+    @media(max-width:720px) {
+      .hero { grid-template-columns:1fr; gap:32px; }
+      .hero h1 { font-size:1.9rem; }
+    }
     .products-inner { max-width: var(--max-width); margin: 0 auto; }
     .products-header { text-align: center; margin-bottom: 40px; }
     .products-header h2 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 8px; }
@@ -55,10 +79,8 @@
     .why-item p { font-size: 0.85rem; color: #aaa; line-height: 1.55; }
     .why-icon { width:40px;height:40px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:12px; }
     @media(max-width:720px) {
-      .hero h1 { font-size:1.9rem; }
       .product-grid { grid-template-columns:1fr; }
       .why-grid { grid-template-columns:1fr; gap:20px; }
-      .notify-row { flex-direction:column; }
     }
   </style>
 </head>
@@ -78,12 +100,35 @@
   </header>
 
   <section class="hero">
-    <span class="hid-badge hid-badge-red" style="margin-bottom:18px;display:inline-block;">NFC Emergency ID</span>
-    <h1>Your emergency info,<br /><em>no phone required.</em></h1>
-    <p>Helper-ID puts your critical emergency information on a physical card or tag. First responders and family can access it instantly — even when your phone is dead, locked, or missing.</p>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-      <a href="#products" class="hid-btn hid-btn-primary hid-btn-lg">See Plans →</a>
+
+    <!-- Left: brand copy -->
+    <div class="hero-copy">
+      <div class="hero-eyebrow">NFC Emergency ID</div>
+      <h1>Found someone's<br /><em>Helper-ID tag?</em></h1>
+      <p class="hero-desc">Enter the CODE and PIN printed on the tag to instantly access their emergency information — allergies, medications, emergency contacts, and more.</p>
+      <div class="hero-cta-row">
+        <a href="#products" class="hid-btn hid-btn-outline">Get Your Own Tag →</a>
+      </div>
     </div>
+
+    <!-- Right: CODE+PIN lookup card -->
+    <div class="hero-form-card">
+      <h3>Access a Profile</h3>
+      <p>Enter the CODE and PIN from a Helper-ID tag or card.</p>
+      <input class="hid-input" type="text" id="hero-code" placeholder="CODE (e.g. A3BX7K)"
+             autocomplete="off" autocapitalize="characters"
+             onkeydown="if(event.key==='Enter')heroLookup()" />
+      <input class="hid-input" type="password" id="hero-pin" placeholder="PIN (e.g. 482931)"
+             autocomplete="off"
+             onkeydown="if(event.key==='Enter')heroLookup()" />
+      <button class="hid-btn hid-btn-primary hid-btn-full" onclick="heroLookup()">
+        Access Profile
+      </button>
+      <div id="hero-error">Invalid CODE or PIN format. Please try again.</div>
+      <div class="hero-divider">or</div>
+      <a href="reader.html" class="hid-btn hid-btn-outline hid-btn-full" style="font-size:0.85rem;">Open Tag Reader</a>
+    </div>
+
   </section>
 
   <section class="products-section" id="products">
@@ -183,6 +228,21 @@
       document.querySelectorAll('[data-stripe="fullMembership"]').forEach(el => el.href = HID_CONFIG.stripe.fullMembership);
     });
 
+    function heroLookup() {
+      const code = document.getElementById('hero-code').value.trim().toUpperCase();
+      const pin  = document.getElementById('hero-pin').value.trim();
+      const err  = document.getElementById('hero-error');
+      if (!code) {
+        err.textContent = 'Please enter a CODE.';
+        err.style.display = 'block';
+        document.getElementById('hero-code').focus();
+        return;
+      }
+      err.style.display = 'none';
+      const params = new URLSearchParams({ code });
+      if (pin) params.set('pin', pin);
+      window.location.href = 'reader.html?' + params.toString();
+    }
   </script>
 </body>
 </html>
