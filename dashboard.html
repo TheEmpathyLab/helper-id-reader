@@ -512,6 +512,11 @@
           <span class="editing-banner-back" onclick="backToOwnProfile()">← Back to your profile</span>
         </div>
 
+        <!-- Photo upload button — shown when editing any profile -->
+        <div id="edit-photo-row" style="display:none;margin-bottom:16px;">
+          <button class="btn-secondary" style="width:auto;padding:8px 16px;font-size:0.85rem;" onclick="triggerAvatarUpload()">📷 Update Photo</button>
+        </div>
+
         <!-- Dependent credentials — shown when editing a dependent -->
         <div id="dep-credentials" class="dep-credentials" style="display:none;">
           <div class="dep-cred-item">
@@ -813,7 +818,8 @@
       document.getElementById('editing-banner').style.display = 'flex';
       document.getElementById('profile-section-title').textContent = 'Edit Profile';
 
-      // Credentials block
+      // Photo + credentials block
+      document.getElementById('edit-photo-row').style.display  = 'block';
       document.getElementById('dep-credentials').style.display = 'flex';
       document.getElementById('dep-cred-code').textContent = profile.code;
       document.getElementById('dep-cred-pin').textContent  = 'Use Regenerate PIN below';
@@ -844,6 +850,7 @@
       document.querySelectorAll('.dep-edit-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('editing-banner').style.display    = 'none';
       document.getElementById('dep-credentials').style.display   = 'none';
+      document.getElementById('edit-photo-row').style.display    = 'none';
       document.getElementById('profile-section-title').textContent = 'Your Profile';
       document.getElementById('pin-context-label').textContent =
         "If you've lost your PIN, generate a new one. Write it down immediately — it won't be shown again.";

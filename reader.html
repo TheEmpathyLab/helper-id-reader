@@ -645,9 +645,10 @@
       const params = new URLSearchParams(window.location.search);
       const code   = params.get('code');
       const pin    = params.get('pin');
-      if (code && pin && !window.location.hash) {
-        document.getElementById('cp-code').value = code;
-        document.getElementById('cp-pin').value  = pin;
+      if (!code || window.location.hash) return;
+      document.getElementById('cp-code').value = code;
+      if (pin) {
+        document.getElementById('cp-pin').value = pin;
         lookupProfile();
       }
     })();
