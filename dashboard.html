@@ -326,6 +326,15 @@
     }
     .field-input:focus { border-color: var(--red); }
     textarea.field-input { resize: vertical; min-height: 72px; }
+    .field-input.field-error {
+      border-color: var(--red) !important;
+      background: var(--red-light);
+    }
+    .field-error-msg {
+      color: var(--red);
+      font-size: 0.78rem;
+      margin-top: 4px;
+    }
 
     /* ── PIN regen ── */
     .pin-new-reveal {
@@ -551,7 +560,9 @@
         <div class="field-group">
           <div>
             <div class="field-label">Date of Birth</div>
-            <input class="field-input" type="text" id="f-dob" placeholder="MM/DD/YYYY" />
+            <input class="field-input" type="text" id="f-dob" placeholder="MM/DD/YYYY"
+              oninput="formatDobInput(this)" onfocus="clearFieldError('f-dob')" maxlength="10" />
+            <div class="field-error-msg" id="f-dob-err" style="display:none;"></div>
           </div>
           <div>
             <div class="field-label">Blood Type</div>
@@ -863,13 +874,61 @@
     }
 
     // ============================================================
+    // Date helpers — DB stores YYYY-MM-DD, form shows MM/DD/YYYY
+    // ============================================================
+    function formatDobInput(input) {
+      // Strip everything except digits
+      let digits = input.value.replace(/\D/g, '').slice(0, 8);
+      let out = digits.slice(0, 2);
+      if (digits.length > 2) out += '/' + digits.slice(2, 4);
+      if (digits.length > 4) out += '/' + digits.slice(4, 8);
+      input.value = out;
+    }
+
+    // MM/DD/YYYY → YYYY-MM-DD (returns null if invalid)
+    function dobToISO(display) {
+      if (!display) return '';
+      const parts = display.split('/');
+      if (parts.length !== 3) return null;
+      const [m, d, y] = parts;
+      if (m.length !== 2 || d.length !== 2 || y.length !== 4) return null;
+      const date = new Date(`${y}-${m}-${d}`);
+      if (isNaN(date)) return null;
+      return `${y}-${m}-${d}`;
+    }
+
+    // YYYY-MM-DD → MM/DD/YYYY
+    function isoToDob(iso) {
+      if (!iso) return '';
+      const parts = iso.split('-');
+      if (parts.length !== 3) return iso;
+      return `${parts[1]}/${parts[2]}/${parts[0]}`;
+    }
+
+    // ============================================================
+    // Field error helpers
+    // ============================================================
+    function showFieldError(fieldId, msg) {
+      document.getElementById(fieldId).classList.add('field-error');
+      const errEl = document.getElementById(`${fieldId}-err`);
+      if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    }
+
+    function clearFieldError(fieldId) {
+      document.getElementById(fieldId)?.classList.remove('field-error');
+      const errEl = document.getElementById(`${fieldId}-err`);
+      if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+    }
+
+    // ============================================================
     // Populate form fields from a profile object
     // ============================================================
     function populateForm(p) {
+      clearFieldError('f-dob');
       setVal('f-fn',    p.first_name         || '');
       setVal('f-ln',    p.last_name          || '');
       setVal('f-pref',  p.preferred_name     || '');
-      setVal('f-dob',   p.date_of_birth      || '');
+      setVal('f-dob',   isoToDob(p.date_of_birth || ''));
       setVal('f-bt',    p.blood_type         || '');
       setVal('f-ec1n',  p.ec1_name           || '');
       setVal('f-ec1r',  p.ec1_relationship   || '');
@@ -899,11 +958,25 @@
       btn.disabled = true;
       btn.textContent = 'Saving…';
 
+      // Validate DOB before sending
+      clearFieldError('f-dob');
+      const dobDisplay = getVal('f-dob');
+      let dobISO = '';
+      if (dobDisplay) {
+        dobISO = dobToISO(dobDisplay);
+        if (!dobISO) {
+          showFieldError('f-dob', 'Enter date as MM/DD/YYYY — e.g. 03/20/2011');
+          btn.disabled = false;
+          btn.textContent = 'Save Changes';
+          return;
+        }
+      }
+
       const fields = {
         first_name:         getVal('f-fn'),
         last_name:          getVal('f-ln'),
         preferred_name:     getVal('f-pref'),
-        date_of_birth:      getVal('f-dob'),
+        date_of_birth:      dobISO,
         blood_type:         getVal('f-bt'),
         ec1_name:           getVal('f-ec1n'),
         ec1_relationship:   getVal('f-ec1r'),
