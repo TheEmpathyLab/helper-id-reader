@@ -833,6 +833,8 @@ app.post('/request-login', async (req, res) => {
 // ---- POST /member-data ----
 // ============================================================
 // Returns member + profile data for the authenticated member.
+// If the member is a household admin, also returns all profiles
+// under that household (dependent profiles they can manage).
 
 app.post('/member-data', async (req, res) => {
   const { session } = req.body;
@@ -850,21 +852,53 @@ app.post('/member-data', async (req, res) => {
 
   if (!member) return res.status(404).json({ error: 'Member not found' });
 
-  const { data: profiles } = await supabase
+  // Own profiles
+  const { data: ownProfiles } = await supabase
     .from('profiles')
     .select('*')
     .eq('member_id', payload.memberId);
 
+  // Household profiles — if this member is a household admin
+  const { data: household } = await supabase
+    .from('households')
+    .select('id, name')
+    .eq('admin_member_id', payload.memberId)
+    .maybeSingle();
+
+  let householdProfiles = [];
+  if (household) {
+    const { data: hProfiles } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('household_id', household.id)
+      .neq('member_id', payload.memberId); // exclude own profile (already in ownProfiles)
+    householdProfiles = hProfiles || [];
+  }
+
+  // Merge and deduplicate by id
+  const allProfiles = [...(ownProfiles || []), ...householdProfiles];
+  const seen = new Set();
+  const profiles = allProfiles.filter(p => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+
   const { data: logs } = await supabase
     .from('access_logs')
     .select('access_method, ip_address, accessed_at, profile_id')
-    .in('profile_id', (profiles || []).map(p => p.id))
+    .in('profile_id', profiles.map(p => p.id))
     .order('accessed_at', { ascending: false })
     .limit(10);
 
-  const sanitized = (profiles || []).map(({ pin_hash, ...p }) => p);
+  const sanitized = profiles.map(({ pin_hash, ...p }) => p);
 
-  return res.json({ member, profiles: sanitized, logs: logs || [] });
+  return res.json({
+    member,
+    profiles: sanitized,
+    logs:     logs || [],
+    household: household || null,
+  });
 });
 
 // ============================================================
@@ -880,15 +914,9 @@ app.post('/update-profile', async (req, res) => {
   try { payload = validateSessionToken(session); }
   catch (err) { return res.status(401).json({ error: err.message }); }
 
-  // Confirm this profile belongs to this member
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', profileId)
-    .eq('member_id', payload.memberId)
-    .maybeSingle();
-
-  if (!profile) return res.status(403).json({ error: 'Profile not found or access denied' });
+  // Confirm access — own profile OR guardian of the profile's household
+  const canEdit = await guardianCanAccess(payload.memberId, profileId);
+  if (!canEdit) return res.status(403).json({ error: 'Profile not found or access denied' });
 
   const allowed = [
     'first_name', 'last_name', 'preferred_name', 'date_of_birth', 'blood_type',
@@ -924,14 +952,8 @@ app.post('/regenerate-pin', async (req, res) => {
   try { payload = validateSessionToken(session); }
   catch (err) { return res.status(401).json({ error: err.message }); }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', profileId)
-    .eq('member_id', payload.memberId)
-    .maybeSingle();
-
-  if (!profile) return res.status(403).json({ error: 'Profile not found or access denied' });
+  const canEdit = await guardianCanAccess(payload.memberId, profileId);
+  if (!canEdit) return res.status(403).json({ error: 'Profile not found or access denied' });
 
   const rawPin  = generatePin();
   const pinHash = await bcrypt.hash(rawPin, 10);
@@ -940,6 +962,125 @@ app.post('/regenerate-pin', async (req, res) => {
   if (error) return res.status(500).json({ error: 'PIN regeneration failed' });
 
   return res.json({ pin: rawPin });
+});
+
+// ============================================================
+// ---- Helper: guardianCanAccess(memberId, profileId) ----
+// ============================================================
+// Returns true if:
+//   (a) the profile belongs directly to this member, OR
+//   (b) this member is the admin of the household the profile is in
+
+async function guardianCanAccess(memberId, profileId) {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, member_id, household_id')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (!profile) return false;
+  if (profile.member_id === memberId) return true;
+
+  if (profile.household_id) {
+    const { data: household } = await supabase
+      .from('households')
+      .select('id')
+      .eq('id', profile.household_id)
+      .eq('admin_member_id', memberId)
+      .maybeSingle();
+    if (household) return true;
+  }
+
+  return false;
+}
+
+// ============================================================
+// ---- POST /admin/create-household ----
+// ============================================================
+// Creates a household record and sets the admin member.
+// Call this once per household, then use /admin/link-household
+// to attach profiles to it.
+//
+// Body: { adminMemberId, name }
+// Returns: { householdId }
+
+app.post('/admin/create-household', async (req, res) => {
+  const secret = req.headers['x-admin-secret'];
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { adminMemberId, name } = req.body;
+  if (!adminMemberId || !name) return res.status(400).json({ error: 'Missing adminMemberId or name' });
+
+  // Verify member exists
+  const { data: member } = await supabase
+    .from('members')
+    .select('id')
+    .eq('id', adminMemberId)
+    .maybeSingle();
+
+  if (!member) return res.status(404).json({ error: 'Member not found' });
+
+  const { data: household, error } = await supabase
+    .from('households')
+    .insert({ admin_member_id: adminMemberId, name })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('/admin/create-household error:', error.message);
+    return res.status(500).json({ error: 'Failed to create household' });
+  }
+
+  // Update admin member's plan to household
+  await supabase.from('members').update({ plan: 'household' }).eq('id', adminMemberId);
+
+  console.log(`/admin/create-household: created "${name}" — id: ${household.id}`);
+  return res.json({ householdId: household.id });
+});
+
+// ============================================================
+// ---- POST /admin/link-household ----
+// ============================================================
+// Links one or more profiles to a household.
+// Safe to call multiple times — just updates household_id.
+//
+// Body: { householdId, profileIds: [uuid, uuid, ...] }
+// Returns: { updated: N }
+
+app.post('/admin/link-household', async (req, res) => {
+  const secret = req.headers['x-admin-secret'];
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { householdId, profileIds } = req.body;
+  if (!householdId || !Array.isArray(profileIds) || !profileIds.length) {
+    return res.status(400).json({ error: 'Missing householdId or profileIds' });
+  }
+
+  // Verify household exists
+  const { data: household } = await supabase
+    .from('households')
+    .select('id')
+    .eq('id', householdId)
+    .maybeSingle();
+
+  if (!household) return res.status(404).json({ error: 'Household not found' });
+
+  const { error, count } = await supabase
+    .from('profiles')
+    .update({ household_id: householdId })
+    .in('id', profileIds);
+
+  if (error) {
+    console.error('/admin/link-household error:', error.message);
+    return res.status(500).json({ error: 'Failed to link profiles' });
+  }
+
+  console.log(`/admin/link-household: linked ${profileIds.length} profile(s) to household ${householdId}`);
+  return res.json({ updated: profileIds.length });
 });
 
 // ============================================================

@@ -52,7 +52,11 @@ create index members_stripe_customer_id_idx on members(stripe_customer_id);
 
 
 -- ---- households ----
--- One admin member manages multiple profiles (household/family plan).
+-- One admin member (guardian) manages multiple profiles.
+-- admin_member_id = the guardian's members.id
+-- Profiles are linked via profiles.household_id
+-- Guardian access is checked server-side via guardianCanAccess()
+-- Use /admin/create-household + /admin/link-household to set up.
 
 create table households (
   id              uuid primary key default uuid_generate_v4(),
