@@ -71,6 +71,41 @@
       color: var(--gray-mid);
     }
     .dash-name { flex: 1; }
+
+    /* ── Headshot upload ── */
+    .avatar-upload-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 72px;
+      height: 72px;
+      cursor: pointer;
+    }
+    .avatar-upload-wrap:hover .avatar-upload-overlay { opacity: 1; }
+    .avatar-upload-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .avatar-upload-overlay.uploading { opacity: 1; background: rgba(0,0,0,0.6); }
+    .avatar-img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      background: var(--gray-light);
+      display: block;
+    }
     .dash-name h2 {
       font-family: var(--font-display);
       font-size: 1.6rem;
@@ -136,6 +171,50 @@
       color: var(--gray-mid);
       margin-bottom: 16px;
     }
+
+    /* ── Dependent credentials block ── */
+    .dep-credentials {
+      background: var(--gray-light);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .dep-cred-item { }
+    .dep-cred-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 3px;
+    }
+    .dep-cred-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--black);
+    }
+    .view-profile-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--red);
+      text-decoration: none;
+      border: 1.5px solid var(--red);
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .view-profile-link:hover { background: var(--red); color: white; }
 
     /* ── Household member cards ── */
     .dep-card {
@@ -386,9 +465,12 @@
 
       <!-- Profile header -->
       <div class="dash-header">
-        <div id="dash-avatar-wrap">
-          <div class="dash-avatar-placeholder">👤</div>
+        <div class="avatar-upload-wrap" onclick="triggerAvatarUpload()" title="Click to upload photo">
+          <img id="dash-avatar-img" class="avatar-img" src="" alt="Profile photo" onerror="this.style.display='none';document.getElementById('dash-avatar-fallback').style.display='flex'" style="display:none;" />
+          <div id="dash-avatar-fallback" style="width:72px;height:72px;border-radius:50%;background:var(--gray-light);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--gray-mid);">👤</div>
+          <div class="avatar-upload-overlay" id="dash-avatar-overlay">📷 Photo</div>
         </div>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none;" onchange="handleAvatarUpload(this)" />
         <div class="dash-name">
           <h2 id="dash-fullname">—</h2>
           <div class="dash-email" id="dash-email">—</div>
@@ -428,6 +510,19 @@
         <div id="editing-banner" class="editing-banner" style="display:none;">
           Editing: <strong id="editing-name">—</strong>
           <span class="editing-banner-back" onclick="backToOwnProfile()">← Back to your profile</span>
+        </div>
+
+        <!-- Dependent credentials — shown when editing a dependent -->
+        <div id="dep-credentials" class="dep-credentials" style="display:none;">
+          <div class="dep-cred-item">
+            <div class="dep-cred-label">CODE</div>
+            <div class="dep-cred-value" id="dep-cred-code">—</div>
+          </div>
+          <div class="dep-cred-item">
+            <div class="dep-cred-label">PIN</div>
+            <div class="dep-cred-value" id="dep-cred-pin" style="color:var(--gray-mid);font-size:0.85rem;">Use Regenerate PIN below</div>
+          </div>
+          <a id="dep-view-link" href="#" target="_blank" class="view-profile-link" style="display:none;">View Profile ↗</a>
         </div>
 
         <div class="field-group">
@@ -653,11 +748,7 @@
       document.getElementById('dash-email').textContent    = member.email;
 
       if (ownProfile?.headshot_url) {
-        const img = document.createElement('img');
-        img.src = ownProfile.headshot_url;
-        img.className = 'dash-avatar';
-        img.alt = 'Profile photo';
-        document.getElementById('dash-avatar-wrap').replaceChildren(img);
+        setAvatarSrc(ownProfile.headshot_url);
       }
 
       document.getElementById('dash-code').textContent = ownProfile?.code || '—';
@@ -687,6 +778,7 @@
         const avatarInner = p.headshot_url
           ? `<img src="${p.headshot_url}" alt="${name}" />`
           : '👤';
+        const readerUrl = `reader.html?code=${encodeURIComponent(p.code)}`;
         return `
           <div class="dep-card" id="dep-card-${p.id}">
             <div class="dep-avatar">${avatarInner}</div>
@@ -694,7 +786,10 @@
               <div class="dep-name">${name}</div>
               <div class="dep-code">${p.code}</div>
             </div>
-            <button class="dep-edit-btn" id="dep-btn-${p.id}" onclick="editDependent('${p.id}')">Edit Profile</button>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+              <a href="${readerUrl}" target="_blank" class="view-profile-link">View ↗</a>
+              <button class="dep-edit-btn" id="dep-btn-${p.id}" onclick="editDependent('${p.id}')">Edit</button>
+            </div>
           </div>`;
       }).join('');
     }
@@ -708,28 +803,35 @@
 
       _activeProfileId = profileId;
 
-      // Highlight the active button
+      // Highlight active button
       document.querySelectorAll('.dep-edit-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(`dep-btn-${profileId}`)?.classList.add('active');
 
-      // Show editing banner
+      // Editing banner
       const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Dependent';
       document.getElementById('editing-name').textContent     = name;
       document.getElementById('editing-banner').style.display = 'flex';
       document.getElementById('profile-section-title').textContent = 'Edit Profile';
 
-      // Update PIN context label
-      document.getElementById('pin-context-label').textContent =
-        `Regenerate ${name.split(' ')[0]}'s PIN. Write it down immediately — it won't be shown again.`;
+      // Credentials block
+      document.getElementById('dep-credentials').style.display = 'flex';
+      document.getElementById('dep-cred-code').textContent = profile.code;
+      document.getElementById('dep-cred-pin').textContent  = 'Use Regenerate PIN below';
+      document.getElementById('dep-cred-pin').style.color  = 'var(--gray-mid)';
+      document.getElementById('dep-cred-pin').style.fontSize = '0.85rem';
+      document.getElementById('dep-view-link').style.display = 'none';
+      document.getElementById('dep-view-link').href = `reader.html?code=${encodeURIComponent(profile.code)}`;
 
-      // Clear any previous save state
-      document.getElementById('profile-err').textContent = '';
-      document.getElementById('profile-ok').style.display = 'none';
+      // PIN context label
+      document.getElementById('pin-context-label').textContent =
+        `Regenerate ${name.split(' ')[0]}'s PIN. Write it down — it won't be shown again.`;
+
+      // Reset save/PIN state
+      document.getElementById('profile-err').textContent   = '';
+      document.getElementById('profile-ok').style.display  = 'none';
       document.getElementById('pin-new-wrap').style.display = 'none';
 
       populateForm(profile);
-
-      // Scroll to edit form
       document.getElementById('editing-banner').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -740,13 +842,14 @@
       _activeProfileId = _ownProfileId;
 
       document.querySelectorAll('.dep-edit-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('editing-banner').style.display = 'none';
+      document.getElementById('editing-banner').style.display    = 'none';
+      document.getElementById('dep-credentials').style.display   = 'none';
       document.getElementById('profile-section-title').textContent = 'Your Profile';
       document.getElementById('pin-context-label').textContent =
         "If you've lost your PIN, generate a new one. Write it down immediately — it won't be shown again.";
-      document.getElementById('profile-err').textContent = '';
-      document.getElementById('profile-ok').style.display = 'none';
-      document.getElementById('pin-new-wrap').style.display = 'none';
+      document.getElementById('profile-err').textContent    = '';
+      document.getElementById('profile-ok').style.display   = 'none';
+      document.getElementById('pin-new-wrap').style.display  = 'none';
 
       const ownProfile = _allProfiles.find(p => p.id === _ownProfileId);
       if (ownProfile) populateForm(ownProfile);
@@ -872,6 +975,19 @@
         const { pin } = await res.json();
         document.getElementById('pin-new-value').textContent = pin;
         document.getElementById('pin-new-wrap').style.display = 'block';
+
+        // If editing a dependent, update credentials block with new PIN + view link
+        if (_activeProfileId !== _ownProfileId) {
+          const profile = _allProfiles.find(p => p.id === _activeProfileId);
+          const pinEl   = document.getElementById('dep-cred-pin');
+          pinEl.textContent  = pin;
+          pinEl.style.color  = 'var(--black)';
+          pinEl.style.fontSize = '1.2rem';
+
+          const viewLink = document.getElementById('dep-view-link');
+          viewLink.href         = `reader.html?code=${encodeURIComponent(profile.code)}&pin=${encodeURIComponent(pin)}`;
+          viewLink.style.display = 'inline-flex';
+        }
       } catch (err) {
         errEl.textContent = err.message;
       }
@@ -910,6 +1026,68 @@
       document.getElementById('login-form-wrap').style.display = 'block';
       document.getElementById('login-sent-wrap').style.display = 'none';
       document.getElementById('login-email').value = '';
+    }
+
+    // ============================================================
+    // Headshot upload
+    // ============================================================
+    function triggerAvatarUpload() {
+      document.getElementById('avatar-input').click();
+    }
+
+    async function handleAvatarUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const overlay = document.getElementById('dash-avatar-overlay');
+      overlay.textContent = '⏳';
+      overlay.classList.add('uploading');
+
+      const profileId = _activeProfileId;
+      const form = new FormData();
+      form.append('photo',     file);
+      form.append('session',   _session);
+      form.append('profileId', profileId);
+
+      try {
+        const res = await fetch(`${API}/upload-photo`, { method: 'POST', body: form });
+        if (!res.ok) throw new Error('Upload failed');
+        const { url } = await res.json();
+
+        // Save URL to profile
+        await fetch(`${API}/update-profile`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, profileId, fields: { headshot_url: url } }),
+        });
+
+        // Update local cache
+        const idx = _allProfiles.findIndex(p => p.id === profileId);
+        if (idx !== -1) _allProfiles[idx].headshot_url = url;
+
+        // Update UI
+        if (profileId === _ownProfileId) {
+          setAvatarSrc(url);
+        } else {
+          // Update dep card avatar
+          const depAvatar = document.querySelector(`#dep-card-${profileId} .dep-avatar`);
+          if (depAvatar) depAvatar.innerHTML = `<img src="${url}" alt="Photo" />`;
+        }
+      } catch {
+        alert('Photo upload failed. Please try again.');
+      } finally {
+        overlay.textContent = '📷 Photo';
+        overlay.classList.remove('uploading');
+        input.value = '';
+      }
+    }
+
+    function setAvatarSrc(url) {
+      const img = document.getElementById('dash-avatar-img');
+      const fallback = document.getElementById('dash-avatar-fallback');
+      img.src = url;
+      img.style.display = 'block';
+      fallback.style.display = 'none';
     }
 
     // ============================================================

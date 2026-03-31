@@ -732,17 +732,40 @@ const upload = multer({
 
 app.post('/upload-photo', upload.single('photo'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file provided' });
-  if (!req.body.token) return res.status(400).json({ error: 'Missing token' });
 
-  let payload;
-  try {
-    payload = validateSetupToken(req.body.token);
-  } catch (err) {
-    return res.status(400).json({ error: err.message });
+  let profileId;
+
+  if (req.body.session && req.body.profileId) {
+    // Dashboard path — session auth + guardian ownership check
+    let payload;
+    try { payload = validateSessionToken(req.body.session); }
+    catch (err) { return res.status(401).json({ error: err.message }); }
+
+    const canEdit = await guardianCanAccess(payload.memberId, req.body.profileId);
+    if (!canEdit) return res.status(403).json({ error: 'Access denied' });
+
+    profileId = req.body.profileId;
+
+  } else if (req.body.token) {
+    // Setup flow path — setup token auth
+    let payload;
+    try { payload = validateSetupToken(req.body.token); }
+    catch (err) { return res.status(400).json({ error: err.message }); }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('member_id', payload.memberId)
+      .maybeSingle();
+
+    profileId = profile?.id || payload.memberId;
+
+  } else {
+    return res.status(400).json({ error: 'Missing authentication' });
   }
 
   const ext      = req.file.mimetype.split('/')[1] || 'jpg';
-  const filename = `${payload.memberId}.${ext}`;
+  const filename = `${profileId}.${ext}`;
 
   const { error: uploadErr } = await supabase.storage
     .from('headshots')
