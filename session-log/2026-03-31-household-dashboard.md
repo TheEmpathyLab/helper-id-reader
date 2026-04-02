@@ -76,15 +76,28 @@
 
 ---
 
-## Open questions / next steps (updated after UI session)
+## Open questions / next steps (updated 2026-04-01 — post issue cleanup)
 
-| Priority | Task | Notes |
-|----------|------|-------|
-| 1 | Migrate 10 paying Bubble members | 3 are households — use scripts/ |
-| 2 | Fix Stripe branding (Issue #14) | BLOCKER before outreach |
-| 3 | DNS flip helper-id.com → DO (Issue #19) | /api/ calls fail on Bubble DNS |
-| 4 | Build household plan + billing (Issue #15, #25) | After migration |
-| 5 | Guardian dashboard — manage household members (Issue #24/#26) | Dashboard phase 2 |
+Issues #1, #2, #5, #24, #26, #27, #28, #29, #30, #31, #32 closed. Remaining open:
+
+| Priority | Issue | Task | Notes |
+|----------|-------|------|-------|
+| 1 | #14 | Fix Stripe branding ("Empathy Lab, Inc." → "Helper-ID") | **BLOCKER** before any public outreach |
+| 2 | #19 | DNS flip helper-id.com → DO app | Mobile users hitting Bubble DNS get network errors on /api/ calls |
+| 3 | — | Migrate 10 paying Bubble members | 3 are households — use scripts/ folder |
+| 4 | #15 | Household plan + family pricing | After migration |
+| 5 | #25 | Billing status + Stripe Customer Portal link | After migration |
+| 6 | #16 | Writer: fetch hosted profile by CODE for NFC write | — |
+| 7 | #20 | Print profile (full page + wallet card) | — |
+| 8 | #21 | Write NFC tag from dashboard | — |
+| 9 | #22 | Order NFC tags | — |
+| 10 | #23 | Share profile (read-only link) | — |
+| — | #6 | Super-admin interface | Future |
+| — | #8 | Access log: member-facing view | Future |
+| — | #9 | SMS auth gate | Future |
+| — | #11 | PDF card print layout | Future |
+| — | #12 | Upgrade path: NFC → Hybrid | Future |
+| — | #13 | Session documentation standard | Future |
 
 ---
 
