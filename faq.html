@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — FAQ</title>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    .faq-hero {
+      text-align: center;
+      padding: 56px 24px 40px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .faq-hero h1 { font-family: var(--font-display); font-size: 2.2rem; line-height: 1.2; margin-bottom: 12px; }
+    .faq-hero p { font-size: 1rem; color: var(--gray-dark); line-height: 1.6; }
+
+    /* ---- Category nav ---- */
+    .faq-nav { border-top: 1.5px solid var(--border); border-bottom: 1.5px solid var(--border); padding: 14px 24px; }
+    .faq-nav-inner { max-width: var(--max-width); margin: 0 auto; display: flex; gap: 24px; flex-wrap: wrap; }
+    .faq-nav a { font-size: 0.85rem; font-weight: 600; color: var(--gray-dark); text-decoration: none; }
+    .faq-nav a:hover { color: var(--red); }
+
+    /* ---- Content ---- */
+    .faq-content { padding: 56px 24px; }
+    .faq-inner { max-width: 720px; margin: 0 auto; }
+
+    .faq-category { margin-bottom: 56px; }
+    .faq-category h2 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 4px; }
+    .faq-category-divider { height: 2px; width: 40px; background: var(--red); margin-bottom: 28px; }
+
+    .faq-item { border-bottom: 1.5px solid var(--border); padding: 20px 0; }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-weight: 700; font-size: 0.95rem; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .faq-q::after { content: '+'; font-size: 1.2rem; color: var(--red); flex-shrink: 0; font-weight: 400; transition: transform 0.2s; }
+    .faq-item.open .faq-q::after { content: '−'; }
+    .faq-a { font-size: 0.92rem; color: var(--gray-dark); line-height: 1.75; display: none; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-a a { color: var(--red); text-decoration: none; font-weight: 600; }
+    .faq-a ul { padding-left: 20px; margin-top: 8px; }
+    .faq-a ul li { margin-bottom: 6px; }
+
+    /* ---- Contact CTA ---- */
+    .faq-contact { background: var(--black); color: white; padding: 56px 24px; text-align: center; }
+    .faq-contact h2 { font-family: var(--font-display); font-size: 1.7rem; color: white; margin-bottom: 12px; }
+    .faq-contact p { font-size: 0.95rem; color: #aaa; margin-bottom: 24px; }
+    .faq-contact a.hid-btn { margin: 0 6px; }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="products.html">Products</a>
+      <a href="reader.html">Read a Tag</a>
+      <a href="pdf.html">Free PDF</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="dashboard.html" class="hid-btn hid-btn-outline" style="font-size:0.85rem;padding:8px 16px;">Member Login</a>
+  </header>
+
+  <div class="faq-hero">
+    <span class="hid-badge hid-badge-red" style="margin-bottom:16px;display:inline-block;">Help &amp; FAQ</span>
+    <h1>Frequently asked questions</h1>
+    <p>Everything you need to know about Helper-ID — how it works, what it costs, and how your information is protected.</p>
+  </div>
+
+  <nav class="faq-nav">
+    <div class="faq-nav-inner">
+      <a href="#getting-started">Getting Started</a>
+      <a href="#nfc-tags">NFC Tags</a>
+      <a href="#profiles">Profiles</a>
+      <a href="#membership">Membership</a>
+      <a href="#privacy">Privacy &amp; Security</a>
+      <a href="#communities">Communities</a>
+    </div>
+  </nav>
+
+  <div class="faq-content">
+    <div class="faq-inner">
+
+      <!-- Getting Started -->
+      <div class="faq-category" id="getting-started">
+        <h2>Getting Started</h2>
+        <div class="faq-category-divider"></div>
+
+        <div class="faq-item">
+          <div class="faq-q">What is Helper-ID?</div>
+          <div class="faq-a">
+            <p>Helper-ID is an emergency identification system. It gives first responders, family members, and bystanders instant access to your critical information — emergency contacts, medical details, allergies, and more — without needing a phone, app, or internet connection.</p>
+            <p>It works through a physical NFC tag or card you carry with you, or through a CODE+PIN lookup from any device.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Who is Helper-ID for?</div>
+          <div class="faq-a">
+            <p>Helper-ID is for anyone who wants to be prepared — but it's especially valuable for:</p>
+            <ul>
+              <li>Seniors and older adults who are out in the community independently</li>
+              <li>Children and teenagers, especially those with medical conditions</li>
+              <li>People with chronic conditions, allergies, or complex medications</li>
+              <li>Athletes, hikers, cyclists, and anyone who spends time outdoors</li>
+              <li>Families who want to be prepared as a household</li>
+              <li>Communities — 55+ residential communities, schools, athletic programs</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">How do I get started?</div>
+          <div class="faq-a">
+            <p>Three ways to start:</p>
+            <ul>
+              <li><strong>Free PDF:</strong> Generate a printable emergency card with your info — no purchase required. <a href="pdf.html">Create a free PDF →</a></li>
+              <li><strong>Digital Download ($9):</strong> Get a hosted profile URL and a guide to write your own NFC tags.</li>
+              <li><strong>Full Membership ($55/yr):</strong> NFC tags shipped to you, hosted CODE+PIN profile, ongoing support.</li>
+            </ul>
+            <p><a href="products.html">See all plans →</a></p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Do I need to download an app?</div>
+          <div class="faq-a">
+            <p>No app required — for you or the person reading your tag. Your profile is accessed through a standard web browser. Any modern smartphone can read an NFC tag or use the CODE+PIN lookup without installing anything.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- NFC Tags -->
+      <div class="faq-category" id="nfc-tags">
+        <h2>NFC Tags</h2>
+        <div class="faq-category-divider"></div>
+
+        <div class="faq-item">
+          <div class="faq-q">What is an NFC tag and how does it work?</div>
+          <div class="faq-a">
+            <p>NFC (Near Field Communication) is the same technology used in contactless credit cards and Apple Pay. An NFC tag is a small chip that can be embedded in a keychain, card, sticker, or wristband.</p>
+            <p>When someone taps their smartphone to your Helper-ID tag, it instantly opens your emergency profile in their browser — no app, no code entry required.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">What phones can read NFC tags?</div>
+          <div class="faq-a">
+            <p>Most modern smartphones can read NFC tags:</p>
+            <ul>
+              <li><strong>iPhone:</strong> iPhone 7 and newer (iPhone XS and newer scan automatically without an app)</li>
+              <li><strong>Android:</strong> Most Android phones from 2015 onward — NFC must be enabled in settings</li>
+            </ul>
+            <p>If someone doesn't have NFC, they can still access your profile using the CODE+PIN lookup at helper-id.com.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Where should I put my NFC tag?</div>
+          <div class="faq-a">
+            <p>The best place is wherever you'll reliably have it when you need it. Common options:</p>
+            <ul>
+              <li>Keychain or key fob</li>
+              <li>Wallet card</li>
+              <li>ID badge or lanyard</li>
+              <li>Wristband or medical bracelet</li>
+              <li>Helmet, backpack, or gear bag</li>
+            </ul>
+            <p>[PLACEHOLDER] Add specific product form factors available when you expand the physical product line.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I update my profile after writing the NFC tag?</div>
+          <div class="faq-a">
+            <p>It depends on which plan you have.</p>
+            <p><strong>Full Membership (hosted profile):</strong> Yes — your NFC tag points to your hosted profile URL. Update your information in your dashboard and the tag automatically reflects the changes. No re-writing needed.</p>
+            <p><strong>Digital Download (self-hosted):</strong> Your tag links to a static profile. To update it, you'd need to re-write the tag with the new information.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profiles -->
+      <div class="faq-category" id="profiles">
+        <h2>Profiles</h2>
+        <div class="faq-category-divider"></div>
+
+        <div class="faq-item">
+          <div class="faq-q">What information is on a Helper-ID profile?</div>
+          <div class="faq-a">
+            <p>You choose what to include. A complete profile typically has:</p>
+            <ul>
+              <li>Name and photo</li>
+              <li>Emergency contacts (name, relationship, phone)</li>
+              <li>Blood type</li>
+              <li>Allergies (highlighted in red for immediate visibility)</li>
+              <li>Current medications</li>
+              <li>Medical conditions</li>
+              <li>Primary physician</li>
+              <li>Insurance information</li>
+              <li>Advance directives or special instructions</li>
+            </ul>
+            <p>You can leave any field blank. Add only what's useful to someone helping you.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">What is CODE+PIN access?</div>
+          <div class="faq-a">
+            <p>CODE+PIN is how someone accesses a hosted profile when they don't have NFC — or as a backup. Every hosted profile has a unique 6-character CODE and a PIN. Enter both at helper-id.com to view the profile.</p>
+            <p>The CODE can be printed on a card, written on a medical bracelet, or shared with family members. The PIN is what prevents unauthorized access.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I have multiple profiles on one account?</div>
+          <div class="faq-a">
+            <p>Yes — household memberships are designed exactly for this. One account, one subscription, multiple profiles (for a spouse, children, or other household members). Each profile gets its own CODE+PIN and NFC tag.</p>
+            <p><a href="products.html">See household pricing →</a></p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">What does the free PDF do?</div>
+          <div class="faq-a">
+            <p>The free PDF generator creates a printable emergency card with your information — formatted for readability under stress. You can print it, laminate it, and carry it in your wallet or store it at home.</p>
+            <p>It's not a hosted profile and doesn't include NFC or CODE+PIN access, but it's a great starting point. <a href="pdf.html">Try it free →</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Membership -->
+      <div class="faq-category" id="membership">
+        <h2>Membership</h2>
+        <div class="faq-category-divider"></div>
+
+        <div class="faq-item">
+          <div class="faq-q">What's the difference between the plans?</div>
+          <div class="faq-a">
+            <p>Three options:</p>
+            <ul>
+              <li><strong>Free PDF ($0):</strong> Printable emergency card only. No hosting, no NFC, no CODE+PIN.</li>
+              <li><strong>Digital Download ($9, one-time):</strong> Hosted profile URL + NFC writing guide. You buy and program your own NFC tags.</li>
+              <li><strong>NFC Pack + Digital Download ($35, one-time):</strong> Same as above, but NFC tags are included and shipped to you.</li>
+              <li><strong>Full Membership ($55/yr):</strong> Everything — hosted profile, NFC tags shipped, ongoing support, household-ready.</li>
+            </ul>
+            <p><a href="products.html">Compare all plans →</a></p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">What happens if I cancel my membership?</div>
+          <div class="faq-a">
+            <p>Your profile remains accessible until the end of your current billing period. After that, the hosted profile is deactivated — meaning CODE+PIN and NFC access no longer work.</p>
+            <p>Your data is not immediately deleted — you have 30 days to export it or reactivate. After 30 days, the data is removed from our systems.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I get a refund?</div>
+          <div class="faq-a">
+            <p>Annual memberships can be refunded within 30 days of purchase if you're unsatisfied for any reason. One-time purchases have limited refund eligibility depending on whether physical goods have shipped. <a href="trust.html#refunds">See full refund policy →</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privacy & Security -->
+      <div class="faq-category" id="privacy">
+        <h2>Privacy &amp; Security</h2>
+        <div class="faq-category-divider"></div>
+
+        <div class="faq-item">
+          <div class="faq-q">Who can see my profile?</div>
+          <div class="faq-a">
+            <p>Only someone with both your CODE and PIN can view your hosted profile. The CODE is not secret — it can be printed on a tag or card. The PIN is what controls access. You decide who to share it with.</p>
+            <p>Helper-ID staff do not access member profiles unless specifically requested by the member for support purposes.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Is my medical information safe?</div>
+          <div class="faq-a">
+            <p>Yes. Medical data is stored encrypted at rest and is only accessible via a successful CODE+PIN lookup. We don't sell, share, or use your medical information for any purpose other than serving it to someone who has authenticated with your credentials.</p>
+            <p><a href="trust.html#data">See full data practices →</a></p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I see who has accessed my profile?</div>
+          <div class="faq-a">
+            <p>Yes. Every access to your hosted profile is logged — including the time, access method (NFC or CODE+PIN), and the IP address of the device that accessed it. You can view your access log in your member dashboard.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">What happens to my data if I delete my account?</div>
+          <div class="faq-a">
+            <p>All data associated with your account is permanently deleted within 30 days of your deletion request. This includes your profile, emergency contact information, medical data, access logs, and any uploaded photos. Deletion is permanent and cannot be undone.</p>
+            <p>To request deletion, email <a href="mailto:hello@helper-id.com">hello@helper-id.com</a> with the subject "Delete My Account."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Communities -->
+      <div class="faq-category" id="communities">
+        <h2>Communities &amp; Groups</h2>
+        <div class="faq-category-divider"></div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can Helper-ID work for a whole community or organization?</div>
+          <div class="faq-a">
+            <p>Yes — and this is where Helper-ID is most impactful. When everyone in a community has a profile, first responders and staff have reliable access to information across the entire group, not just one person.</p>
+            <p>We work with 55+ residential communities, schools, athletic programs, and other organizations. [PLACEHOLDER] Add specific community partnership details and contact info for group inquiries.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Is there group or bulk pricing?</div>
+          <div class="faq-a">
+            <p>[PLACEHOLDER] Add group pricing details here once that program is established. Include minimum group sizes, how setup works, and who to contact.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">How does Helper-ID work for 55+ communities?</div>
+          <div class="faq-a">
+            <p>[PLACEHOLDER] This is a dedicated question for the 55+ vertical. Describe the specific workflow for activity directors, how residents use the tags, how staff can access profiles in an emergency, and any specific accommodations for this community.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contact CTA -->
+  <section class="faq-contact">
+    <h2>Still have questions?</h2>
+    <p>We're a small team and we respond personally. Reach out anytime.</p>
+    <a href="mailto:hello@helper-id.com" class="hid-btn hid-btn-primary">Email Us →</a>
+    <a href="products.html" class="hid-btn hid-btn-outline" style="color:white;border-color:white;">See Plans</a>
+  </section>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID</span>
+    </div>
+    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="trust.html">Privacy &amp; Terms</a> &nbsp;·&nbsp; <a href="faq.html">FAQ</a></p>
+  </footer>
+
+  <script>
+    // Simple accordion toggle
+    document.querySelectorAll('.faq-q').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.closest('.faq-item');
+        const isOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        // Open this one if it wasn't open
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+  </script>
+
+</body>
+</html>

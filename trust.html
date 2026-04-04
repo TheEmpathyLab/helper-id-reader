@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Privacy &amp; Terms</title>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    .trust-hero {
+      text-align: center;
+      padding: 56px 24px 40px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .trust-hero h1 { font-family: var(--font-display); font-size: 2.2rem; line-height: 1.2; margin-bottom: 12px; }
+    .trust-hero p { font-size: 0.9rem; color: var(--gray-mid); }
+
+    /* ---- Nav anchors ---- */
+    .trust-nav { border-top: 1.5px solid var(--border); border-bottom: 1.5px solid var(--border); padding: 14px 24px; }
+    .trust-nav-inner { max-width: var(--max-width); margin: 0 auto; display: flex; gap: 24px; flex-wrap: wrap; }
+    .trust-nav a { font-size: 0.85rem; font-weight: 600; color: var(--gray-dark); text-decoration: none; }
+    .trust-nav a:hover { color: var(--red); }
+
+    /* ---- Content ---- */
+    .trust-content { padding: 56px 24px; }
+    .trust-inner { max-width: 720px; margin: 0 auto; }
+    .trust-section { margin-bottom: 56px; padding-bottom: 56px; border-bottom: 1.5px solid var(--border); }
+    .trust-section:last-child { border-bottom: none; }
+    .trust-section h2 { font-family: var(--font-display); font-size: 1.6rem; margin-bottom: 8px; }
+    .trust-section .last-updated { font-size: 0.78rem; color: var(--gray-mid); margin-bottom: 24px; }
+    .trust-section h3 { font-size: 1rem; font-weight: 700; margin: 24px 0 8px; }
+    .trust-section p { font-size: 0.92rem; color: var(--gray-dark); line-height: 1.75; margin-bottom: 14px; }
+    .trust-section ul { padding-left: 20px; margin-bottom: 14px; }
+    .trust-section ul li { font-size: 0.92rem; color: var(--gray-dark); line-height: 1.7; margin-bottom: 6px; }
+    .trust-highlight { background: #FAFAFA; border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 24px; }
+    .trust-highlight p { margin-bottom: 0; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="products.html">Products</a>
+      <a href="reader.html">Read a Tag</a>
+      <a href="pdf.html">Free PDF</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="dashboard.html" class="hid-btn hid-btn-outline" style="font-size:0.85rem;padding:8px 16px;">Member Login</a>
+  </header>
+
+  <div class="trust-hero">
+    <span class="hid-badge hid-badge-red" style="margin-bottom:16px;display:inline-block;">Legal &amp; Privacy</span>
+    <h1>Privacy &amp; Terms</h1>
+    <p>Plain language. No legalese where we can avoid it. Last reviewed April 2026.</p>
+  </div>
+
+  <nav class="trust-nav">
+    <div class="trust-nav-inner">
+      <a href="#privacy">Privacy Policy</a>
+      <a href="#terms">Terms of Service</a>
+      <a href="#data">Data Practices</a>
+      <a href="#refunds">Refunds</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <div class="trust-content">
+    <div class="trust-inner">
+
+      <!-- Privacy Policy -->
+      <div class="trust-section" id="privacy">
+        <h2>Privacy Policy</h2>
+        <p class="last-updated">Last updated: April 2026</p>
+
+        <div class="trust-highlight">
+          <p><strong>The short version:</strong> We collect only what's needed to run the service. We don't sell your data. We don't share it with advertisers. Your emergency profile information is used for one purpose — helping you be found and helped.</p>
+        </div>
+
+        <h3>What we collect</h3>
+        <p>When you create a Helper-ID account or profile, we collect:</p>
+        <ul>
+          <li>Your email address (used for login and account communication)</li>
+          <li>Profile information you provide (name, emergency contacts, medical information)</li>
+          <li>Payment information processed by Stripe (we never see or store your card number)</li>
+          <li>Access logs — when and how your profile was accessed (NFC tap or CODE+PIN entry)</li>
+        </ul>
+
+        <h3>What we don't collect</h3>
+        <ul>
+          <li>We don't track your location</li>
+          <li>We don't use cookies for advertising</li>
+          <li>We don't build behavioral profiles</li>
+          <li>We don't sell or share your data with third parties for marketing purposes</li>
+        </ul>
+
+        <h3>Who can see your profile</h3>
+        <p>Your hosted profile is accessible only via the correct CODE and PIN combination. Anyone with both can view it — that's by design. The CODE and PIN are yours to share or keep private. You control who has them.</p>
+
+        <h3>How we store your data</h3>
+        <p>[PLACEHOLDER] Describe the data storage setup — Supabase (PostgreSQL), where servers are located, encryption at rest, etc. Confirm specifics before publishing.</p>
+
+        <h3>Data retention</h3>
+        <p>Your data is retained as long as your account is active. If you cancel your membership or request deletion, your profile data is removed within 30 days. Access logs are retained for 12 months for security purposes.</p>
+
+        <h3>Third-party services</h3>
+        <p>We use the following third-party services to operate Helper-ID:</p>
+        <ul>
+          <li><strong>Stripe</strong> — payment processing</li>
+          <li><strong>Supabase</strong> — database and file storage</li>
+          <li><strong>SendGrid</strong> — transactional email</li>
+          <li><strong>DigitalOcean</strong> — application hosting</li>
+        </ul>
+        <p>Each of these services has their own privacy policies. We've chosen providers with strong data practices, but we encourage you to review their policies if you have questions.</p>
+      </div>
+
+      <!-- Terms of Service -->
+      <div class="trust-section" id="terms">
+        <h2>Terms of Service</h2>
+        <p class="last-updated">Last updated: April 2026</p>
+
+        <div class="trust-highlight">
+          <p><strong>The short version:</strong> Use Helper-ID honestly. Don't misuse other people's profile access. We provide this service in good faith and ask the same from you.</p>
+        </div>
+
+        <h3>What Helper-ID is</h3>
+        <p>Helper-ID is an emergency identification and information service operated by Empathy Lab, Inc. We provide NFC tags, hosted emergency profiles, and related tools for individuals and communities.</p>
+
+        <h3>Your responsibilities</h3>
+        <ul>
+          <li>You are responsible for the accuracy of the information in your profile</li>
+          <li>You are responsible for keeping your CODE and PIN secure and sharing them appropriately</li>
+          <li>You may not use Helper-ID to store or share information that is false, illegal, or harmful</li>
+          <li>You may not access another person's profile without a legitimate need to do so</li>
+        </ul>
+
+        <h3>Our responsibilities</h3>
+        <p>We commit to keeping your profile accessible, your data secure, and the service operational. We provide support for members and work to resolve issues promptly.</p>
+        <p>[PLACEHOLDER] Add specific uptime commitments, SLA language, or any service level expectations you want to set here.</p>
+
+        <h3>Limitation of liability</h3>
+        <p>Helper-ID is an information access tool — not a medical device, emergency dispatch system, or substitute for 911. We are not liable for outcomes that occur during emergency situations. The accuracy of your profile depends entirely on the information you provide.</p>
+
+        <h3>Changes to these terms</h3>
+        <p>We may update these terms from time to time. We'll notify active members by email of material changes. Continued use of Helper-ID after changes constitutes acceptance of the updated terms.</p>
+
+        <h3>Governing law</h3>
+        <p>[PLACEHOLDER] Specify jurisdiction — Oregon, USA, or wherever Empathy Lab, Inc. is incorporated.</p>
+      </div>
+
+      <!-- Data Practices -->
+      <div class="trust-section" id="data">
+        <h2>Data Practices</h2>
+        <p class="last-updated">Last updated: April 2026</p>
+
+        <h3>Access logging</h3>
+        <p>Every time your profile is accessed — whether by NFC tap or CODE+PIN entry — we log the time, access method, and IP address. You can view your access log in your member dashboard. This gives you visibility into when and how your profile has been seen.</p>
+
+        <h3>Profile photos</h3>
+        <p>Headshot photos you upload are stored in a private, encrypted storage bucket. They are not publicly accessible — they are only served when a valid CODE+PIN lookup is completed.</p>
+
+        <h3>Medical information</h3>
+        <p>Medical data (allergies, medications, conditions, blood type) is stored encrypted at rest and is only displayed to someone who has successfully completed a CODE+PIN lookup. We treat this data with the highest level of care in our system.</p>
+
+        <h3>Requesting your data</h3>
+        <p>You can request a copy of all data we hold about you at any time. Email <a href="mailto:hello@helper-id.com" style="color:var(--red);text-decoration:none;font-weight:600;">hello@helper-id.com</a> with the subject "Data Request" and we'll respond within 7 business days.</p>
+
+        <h3>Deleting your data</h3>
+        <p>You can request full deletion of your account and all associated data at any time. Email us with the subject "Delete My Account." Deletion is permanent and cannot be undone.</p>
+      </div>
+
+      <!-- Refunds -->
+      <div class="trust-section" id="refunds">
+        <h2>Refund Policy</h2>
+        <p class="last-updated">Last updated: April 2026</p>
+
+        <h3>Digital downloads</h3>
+        <p>Digital download purchases ($9) are non-refundable once the profile URL has been generated and delivered. If you have an issue with your purchase, contact us and we'll make it right.</p>
+
+        <h3>NFC Pack</h3>
+        <p>Physical NFC tag orders ($35) can be refunded within 14 days of purchase if the tags have not been written. Once an NFC tag has been written with your profile data, it cannot be refunded. Contact us if your tags arrive damaged.</p>
+
+        <h3>Full Membership</h3>
+        <p>Annual memberships ($55/yr) can be refunded within 30 days of purchase if you're unsatisfied for any reason. After 30 days, no refunds are issued but your membership remains active until the end of the billing period.</p>
+
+        <h3>How to request a refund</h3>
+        <p>Email <a href="mailto:hello@helper-id.com" style="color:var(--red);text-decoration:none;font-weight:600;">hello@helper-id.com</a> with your order details and reason. We respond within 2 business days.</p>
+      </div>
+
+      <!-- Contact -->
+      <div class="trust-section" id="contact">
+        <h2>Contact</h2>
+        <p>Questions about privacy, your data, or these terms? We're a small team and we respond personally.</p>
+        <p>
+          <strong>Email:</strong> <a href="mailto:hello@helper-id.com" style="color:var(--red);text-decoration:none;font-weight:600;">hello@helper-id.com</a><br />
+          <strong>Company:</strong> Empathy Lab, Inc.<br />
+          [PLACEHOLDER] Add mailing address if required for legal compliance.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID</span>
+    </div>
+    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="trust.html">Privacy &amp; Terms</a> &nbsp;·&nbsp; <a href="faq.html">FAQ</a></p>
+  </footer>
+
+</body>
+</html>

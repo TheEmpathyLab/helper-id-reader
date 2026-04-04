@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — About</title>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    /* ---- Page hero ---- */
+    .about-hero {
+      text-align: center;
+      padding: 64px 24px 48px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .about-hero h1 { font-family: var(--font-display); font-size: 2.4rem; line-height: 1.15; margin-bottom: 16px; }
+    .about-hero h1 em { font-style: normal; color: var(--red); }
+    .about-hero p { font-size: 1.05rem; color: var(--gray-dark); line-height: 1.7; }
+
+    /* ---- Story section ---- */
+    .story-section { padding: 56px 24px; border-top: 1.5px solid var(--border); }
+    .story-inner { max-width: var(--max-width); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+    .story-inner h2 { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.2; margin-bottom: 20px; }
+    .story-inner p { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.75; margin-bottom: 16px; }
+    @media(max-width:720px) { .story-inner { grid-template-columns: 1fr; gap: 32px; } }
+
+    /* ---- Values ---- */
+    .values-section { background: var(--black); padding: 56px 24px; color: white; }
+    .values-inner { max-width: var(--max-width); margin: 0 auto; }
+    .values-inner .hid-section-label { color: #F87171; }
+    .values-inner h2 { font-family: var(--font-display); font-size: 1.9rem; color: white; margin-bottom: 36px; }
+    .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .value-item h4 { font-size: 0.95rem; color: white; margin-bottom: 6px; }
+    .value-item p { font-size: 0.85rem; color: #aaa; line-height: 1.6; }
+    .value-icon { width: 40px; height: 40px; background: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 12px; }
+    @media(max-width:720px) { .values-grid { grid-template-columns: 1fr; gap: 20px; } }
+
+    /* ---- Empathy Lab ---- */
+    .lab-section { padding: 56px 24px; border-top: 1.5px solid var(--border); }
+    .lab-inner { max-width: 680px; margin: 0 auto; text-align: center; }
+    .lab-inner h2 { font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 16px; }
+    .lab-inner p { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.75; margin-bottom: 16px; }
+    .lab-inner a { color: var(--red); text-decoration: none; font-weight: 600; }
+
+    /* ---- CTA ---- */
+    .about-cta { padding: 56px 24px; text-align: center; background: #FAFAFA; border-top: 1.5px solid var(--border); }
+    .about-cta h2 { font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 12px; }
+    .about-cta p { font-size: 0.95rem; color: var(--gray-dark); margin-bottom: 24px; }
+    .about-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="products.html">Products</a>
+      <a href="reader.html">Read a Tag</a>
+      <a href="pdf.html">Free PDF</a>
+      <a href="about.html" class="active">About</a>
+    </nav>
+    <a href="dashboard.html" class="hid-btn hid-btn-outline" style="font-size:0.85rem;padding:8px 16px;">Member Login</a>
+  </header>
+
+  <!-- Hero -->
+  <div class="about-hero">
+    <span class="hid-badge hid-badge-red" style="margin-bottom:16px;display:inline-block;">Our Mission</span>
+    <h1>Emergency information<br />that works when it <em>matters most</em></h1>
+    <p>Helper-ID exists because the moment a first responder needs your information is exactly the moment you can't provide it yourself. We built a simple, physical solution to a problem that affects everyone.</p>
+  </div>
+
+  <!-- Story -->
+  <section class="story-section">
+    <div class="story-inner">
+      <div>
+        <span class="hid-section-label">The Problem</span>
+        <h2>Your phone can't help when it's dead, locked, or missing.</h2>
+        <p>[PLACEHOLDER] Describe the origin of Helper-ID — the moment, the scenario, or the person that made the problem real. What happened that made this feel urgent?</p>
+        <p>Emergency contacts stored in phones are inaccessible in the moments they're needed most. Medical information written on paper gets lost. ICE contacts require a working, unlocked phone. Helper-ID is the physical backup that doesn't depend on any of that.</p>
+      </div>
+      <div>
+        <span class="hid-section-label">The Solution</span>
+        <h2>A tag that speaks for you when you can't.</h2>
+        <p>Helper-ID is a physical NFC tag or card — worn, carried, or kept close — that gives first responders, family members, and bystanders instant access to the information they need. No app required. No phone required. No guessing.</p>
+        <p>[PLACEHOLDER] Add any early user stories or specific communities that validated the idea — caregivers, seniors, parents of kids with medical needs, athletes, hikers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section class="values-section">
+    <div class="values-inner">
+      <span class="hid-section-label">What We Believe</span>
+      <h2>Principles we build by</h2>
+      <div class="values-grid">
+        <div class="value-item">
+          <div class="value-icon">🧭</div>
+          <h4>Physical First</h4>
+          <p>Digital systems fail. Batteries die. Signals drop. A physical tag works in every scenario — it doesn't need power, signal, or a working phone to do its job.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">🔓</div>
+          <h4>Your Data, Your Control</h4>
+          <p>You decide what's on your profile. You decide who can see it. We don't sell your information, share it with third parties, or use it for anything other than helping you be found and helped.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">🤝</div>
+          <h4>Built for Communities</h4>
+          <p>Helper-ID is most powerful when a whole community has it — families, neighborhoods, assisted living facilities, athletic programs. We design for adoption, not just individuals.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">⚡</div>
+          <h4>Radically Simple</h4>
+          <p>A first responder in a stressful situation shouldn't have to figure out your technology. Tap, read, act. That's the entire user experience for the person who needs it most.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">💰</div>
+          <h4>Accessible Pricing</h4>
+          <p>Emergency preparedness shouldn't be a luxury. We keep pricing honest — a free PDF option, a one-time purchase path, and a membership for those who want the full hosted experience.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">🛡️</div>
+          <h4>Quietly Reliable</h4>
+          <p>You set it up once and don't think about it again. It's there when you need it. That's the whole promise — not an app you have to remember to update, but a system that just works.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empathy Lab -->
+  <section class="lab-section">
+    <div class="lab-inner">
+      <span class="hid-section-label">Built By</span>
+      <h2>An Empathy Lab project</h2>
+      <p>Helper-ID is a product of <strong>Empathy Lab</strong>, an independent lab focused on building tools that solve real human problems — not hypothetical ones. We build things for the moments that matter: emergencies, transitions, and the times when people need help they didn't ask for.</p>
+      <p>[PLACEHOLDER] Add a sentence or two about Shelton Davis and the personal or professional context behind Empathy Lab. What drives the lab's focus on this type of problem?</p>
+      <p>[PLACEHOLDER] Any community partnerships, institutional relationships, or advisory relationships worth mentioning here.</p>
+      <p style="margin-top:24px;"><a href="mailto:hello@helper-id.com">hello@helper-id.com</a> &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="about-cta">
+    <h2>Ready to be prepared?</h2>
+    <p>Set up your Helper-ID in minutes. Free PDF, one-time purchase, or full membership.</p>
+    <div class="about-cta-row">
+      <a href="products.html" class="hid-btn hid-btn-primary">See Plans →</a>
+      <a href="pdf.html" class="hid-btn hid-btn-outline">Free PDF First</a>
+    </div>
+  </section>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID</span>
+    </div>
+    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="trust.html">Privacy &amp; Terms</a> &nbsp;·&nbsp; <a href="faq.html">FAQ</a></p>
+  </footer>
+
+</body>
+</html>
