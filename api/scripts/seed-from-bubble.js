@@ -190,31 +190,40 @@ async function run() {
   let ok = 0, failed = 0;
 
   for (const m of MEMBERS) {
-    // ---- Upsert member ----
-    const { data: memberData, error: memberError } = await supabase
+    // ---- Insert member (skip if already exists) ----
+    let memberId;
+    const { data: existing } = await supabase
       .from('members')
-      .upsert(
-        { email: m.email, status: 'active', plan: 'individual' },
-        { onConflict: 'email' }
-      )
       .select('id')
+      .eq('email', m.email)
       .single();
 
-    if (memberError) {
-      console.error(`FAIL  — member ${m.email}: ${memberError.message}`);
-      failed++;
-      continue;
+    if (existing) {
+      memberId = existing.id;
+    } else {
+      const { data: memberData, error: memberError } = await supabase
+        .from('members')
+        .insert({ email: m.email, status: 'active', plan: 'individual' })
+        .select('id')
+        .single();
+
+      if (memberError) {
+        console.error(`FAIL  — member ${m.email}: ${memberError.message}`);
+        failed++;
+        continue;
+      }
+      memberId = memberData.id;
     }
 
     // ---- Hash PIN ----
     const pinHash = await bcrypt.hash(m.pin, 12);
 
-    // ---- Upsert profile ----
+    // ---- Insert profile (skip if code already exists) ----
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert(
         {
-          member_id:          memberData.id,
+          member_id:          memberId,
           code:               m.code,
           pin_hash:           pinHash,
           first_name:         m.first_name,

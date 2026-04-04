@@ -47,7 +47,7 @@ create table members (
   created_at             timestamptz   not null default now()
 );
 
-create index members_email_idx              on members(email);
+create unique index members_email_idx       on members(email);
 create index members_stripe_customer_id_idx on members(stripe_customer_id);
 
 
