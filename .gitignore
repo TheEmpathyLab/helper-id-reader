@@ -7,3 +7,6 @@ node_modules/
 
 # Logs
 *.log
+
+# Migration assets — not for version control
+api/scripts/headshots/
