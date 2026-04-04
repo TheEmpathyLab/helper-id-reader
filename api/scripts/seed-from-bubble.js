@@ -1,29 +1,30 @@
 // ============================================================
 // Helper-ID — Bubble → Supabase migration seed script
 // ============================================================
-// Reads a Bubble CSV/TSV export and upserts members + profiles
-// into Supabase. Safe to re-run — uses upsert on email and code.
+// Hardcoded from Bubble v3 export. Safe to re-run — upserts on
+// email (members) and code (profiles).
 //
 // Usage:
 //   cd api
 //   SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx \
-//     node scripts/seed-from-bubble.js path/to/bubble-export.csv
+//     node scripts/seed-from-bubble.js
 //
-// After this runs, patch the two Stripe members:
-//   node scripts/patch-stripe-members.js
+// After this runs:
+//   1. node scripts/patch-stripe-members.js  (2 paying members)
+//   2. node scripts/update-member-email.js   (when test-email members claim real emails)
 //
-// NOTE: Height and Weight fields from Bubble are intentionally
-// not migrated — no columns exist in the schema yet.
-// Track addition of these fields as a separate schema update.
+// NOTE: Height and Weight fields from Bubble not migrated —
+//       no schema columns yet. Add columns before importing.
+//
+// NOTE: 3 members have temporary shelton+X@helper-id.com emails
+//       (originally @test.com from Bubble v2 build transfer).
+//       Use update-member-email.js to swap in real emails.
 // ============================================================
 
-const fs   = require('fs');
-const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 
-// ---- Supabase client ----
-const SUPABASE_URL             = process.env.SUPABASE_URL;
+const SUPABASE_URL              = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -33,129 +34,220 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// ---- CSV/TSV parser ----
-// Handles both tab-separated (Bubble default) and comma-separated exports.
-function parseFlatFile(raw) {
-  const lines = raw.trim().split('\n');
-  const delimiter = lines[0].includes('\t') ? '\t' : ',';
-  const headers = lines[0].split(delimiter).map(h => h.trim().replace(/^"|"$/g, ''));
-  return lines.slice(1).map(line => {
-    const values = line.split(delimiter).map(v => v.trim().replace(/^"|"$/g, ''));
-    const row = {};
-    headers.forEach((h, i) => { row[h] = values[i] || ''; });
-    return row;
-  });
-}
+// ============================================================
+// Member data — from Bubble v3 export, 2026-04-03
+// ============================================================
+const MEMBERS = [
+  {
+    // Temp email — was danhaber@test.com (v2 build transfer artifact)
+    // Update with: node scripts/update-member-email.js
+    email:      'shelton+dan@helper-id.com',
+    first_name: 'Dan',
+    last_name:  'Haber',
+    code:       'k4rzdz',
+    pin:        '5s6dtz',
+    blood_type: null,       // Source: "I don't know, the red type!!" — unknown, needs update
+    allergies:  null,
+    ec1_name:   'Jodee Haber',
+    ec1_phone:  '330.224.5663',
+    ec2_name:   'Barb Spera',
+    ec2_phone:  null,
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    // Temp email — was kristinbodiford@test.com (v2 build transfer artifact)
+    email:      'shelton+kristin@helper-id.com',
+    first_name: 'Kristin',
+    last_name:  'Bodiford',
+    code:       'kry5tn',
+    pin:        'ggdtst',
+    blood_type: null,
+    allergies:  null,
+    ec1_name:   null,
+    ec1_phone:  null,
+    ec2_name:   null,
+    ec2_phone:  null,
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    // Temp email — was anarabodiford@test.com (v2 build transfer artifact)
+    email:      'shelton+anara@helper-id.com',
+    first_name: 'Anara',
+    last_name:  'Bodiford',
+    code:       'anara5',
+    pin:        'qkk05s',
+    blood_type: null,       // Source: "I don't know, the red type!!" — unknown, needs update
+    allergies:  null,
+    ec1_name:   'Kristin Bodiford',
+    ec1_phone:  '9259151195',
+    ec2_name:   'Erik Lawrence',
+    ec2_phone:  '5037184905',
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    email:      'shelton+dylan@helper-id.com',
+    first_name: 'Dylan',
+    last_name:  'Blazevic',
+    code:       'dylan5',
+    pin:        '5ufs5m',
+    blood_type: null,       // Source: "I don't know, the red type!!" — unknown, needs update
+    allergies:  null,
+    ec1_name:   'Nikki Elkins',
+    ec1_phone:  '5035779906',
+    ec2_name:   'Margie Long',
+    ec2_phone:  '9717060636',
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    email:      'shelton+jamaal@helper-id.com',
+    first_name: 'Jamaal',
+    last_name:  'Robinson',
+    code:       'jamaal',
+    pin:        'vccb6a',
+    blood_type: null,
+    allergies:  null,
+    ec1_name:   'Nayanna Cooper',
+    ec1_phone:  null,       // Source was "0" — not a valid phone
+    ec2_name:   'Shelton Davis (brother)',
+    ec2_phone:  '7144202715',
+    // Additional EC dropped: Elton Robinson (dad) 9097318946 — no third EC slot in schema
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    email:      'shelton+julenna@helper-id.com',
+    first_name: 'Julenna',
+    last_name:  'Newbanks Shirley',
+    code:       '168RWP',
+    pin:        'PYDWH3',
+    blood_type: null,
+    allergies:  null,
+    ec1_name:   null,
+    ec1_phone:  null,
+    ec2_name:   null,
+    ec2_phone:  null,
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    email:      'shelton+matt@helper-id.com',
+    first_name: 'Matt',
+    last_name:  'Shirley',
+    code:       'ROA2UK',
+    pin:        'YCS1VT',
+    blood_type: null,
+    allergies:  null,
+    ec1_name:   'Julenna Newbanks-Shirley',
+    ec1_phone:  '7406835458',
+    ec2_name:   null,
+    ec2_phone:  null,
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    email:      'shelton+karen@helper-id.com',
+    first_name: 'Karen',
+    last_name:  'MacKay',
+    code:       'NFF8NF',
+    pin:        '9QI80X',
+    blood_type: null,
+    allergies:  null,
+    ec1_name:   null,
+    ec1_phone:  null,
+    ec2_name:   null,
+    ec2_phone:  null,
+    insurance_provider: null,
+    status:     'active',
+  },
+  {
+    email:      'eman2551@gmail.com',
+    first_name: 'Elton',
+    last_name:  'Robinson',
+    code:       'Y7M34R',
+    pin:        'I3O5YP',
+    blood_type: null,
+    allergies:  null,
+    ec1_name:   'Connie Robinson',
+    ec1_phone:  '9099998387',
+    ec2_name:   'Jamaal T. Robinson',
+    ec2_phone:  '9162478044',
+    // Bubble stored a record ID — believed to be Medicare. Confirm + update manually.
+    insurance_provider: '1771536981711x113668728750604290',
+    // Additional EC dropped: Priscilla Robinson 4713557438 — no third EC slot in schema
+    status:     'active',
+  },
+];
 
-// ---- Allergy concatenation ----
-// Drops empty fields, labels each present field.
-function buildAllergies(row) {
-  const parts = [];
-  if (row['Allergy Animal'])        parts.push(`Animal: ${row['Allergy Animal']}`);
-  if (row['Allergy Environmental']) parts.push(`Environmental: ${row['Allergy Environmental']}`);
-  if (row['Allergy Food'])          parts.push(`Food: ${row['Allergy Food']}`);
-  if (row['Allergy Medicines'])     parts.push(`Medicines: ${row['Allergy Medicines']}`);
-  return parts.length ? parts.join(', ') : null;
-}
-
-// ---- Main ----
+// ============================================================
+// Main
+// ============================================================
 async function run() {
-  const csvPath = process.argv[2];
-  if (!csvPath) {
-    console.error('Usage: node scripts/seed-from-bubble.js path/to/export.csv');
-    process.exit(1);
-  }
+  console.log(`Seeding ${MEMBERS.length} members...\n`);
+  let ok = 0, failed = 0;
 
-  const raw  = fs.readFileSync(path.resolve(csvPath), 'utf8');
-  const rows = parseFlatFile(raw);
-  console.log(`Found ${rows.length} row(s) to process.\n`);
-
-  let ok = 0, skipped = 0, failed = 0;
-
-  for (const row of rows) {
-    const email = (row['Owner'] || '').toLowerCase().trim();
-    if (!email) {
-      console.warn(`SKIP — no Owner/email (unique id: ${row['unique id']})`);
-      skipped++;
-      continue;
-    }
-
-    const pin = (row['Pin'] || '').trim();
-    if (!pin) {
-      console.warn(`SKIP — no PIN for ${email}`);
-      skipped++;
-      continue;
-    }
-
-    const code = (row['Code'] || '').trim();
-    if (!code) {
-      console.warn(`SKIP — no Code for ${email}`);
-      skipped++;
-      continue;
-    }
-
+  for (const m of MEMBERS) {
     // ---- Upsert member ----
     const { data: memberData, error: memberError } = await supabase
       .from('members')
       .upsert(
-        { email, status: 'active', plan: 'individual' },
+        { email: m.email, status: 'active', plan: 'individual' },
         { onConflict: 'email' }
       )
       .select('id')
       .single();
 
     if (memberError) {
-      console.error(`FAIL  — member upsert for ${email}: ${memberError.message}`);
+      console.error(`FAIL  — member ${m.email}: ${memberError.message}`);
       failed++;
       continue;
     }
 
-    // ---- Build profile ----
-    const pinHash  = await bcrypt.hash(pin, 12);
-    const allergies = buildAllergies(row);
-
-    const hasInsurance      = ['true', 'yes', '1'].includes((row['Has Insurance'] || '').toLowerCase());
-    const insuranceProvider = hasInsurance ? (row['Health Insurance'] || null) : null;
-
-    const isPublished = ['true', 'yes', '1'].includes((row['Published'] || '').toLowerCase());
-
-    const profile = {
-      member_id:          memberData.id,
-      code,
-      pin_hash:           pinHash,
-      first_name:         (row['first name'] || row['First Name'] || '').trim(),
-      last_name:          (row['last name']  || row['Last Name']  || '').trim(),
-      blood_type:         row['Blood Group']  || null,
-      allergies,
-      ec1_name:           row['Primary Emergency Contact Name']   || null,
-      ec1_phone:          row['Primary Emergency Contact Phone']  || null,
-      ec2_name:           row['Secondary Emergency Contact Name'] || null,
-      ec2_phone:          row['Secondary Emergency Contact Phone']|| null,
-      insurance_provider: insuranceProvider,
-      access_tier:        'cp_only',
-      status:             isPublished ? 'active' : 'pending',
-    };
+    // ---- Hash PIN ----
+    const pinHash = await bcrypt.hash(m.pin, 12);
 
     // ---- Upsert profile ----
     const { error: profileError } = await supabase
       .from('profiles')
-      .upsert(profile, { onConflict: 'code' });
+      .upsert(
+        {
+          member_id:          memberData.id,
+          code:               m.code,
+          pin_hash:           pinHash,
+          first_name:         m.first_name,
+          last_name:          m.last_name,
+          blood_type:         m.blood_type,
+          allergies:          m.allergies,
+          ec1_name:           m.ec1_name,
+          ec1_phone:          m.ec1_phone,
+          ec2_name:           m.ec2_name,
+          ec2_phone:          m.ec2_phone,
+          insurance_provider: m.insurance_provider,
+          access_tier:        'cp_only',
+          status:             m.status,
+        },
+        { onConflict: 'code' }
+      );
 
     if (profileError) {
-      console.error(`FAIL  — profile upsert for ${email} (code: ${code}): ${profileError.message}`);
+      console.error(`FAIL  — profile ${m.email} (code: ${m.code}): ${profileError.message}`);
       failed++;
       continue;
     }
 
-    console.log(`OK    — ${email}  code: ${code}`);
+    console.log(`OK    — ${m.first_name} ${m.last_name}  <${m.email}>  code: ${m.code}`);
     ok++;
   }
 
   console.log(`\n────────────────────────`);
-  console.log(`Done.  OK: ${ok}  Skipped: ${skipped}  Failed: ${failed}`);
-  if (ok > 0) {
-    console.log(`\nNext: run scripts/patch-stripe-members.js for the two Stripe members.`);
-  }
+  console.log(`Done.  OK: ${ok}  Failed: ${failed}`);
+  console.log(`\nNext steps:`);
+  console.log(`  1. node scripts/patch-stripe-members.js`);
+  console.log(`  2. node scripts/update-member-email.js <old> <new>  (for the 3 temp emails)`);
+  console.log(`  3. Manually update Elton Robinson's insurance_provider to "Medicare" once confirmed`);
 }
 
 run().catch(err => {
