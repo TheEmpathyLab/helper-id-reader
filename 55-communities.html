@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Community Ready</title>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    /* ---- Hero ---- */
+    .comm-hero {
+      padding: 64px 24px 56px;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .comm-hero h1 { font-family: var(--font-display); font-size: 2.6rem; line-height: 1.15; margin-bottom: 16px; }
+    .comm-hero h1 em { font-style: normal; color: var(--red); }
+    .comm-hero p { font-size: 1.05rem; color: var(--gray-dark); line-height: 1.7; max-width: 580px; margin: 0 auto 28px; }
+    .comm-hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ---- Features ---- */
+    .features-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
+    .features-inner { max-width: var(--max-width); margin: 0 auto; }
+    .features-header { text-align: center; margin-bottom: 40px; }
+    .features-header h2 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 8px; }
+    .features-header p { font-size: 0.95rem; color: var(--gray-dark); }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .feature-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+    }
+    .feature-icon { font-size: 2rem; margin-bottom: 14px; }
+    .feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: 0.88rem; color: var(--gray-dark); line-height: 1.65; }
+    @media(max-width:720px) { .features-grid { grid-template-columns: 1fr; } }
+
+    /* ---- Problem ---- */
+    .problem-section { background: var(--black); color: white; padding: 56px 24px; }
+    .problem-inner { max-width: var(--max-width); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+    .problem-inner .hid-section-label { color: #F87171; }
+    .problem-inner h2 { font-family: var(--font-display); font-size: 1.9rem; color: white; line-height: 1.2; margin-bottom: 16px; }
+    .problem-inner p { font-size: 0.92rem; color: #aaa; line-height: 1.7; margin-bottom: 12px; }
+    .problem-list { list-style: none; margin: 20px 0; }
+    .problem-list li { font-size: 0.92rem; color: #aaa; padding: 8px 0; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 12px; }
+    .problem-list li::before { content: '✗'; color: #F87171; font-weight: 700; flex-shrink: 0; }
+    .solution-list { list-style: none; margin: 20px 0; }
+    .solution-list li { font-size: 0.92rem; color: #aaa; padding: 8px 0; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 12px; }
+    .solution-list li::before { content: '✓'; color: #4ADE80; font-weight: 700; flex-shrink: 0; }
+    @media(max-width:720px) { .problem-inner { grid-template-columns: 1fr; gap: 36px; } }
+
+    /* ---- How it works ---- */
+    .how-section { padding: 56px 24px; border-top: 1.5px solid var(--border); }
+    .how-inner { max-width: var(--max-width); margin: 0 auto; }
+    .how-header { text-align: center; margin-bottom: 48px; }
+    .how-header h2 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 8px; }
+    .how-header p { font-size: 0.95rem; color: var(--gray-dark); max-width: 560px; margin: 0 auto; }
+    .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-bottom: 48px; }
+    .how-step { text-align: center; padding: 0 12px; }
+    .how-step-num { width: 44px; height: 44px; background: var(--red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; margin: 0 auto 16px; }
+    .how-step h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .how-step p { font-size: 0.85rem; color: var(--gray-dark); line-height: 1.6; }
+    .how-profile-box {
+      background: #FAFAFA;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .how-profile-box h3 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 16px; text-align: center; }
+    .profile-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .profile-field { background: white; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; color: var(--gray-dark); }
+    .profile-field span { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-mid); margin-bottom: 2px; }
+    .profile-field.allergy { border-color: var(--red); }
+    .profile-field.allergy span { color: var(--red); }
+    .how-no-list { display: flex; gap: 24px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+    .how-no-item { font-size: 0.85rem; color: var(--gray-mid); display: flex; align-items: center; gap: 6px; }
+    .how-no-item::before { content: '✓'; color: #16A34A; font-weight: 700; }
+    @media(max-width:720px) { .how-steps { grid-template-columns: 1fr; } .profile-fields { grid-template-columns: 1fr; } }
+
+    /* ---- Where it lives ---- */
+    .where-section { background: #FAFAFA; border-top: 1.5px solid var(--border); padding: 56px 24px; }
+    .where-inner { max-width: 680px; margin: 0 auto; text-align: center; }
+    .where-inner h2 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 12px; }
+    .where-inner p { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.7; margin-bottom: 28px; }
+    .where-tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+    .where-tag { background: white; border: 2px solid var(--border); border-radius: 999px; padding: 8px 18px; font-size: 0.85rem; font-weight: 600; color: var(--gray-dark); }
+
+    /* ---- CTA ---- */
+    .comm-cta { padding: 56px 24px; text-align: center; border-top: 1.5px solid var(--border); }
+    .comm-cta h2 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 12px; }
+    .comm-cta p { font-size: 0.95rem; color: var(--gray-dark); margin-bottom: 28px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .comm-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="products.html">Products</a>
+      <a href="reader.html">Read a Tag</a>
+      <a href="pdf.html">Free PDF</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="dashboard.html" class="hid-btn hid-btn-outline" style="font-size:0.85rem;padding:8px 16px;">Member Login</a>
+  </header>
+
+  <!-- Hero -->
+  <div class="comm-hero">
+    <span class="hid-badge hid-badge-red" style="margin-bottom:16px;display:inline-block;">55+ Communities</span>
+    <h1>You don't slow down<br />just because you <em>plan ahead.</em></h1>
+    <p>Helper-ID keeps essential information accessible in case it's ever needed — so you can stay focused on enjoying your life to its fullest.</p>
+    <div class="comm-hero-cta">
+      <a href="products.html" class="hid-btn hid-btn-primary">Become a Helper →</a>
+      <a href="pdf.html" class="hid-btn hid-btn-outline">Try a Free PDF First</a>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="features-section">
+    <div class="features-inner">
+      <div class="features-header">
+        <span class="hid-section-label">A Community of Helpers</span>
+        <h2>Built for the way you live</h2>
+        <p>Helper-ID is powered by an empathetic, listening, compassionate team. Our goal is to build and support a community of Helpers.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🟢</div>
+          <h3>Easy to Use</h3>
+          <p>A simple profile, easy code, and quick access makes this the low-tech solution to helping out friends, neighbors, family members, and those you don't know. No apps. No passwords to remember.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Secure</h3>
+          <p>Only the information you consent to sharing will be available to your Helper. You decide what's on your profile — emergency situations, sharing with loved ones, daycares, and caregivers.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👂</div>
+          <h3>Continuously Improving</h3>
+          <p>We are founded on listening and co-creating. We take our job of empathetically listening and compassionately creating with you seriously. That's our job — to help you help yourself and each other.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem / Solution -->
+  <section class="problem-section">
+    <div class="problem-inner">
+      <div>
+        <span class="hid-section-label">Where Today's Systems Fall Short</span>
+        <h2>Most communities want to help. The problem isn't willingness — it's access.</h2>
+        <p>Over time, many of us end up relying on systems that feel reasonable but don't actually work when help is needed.</p>
+        <ul class="problem-list">
+          <li>Outdated ICE contacts</li>
+          <li>Phones that aren't set up</li>
+          <li>Being without our phones</li>
+          <li>Important papers buried in drawers</li>
+        </ul>
+      </div>
+      <div>
+        <span class="hid-section-label">Being Ready Together</span>
+        <h2>Some individuals are ready. But as a community, being ready together is what matters.</h2>
+        <p>Helper-ID makes help easier — without changing how you live.</p>
+        <ul class="solution-list">
+          <li>Your profile is always up to date</li>
+          <li>No phone needed to access it</li>
+          <li>Works with a simple CODE + PIN</li>
+          <li>Your information, in your control</li>
+          <li>Ready when your community needs it</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how-section">
+    <div class="how-inner">
+      <div class="how-header">
+        <span class="hid-section-label">What is Helper-ID?</span>
+        <h2>Simple by design. Powerful when it matters.</h2>
+        <p>Helper-ID is a simple way to make sure the right people can help you if you ever need it — without changing how you live your life.</p>
+      </div>
+
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-step-num">1</div>
+          <h3>You create your profile</h3>
+          <p>Add the information you choose to share — emergency contacts, medical notes, allergy information, helpful instructions.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">2</div>
+          <h3>You get a CODE + PIN</h3>
+          <p>Each Helper-ID has a unique CODE and PIN. Keep it where you want — your wallet, a keychain, a bracelet, a sticker, or printed on your fridge.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">3</div>
+          <h3>Help arrives instantly</h3>
+          <p>Someone enters your CODE + PIN at helper-id.com. Your profile opens. Only what you chose to share is shown. That's it.</p>
+        </div>
+      </div>
+
+      <div class="how-profile-box">
+        <h3>Your profile — only what you choose to share</h3>
+        <div class="profile-fields">
+          <div class="profile-field"><span>Emergency Contact</span>Jane Smith — 555.123.4567</div>
+          <div class="profile-field"><span>Second Contact</span>Robert Smith — 555.987.6543</div>
+          <div class="profile-field allergy"><span>Allergies</span>Penicillin, Shellfish</div>
+          <div class="profile-field"><span>Blood Type</span>A+</div>
+          <div class="profile-field"><span>Medications</span>Metformin, Lisinopril</div>
+          <div class="profile-field"><span>Insurance</span>Medicare — ID: 1A2B3C4D</div>
+        </div>
+      </div>
+
+      <div class="how-no-list">
+        <div class="how-no-item">No apps to install</div>
+        <div class="how-no-item">No tracking</div>
+        <div class="how-no-item">No ongoing complexity</div>
+        <div class="how-no-item">Update anytime</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Where it lives -->
+  <section class="where-section">
+    <div class="where-inner">
+      <span class="hid-section-label">Your CODE + PIN Lives Where You Want It</span>
+      <h2>We provide the basics.<br />You customize it to suit your life.</h2>
+      <p>Your CODE and PIN can go anywhere that makes sense for you. There's no right answer — just whatever keeps it close and findable when it's needed.</p>
+      <div class="where-tags">
+        <div class="where-tag">👜 Wallet card</div>
+        <div class="where-tag">🔑 Keychain</div>
+        <div class="where-tag">💪 Bracelet</div>
+        <div class="where-tag">🚗 Glove box</div>
+        <div class="where-tag">🏠 Fridge door</div>
+        <div class="where-tag">📋 Medical binder</div>
+        <div class="where-tag">🏷️ Luggage tag</div>
+      </div>
+      <a href="products.html" class="hid-btn hid-btn-primary">Get Your Helper-ID →</a>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="comm-cta">
+    <span class="hid-section-label">Become a Helper</span>
+    <h2>Be ready for all of what life brings you.</h2>
+    <p>Join a community of people who believe that being prepared is an act of care — for yourself and for each other.</p>
+    <div class="comm-cta-row">
+      <a href="products.html" class="hid-btn hid-btn-primary">See Plans →</a>
+      <a href="pdf.html" class="hid-btn hid-btn-outline">Free PDF First</a>
+      <a href="faq.html" class="hid-btn hid-btn-outline">Read the FAQ</a>
+    </div>
+  </section>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID</span>
+    </div>
+    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="trust.html">Privacy &amp; Terms</a> &nbsp;·&nbsp; <a href="faq.html">FAQ</a></p>
+  </footer>
+
+  <script src="config.js"></script>
+</body>
+</html>
