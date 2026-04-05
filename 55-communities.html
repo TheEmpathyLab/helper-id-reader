@@ -6,17 +6,56 @@
   <title>Helper-ID — Community Ready</title>
   <link rel="stylesheet" href="hid-style.css" />
   <style>
+    /* ---- Image placeholder ---- */
+    /* Shows filename label when image file hasn't been dropped in yet */
+    .img-slot {
+      position: relative;
+      background: #e8e8e8;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .img-slot img {
+      display: block; width: 100%; height: 100%; object-fit: cover;
+    }
+    .img-slot::after {
+      content: attr(data-label);
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 0.72rem; color: #999; font-family: monospace; white-space: nowrap;
+      background: rgba(255,255,255,0.85); padding: 5px 10px; border-radius: 4px;
+      pointer-events: none;
+    }
+    .img-slot.loaded::after { display: none; }
+
     /* ---- Hero ---- */
     .comm-hero {
-      padding: 64px 24px 56px;
-      text-align: center;
-      max-width: 720px;
+      padding: 56px 24px 48px;
+      max-width: var(--max-width);
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 48px;
+      align-items: center;
     }
-    .comm-hero h1 { font-family: var(--font-display); font-size: 2.6rem; line-height: 1.15; margin-bottom: 16px; }
-    .comm-hero h1 em { font-style: normal; color: var(--red); }
-    .comm-hero p { font-size: 1.05rem; color: var(--gray-dark); line-height: 1.7; max-width: 580px; margin: 0 auto 28px; }
-    .comm-hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .comm-hero-copy h1 { font-family: var(--font-display); font-size: 2.6rem; line-height: 1.15; margin-bottom: 16px; }
+    .comm-hero-copy h1 em { font-style: normal; color: var(--red); }
+    .comm-hero-copy p { font-size: 1.05rem; color: var(--gray-dark); line-height: 1.7; margin-bottom: 28px; }
+    .comm-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .comm-hero-img { height: 380px; }
+    @media(max-width:720px) {
+      .comm-hero { grid-template-columns: 1fr; gap: 28px; }
+      .comm-hero-copy h1 { font-size: 2rem; }
+      .comm-hero-img { height: 240px; }
+    }
+
+    /* ---- Community image ---- */
+    .community-img-wrap { max-width: var(--max-width); margin: 0 auto 40px; }
+    .community-img-slot { height: 320px; }
+
+    /* ---- Problem images ---- */
+    .problem-imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
+    .problem-img-slot { height: 130px; border-radius: 10px; }
+    .problem-img-slot::after { font-size: 0.65rem; }
+    @media(max-width:720px) { .problem-imgs { grid-template-columns: 1fr; } }
 
     /* ---- Features ---- */
     .features-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
@@ -112,12 +151,19 @@
 
   <!-- Hero -->
   <div class="comm-hero">
-    <span class="hid-badge hid-badge-red" style="margin-bottom:16px;display:inline-block;">55+ Communities</span>
-    <h1>You don't slow down<br />just because you <em>plan ahead.</em></h1>
-    <p>Helper-ID keeps essential information accessible in case it's ever needed — so you can stay focused on enjoying your life to its fullest.</p>
-    <div class="comm-hero-cta">
-      <a href="products.html" class="hid-btn hid-btn-primary">Become a Helper →</a>
-      <a href="pdf.html" class="hid-btn hid-btn-outline">Try a Free PDF First</a>
+    <div class="comm-hero-copy">
+      <span class="hid-badge hid-badge-red" style="margin-bottom:16px;display:inline-block;">55+ Communities</span>
+      <h1>You don't slow down<br />just because you <em>plan ahead.</em></h1>
+      <p>Helper-ID keeps essential information accessible in case it's ever needed — so you can stay focused on enjoying your life to its fullest.</p>
+      <div class="comm-hero-cta">
+        <a href="products.html" class="hid-btn hid-btn-primary">Become a Helper →</a>
+        <a href="pdf.html" class="hid-btn hid-btn-outline">Try a Free PDF First</a>
+      </div>
+    </div>
+    <!-- Drop in: images/55-hero.jpg — two people holding a Helper-ID card -->
+    <div class="img-slot comm-hero-img" data-label="images/55-hero.jpg">
+      <img src="images/55-hero.jpg" alt="Two community members holding a Helper-ID card"
+           onload="this.closest('.img-slot').classList.add('loaded')" />
     </div>
   </div>
 
@@ -129,6 +175,14 @@
         <h2>Built for the way you live</h2>
         <p>Helper-ID is powered by an empathetic, listening, compassionate team. Our goal is to build and support a community of Helpers.</p>
       </div>
+      <!-- Drop in: images/55-pool.jpg — bag at community pool with HID tag attached -->
+      <div class="community-img-wrap">
+        <div class="img-slot community-img-slot" data-label="images/55-pool.jpg">
+          <img src="images/55-pool.jpg" alt="A bag at the community pool with a Helper-ID tag attached"
+               onload="this.closest('.img-slot').classList.add('loaded')" />
+        </div>
+      </div>
+
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">🟢</div>
@@ -162,6 +216,21 @@
           <li>Being without our phones</li>
           <li>Important papers buried in drawers</li>
         </ul>
+        <!-- Drop in: images/55-problem-card.jpg, 55-problem-files.jpg, 55-problem-phone.jpg -->
+        <div class="problem-imgs">
+          <div class="img-slot problem-img-slot" data-label="55-problem-card.jpg">
+            <img src="images/55-problem-card.jpg" alt="An index card with emergency information"
+                 onload="this.closest('.img-slot').classList.add('loaded')" />
+          </div>
+          <div class="img-slot problem-img-slot" data-label="55-problem-files.jpg">
+            <img src="images/55-problem-files.jpg" alt="An old filing system"
+                 onload="this.closest('.img-slot').classList.add('loaded')" />
+          </div>
+          <div class="img-slot problem-img-slot" data-label="55-problem-phone.jpg">
+            <img src="images/55-problem-phone.jpg" alt="A phone with no emergency information on screen"
+                 onload="this.closest('.img-slot').classList.add('loaded')" />
+          </div>
+        </div>
       </div>
       <div>
         <span class="hid-section-label">Being Ready Together</span>
