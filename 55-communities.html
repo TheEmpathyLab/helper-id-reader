@@ -51,11 +51,8 @@
     .community-img-wrap { max-width: var(--max-width); margin: 0 auto 40px; }
     .community-img-slot { height: 320px; }
 
-    /* ---- Problem images ---- */
-    .problem-imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
-    .problem-img-slot { height: 130px; border-radius: 10px; }
-    .problem-img-slot::after { font-size: 0.65rem; }
-    @media(max-width:720px) { .problem-imgs { grid-template-columns: 1fr; } }
+    /* ---- Problem image ---- */
+    .problem-img-slot { height: 260px; margin-top: 28px; }
 
     /* ---- Features ---- */
     .features-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
@@ -216,20 +213,10 @@
           <li>Being without our phones</li>
           <li>Important papers buried in drawers</li>
         </ul>
-        <!-- Drop in: images/55-problem-card.jpg, 55-problem-files.jpg, 55-problem-phone.jpg -->
-        <div class="problem-imgs">
-          <div class="img-slot problem-img-slot" data-label="55-problem-card.jpg">
-            <img src="images/55-problem-card.jpg" alt="An index card with emergency information"
-                 onload="this.closest('.img-slot').classList.add('loaded')" />
-          </div>
-          <div class="img-slot problem-img-slot" data-label="55-problem-files.jpg">
-            <img src="images/55-problem-files.jpg" alt="An old filing system"
-                 onload="this.closest('.img-slot').classList.add('loaded')" />
-          </div>
-          <div class="img-slot problem-img-slot" data-label="55-problem-phone.jpg">
-            <img src="images/55-problem-phone.jpg" alt="A phone with no emergency information on screen"
-                 onload="this.closest('.img-slot').classList.add('loaded')" />
-          </div>
+        <!-- Drop in: images/55-problem.jpg — index card, old file system, phone without info -->
+        <div class="img-slot problem-img-slot" data-label="images/55-problem.jpg">
+          <img src="images/55-problem.jpg" alt="Index card, old filing system, and phone without emergency information"
+               onload="this.closest('.img-slot').classList.add('loaded')" />
         </div>
       </div>
       <div>
