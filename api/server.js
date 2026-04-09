@@ -12,6 +12,7 @@ const { createClient } = require('@supabase/supabase-js');
 const bcrypt           = require('bcryptjs');
 const crypto           = require('crypto');
 const Stripe           = require('stripe');
+const rateLimit        = require('express-rate-limit');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -26,8 +27,16 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SETUP_LINK_SECRET         = process.env.SETUP_LINK_SECRET;
 const SITE_URL                  = process.env.SITE_URL || 'https://helper-id.com';
 
-if (!SENDGRID_API_KEY) {
-  console.error('ERROR: SENDGRID_API_KEY environment variable is not set.');
+const REQUIRED_ENV_VARS = [
+  'SENDGRID_API_KEY',
+  'STRIPE_SECRET_KEY',
+  'STRIPE_WEBHOOK_SECRET',
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+];
+const missingEnvVars = REQUIRED_ENV_VARS.filter(v => !process.env[v]);
+if (missingEnvVars.length > 0) {
+  console.error('ERROR: Missing required environment variables:', missingEnvVars.join(', '));
   process.exit(1);
 }
 
@@ -60,6 +69,45 @@ app.use(cors({
     }
   },
 }));
+
+// ---- Rate limiting ----
+// IP-based: 10 attempts per 15-minute window on /lookup
+// Applies before any DB query so brute-force is stopped at the edge.
+const lookupLimiter = rateLimit({
+  windowMs:        15 * 60 * 1000,
+  max:             10,
+  standardHeaders: true,
+  legacyHeaders:   false,
+  message:         { error: 'Too many attempts. Please try again in 15 minutes.' },
+});
+
+// Code-based lockout (in-memory): after 10 failed PINs on a given code,
+// lock that code for 15 minutes regardless of IP.
+// This catches distributed brute-force across multiple IPs.
+const CODE_MAX_FAILURES = 10;
+const CODE_LOCKOUT_MS   = 15 * 60 * 1000;
+const codeFailures      = new Map(); // code -> { count, lockedUntil }
+
+function isCodeLocked(code) {
+  const entry = codeFailures.get(code);
+  if (!entry) return false;
+  if (Date.now() < entry.lockedUntil) return true;
+  codeFailures.delete(code); // lockout expired
+  return false;
+}
+
+function recordCodeFailure(code) {
+  const entry = codeFailures.get(code) || { count: 0, lockedUntil: 0 };
+  entry.count++;
+  if (entry.count >= CODE_MAX_FAILURES) {
+    entry.lockedUntil = Date.now() + CODE_LOCKOUT_MS;
+  }
+  codeFailures.set(code, entry);
+}
+
+function clearCodeFailures(code) {
+  codeFailures.delete(code);
+}
 
 // ---- Health check ----
 app.get('/health', (req, res) => {
@@ -519,18 +567,25 @@ async function sendWelcomeEmail({ email, code, pin, setupUrl, plan }) {
 // Also writes an access_log entry on every successful lookup.
 // Used by reader.html for the CODE+PIN access path.
 
-app.post('/lookup', async (req, res) => {
+app.post('/lookup', lookupLimiter, async (req, res) => {
   const { code, pin } = req.body;
 
   if (!code || !pin) {
     return res.status(400).json({ error: 'Missing code or pin' });
   }
 
+  const normalizedCode = code.trim().toUpperCase();
+
+  // Code-based lockout check — catches distributed brute-force across IPs
+  if (isCodeLocked(normalizedCode)) {
+    return res.status(429).json({ error: 'Too many failed attempts for this code. Please try again in 15 minutes.' });
+  }
+
   // Find active profile by code
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('code', code.trim().toUpperCase())
+    .eq('code', normalizedCode)
     .eq('status', 'active')
     .maybeSingle();
 
@@ -541,14 +596,26 @@ app.post('/lookup', async (req, res) => {
   // Verify PIN — stored hash was generated from the XXX-XXX formatted string
   const pinValid = await bcrypt.compare(pin.trim(), profile.pin_hash);
   if (!pinValid) {
+    // Log failed attempt and update code-based lockout counter
+    recordCodeFailure(normalizedCode);
+    await supabase.from('access_logs').insert({
+      profile_id:     profile.id,
+      access_method:  'cp',
+      ip_address:     req.headers['x-forwarded-for'] || req.ip || null,
+      failed_attempt: true,
+    });
     return res.status(401).json({ error: 'Invalid PIN' });
   }
 
+  // Successful auth — clear any accumulated failure count for this code
+  clearCodeFailures(normalizedCode);
+
   // Write access log
   await supabase.from('access_logs').insert({
-    profile_id:    profile.id,
-    access_method: 'cp',
-    ip_address:    req.headers['x-forwarded-for'] || req.ip || null,
+    profile_id:     profile.id,
+    access_method:  'cp',
+    ip_address:     req.headers['x-forwarded-for'] || req.ip || null,
+    failed_attempt: false,
   });
 
   // Return sanitized profile — never expose pin_hash

@@ -134,6 +134,7 @@ create table access_logs (
   access_method  log_access_method not null,
   accessor_phone text,
   ip_address     text,
+  failed_attempt boolean       not null default false,  -- true = bad PIN attempt (intrusion detection)
   accessed_at    timestamptz   not null default now()
 );
 

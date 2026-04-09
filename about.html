@@ -22,20 +22,31 @@
     .story-inner { max-width: var(--max-width); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
     .story-inner h2 { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.2; margin-bottom: 20px; }
     .story-inner p { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.75; margin-bottom: 16px; }
+    .story-inner ul { padding-left: 20px; margin-bottom: 16px; }
+    .story-inner ul li { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.75; margin-bottom: 6px; }
+    .story-inner blockquote { border-left: 3px solid var(--red); padding-left: 16px; margin: 20px 0; font-style: italic; color: var(--gray-dark); font-size: 0.95rem; line-height: 1.7; }
     @media(max-width:720px) { .story-inner { grid-template-columns: 1fr; gap: 32px; } }
+
+    /* ---- Image slots ---- */
+    .img-slot { position: relative; background: #e8e8e8; border-radius: var(--radius-lg); overflow: hidden; margin-top: 28px; }
+    .img-slot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .img-slot::after { content: attr(data-label); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.72rem; color: #999; font-family: monospace; background: rgba(255,255,255,0.85); padding: 5px 10px; border-radius: 4px; }
+    .img-slot.loaded::after { display: none; }
+    .about-img-research { height: 260px; }
+    .about-img-desk { height: 260px; }
 
     /* ---- Values ---- */
     .values-section { background: var(--black); padding: 56px 24px; color: white; }
     .values-inner { max-width: var(--max-width); margin: 0 auto; }
     .values-inner .hid-section-label { color: #F87171; }
     .values-inner h2 { font-family: var(--font-display); font-size: 1.9rem; color: white; margin-bottom: 36px; }
-    .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .values-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
     .value-item h4 { font-size: 0.95rem; color: white; margin-bottom: 6px; }
     .value-item p { font-size: 0.85rem; color: #aaa; line-height: 1.6; }
     .value-icon { width: 40px; height: 40px; background: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 12px; }
     @media(max-width:720px) { .values-grid { grid-template-columns: 1fr; gap: 20px; } }
 
-    /* ---- Empathy Lab ---- */
+    /* ---- Stewardship ---- */
     .lab-section { padding: 56px 24px; border-top: 1.5px solid var(--border); }
     .lab-inner { max-width: 680px; margin: 0 auto; text-align: center; }
     .lab-inner h2 { font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 16px; }
@@ -78,16 +89,33 @@
       <div>
         <span class="hid-section-label">Where Helper-ID Came From</span>
         <h2>Born out of years of listening.</h2>
-        <p>As part of Empathy Lab, Inc., we've spent nearly a decade working at the intersection of design, behavior, and technology — helping organizations build more human-centered tools and services.</p>
+        <p>Helper-ID was born out of years of listening — listening to people who were doing their best to care for others, but kept running into the same frustrating roadblocks. As part of Empathy Lab, Inc., we've spent nearly a decade working at the intersection of design, behavior, and technology, helping organizations build more human-centered tools and services.</p>
         <p>Over time, a clear pattern emerged: when something went wrong — a health emergency, a crisis, a moment of disorientation — the systems meant to support us often failed. People didn't have the right information when they needed it most. Helpers were willing, but disconnected. Important details lived in too many places, or nowhere at all.</p>
-        <p>So we started asking: <em>"What if we could make helping someone easier, faster, and safer — without giving up your privacy or adding more complexity?"</em></p>
+        <blockquote>"What if we could make helping someone easier, faster, and safer — without giving up your privacy or adding more complexity?"</blockquote>
+
+        <div class="img-slot about-img-research" data-label="images/about-research.png">
+          <img src="images/about-research.png" alt="A room with walls covered in post-it notes from early Helper-ID research"
+               onload="this.closest('.img-slot').classList.add('loaded')" />
+        </div>
       </div>
       <div>
         <span class="hid-section-label">What We Want to Accomplish</span>
         <h2>Empower everyday helpers.</h2>
         <p>Helper-ID is on a mission to empower everyday helpers — family members, friends, neighbors, teachers, caregivers, and even strangers — with the right tools to support others when it matters most.</p>
-        <p>We're building a simple, secure way to organize critical information you choose to share, make it accessible to trusted people in a moment of need using just a Code and PIN, keep your data private and under your control, and reduce the stress and scrambling that often happens when help is needed fast.</p>
-        <p>We believe in <strong>people over platforms, privacy over profit, and helpers over bystanders.</strong></p>
+        <p>We're building a simple, secure way to:</p>
+        <ul>
+          <li>Organize critical information you choose to share — contacts, medical info, and plans.</li>
+          <li>Make it accessible to trusted people in a moment of need, using just a Code and PIN.</li>
+          <li>Keep your data private and under your control.</li>
+          <li>Reduce the stress and scrambling that often happens when help is needed fast.</li>
+        </ul>
+        <p>We believe in <strong>people over platforms, privacy over profit, and helpers over bystanders.</strong> Helper-ID isn't here to sell your data or lock you into a system — it's here to give you, and your circle of care, a better way to be ready.</p>
+        <p>We call it <em>"preparedness for people who care."</em></p>
+
+        <div class="img-slot about-img-desk" data-label="images/about-desk.png">
+          <img src="images/about-desk.png" alt="A desk with Helper-ID prototypes and a cup of coffee"
+               onload="this.closest('.img-slot').classList.add('loaded')" />
+        </div>
       </div>
     </div>
   </section>
@@ -95,7 +123,7 @@
   <!-- Values -->
   <section class="values-section">
     <div class="values-inner">
-      <span class="hid-section-label">What We Believe</span>
+      <span class="hid-section-label">Empowering Help</span>
       <h2>Principles we build by</h2>
       <div class="values-grid">
         <div class="value-item">
@@ -118,26 +146,16 @@
           <h4>Preparedness Over Perfection</h4>
           <p>It's better to be safe than sorry. Together, we can prepare a little bit more so that we can enjoy more of our lives together. Prepare today, enjoy more tomorrows.</p>
         </div>
-        <div class="value-item">
-          <div class="value-icon">🛡️</div>
-          <h4>Empowering Help</h4>
-          <p>Helper-ID is most powerful when a whole community has it — families, neighborhoods, assisted living facilities, athletic programs. We design for adoption, not just individuals.</p>
-        </div>
-        <div class="value-item">
-          <div class="value-icon">📍</div>
-          <h4>Always Reliable</h4>
-          <p>By design, Helper-ID is intentionally built to function as a simple, functional, secure, and always reliable tool. Set it up once. It's there when you need it.</p>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- Empathy Lab -->
+  <!-- Stewardship -->
   <section class="lab-section">
     <div class="lab-inner">
       <span class="hid-section-label">Stewardship</span>
       <h2>Built by people who care about people.</h2>
-      <p>Helper-ID is maintained by a small, independent team focused on clarity, privacy, and long-term reliability. Helper-ID is founded by a passionate human with a background in behavioral psychology, industrial design, user experience research, and empathy-driven action.</p>
+      <p>Helper-ID is maintained by a small, independent team focused on clarity, privacy, and long-term reliability. Founded by a passionate human with a background in behavioral psychology, industrial design, user experience research, and empathy-driven action.</p>
       <p>By design, Helper-ID is intentionally built to function as a simple, functional, secure, and always reliable tool. The Helper community is the center.</p>
       <p>Helper-ID isn't here to sell your data or lock you into a system — it's here to give you, and your circle of care, a better way to be ready.</p>
       <p style="margin-top:24px;"><a href="mailto:hello@helper-id.com">hello@helper-id.com</a> &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
