@@ -63,6 +63,7 @@
       <a href="#privacy">Privacy Policy</a>
       <a href="#terms">Terms of Service</a>
       <a href="#data">Data Practices</a>
+      <a href="#security">Security</a>
       <a href="#refunds">Refunds</a>
       <a href="#contact">Contact</a>
     </div>
@@ -101,7 +102,7 @@
         <p>Your hosted profile is accessible only via the correct CODE and PIN combination. Anyone with both can view it — that's by design. The CODE and PIN are yours to share or keep private. You control who has them.</p>
 
         <h3>How we store your data</h3>
-        <p>[PLACEHOLDER] Describe the data storage setup — Supabase (PostgreSQL), where servers are located, encryption at rest, etc. Confirm specifics before publishing.</p>
+        <p>Your profile data is stored in an encrypted database hosted on infrastructure managed by industry-standard cloud providers. Data is encrypted at rest — meaning it is unreadable at the storage layer without the encryption keys managed by our hosting environment. All connections to and from Helper-ID are encrypted in transit over HTTPS.</p>
 
         <h3>Data retention</h3>
         <p>Your data is retained as long as your account is active. If you cancel your membership or request deletion, your profile data is removed within 30 days. Access logs are retained for 12 months for security purposes.</p>
@@ -170,6 +171,42 @@
 
         <h3>Deleting your data</h3>
         <p>You can request full deletion of your account and all associated data at any time. Email us with the subject "Delete My Account." Deletion is permanent and cannot be undone.</p>
+      </div>
+
+      <!-- Security -->
+      <div class="trust-section" id="security">
+        <h2>Security</h2>
+        <p class="last-updated">Last updated: April 2026</p>
+
+        <div class="trust-highlight">
+          <p><strong>The short version:</strong> We don't just say we take security seriously — we've built specific protections into every layer of the platform. Here's what that means in plain language.</p>
+        </div>
+
+        <h3>Your connection is always encrypted</h3>
+        <p>Every interaction with Helper-ID travels over an encrypted connection. Your browser is permanently instructed to use encryption when connecting to Helper-ID, even if you type a plain web address.</p>
+
+        <h3>Your data is encrypted at rest</h3>
+        <p>Your profile information — including any medical details you've added — is stored encrypted. The underlying data is unreadable without the encryption keys managed by our infrastructure provider.</p>
+
+        <h3>Profiles require server-side authentication to access</h3>
+        <p>Your profile data cannot be queried directly from our database. Every lookup goes through our application server, which enforces authentication before any data is returned. This protection lives at the database layer — it cannot be bypassed at the application level.</p>
+
+        <h3>Your PIN is never stored</h3>
+        <p>When you set a PIN, we immediately convert it into a one-way cryptographic value and discard the original. We never store your PIN in a readable form — not in our database, not in our logs, nowhere.</p>
+
+        <h3>Automated attacks are actively blocked</h3>
+        <p>The profile lookup system is protected against automated attempts to guess PINs. Repeated failures — whether from one location or many — are detected and blocked. Every failed attempt is logged.</p>
+
+        <h3>Every profile access is recorded</h3>
+        <p>Any time your profile is viewed, we record the date, time, and access method. You can see this history in your member dashboard. You always know when your information has been accessed.</p>
+
+        <h3>We never touch your payment information</h3>
+        <p>Billing is handled entirely by Stripe, a PCI-DSS certified payment processor. Helper-ID never sees, receives, or stores your card number or banking details.</p>
+
+        <h3>Tier 2 NFC members: your data stays on your tag</h3>
+        <p>If you use a self-sovereign NFC tag, your profile data is read directly from the tag by the person scanning it — it never passes through our servers. Your information goes from your tag to their screen and nowhere else.</p>
+
+        <p style="margin-top:24px;">Questions about our security practices? <a href="mailto:hello@helper-id.com" style="color:var(--red);text-decoration:none;font-weight:600;">hello@helper-id.com</a></p>
       </div>
 
       <!-- Refunds -->
