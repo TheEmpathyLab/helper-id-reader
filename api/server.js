@@ -70,6 +70,30 @@ app.use(cors({
   },
 }));
 
+// ---- Security headers ----
+// Applied to every response. Suppresses stack info, blocks clickjacking,
+// prevents MIME sniffing, enforces HTTPS via HSTS.
+app.disable('x-powered-by');
+
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options',   'nosniff');
+  res.setHeader('X-Frame-Options',          'DENY');
+  res.setHeader('Referrer-Policy',          'no-referrer');
+  res.setHeader('Permissions-Policy',       'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Strict-Transport-Security','max-age=31536000; includeSubDomains');
+  // CSP: self + Supabase storage for headshot images.
+  // Tighten script-src if inline scripts are ever removed from reader.html.
+  res.setHeader('Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: blob: https://*.supabase.co https://randomuser.me; " +
+    "connect-src 'self' https://*.supabase.co; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "frame-ancestors 'none';"
+  );
+  next();
+});
+
 // ---- Rate limiting ----
 // IP-based: 10 attempts per 15-minute window on /lookup
 // Applies before any DB query so brute-force is stopped at the edge.
