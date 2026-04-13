@@ -488,6 +488,16 @@
 
   <script src="hid-form-fields.js"></script>
   <script>
+    // ── PRIVACY GUARANTEE — NFC / Tier 2 self-sovereign path ──────────────
+    // The URL fragment (#...) is never transmitted to the server.
+    // Per the HTTP spec, browsers strip the fragment before sending any request.
+    // The Base64-encoded profile is decoded entirely here in the browser using atob().
+    // No profile data from the NFC path touches our servers, logs, or network requests.
+    // The fetch('/api/lookup') call below fires ONLY on the CODE+PIN path and is
+    // explicitly guarded to never run when a hash is present (see autoLookup below).
+    // Do not add analytics, external scripts, or fetch() calls that could capture
+    // decoded profile fields — doing so would break this guarantee.
+    // ────────────────────────────────────────────────────────────────────────────
     function render() {
       const hash = window.location.hash.slice(1);
 
@@ -496,7 +506,7 @@
         return;
       }
 
-      // Decode profile from NFC URL fragment
+      // Decode profile from NFC URL fragment — stays entirely in the browser
       let profile;
       try {
         const json = decodeURIComponent(escape(atob(hash)));
