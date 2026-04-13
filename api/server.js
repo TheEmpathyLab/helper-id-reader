@@ -605,10 +605,11 @@ app.post('/lookup', lookupLimiter, async (req, res) => {
     return res.status(429).json({ error: 'Too many failed attempts for this code. Please try again in 15 minutes.' });
   }
 
-  // Find active profile by code
+  // Fetch only the fields needed for authentication + access logging.
+  // pin_hash and profile.id are fetched here but never returned to the client.
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, pin_hash, code, first_name, last_name, preferred_name, date_of_birth, headshot_url, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, blood_type, allergies, medications, conditions, primary_physician, insurance_provider, insurance_id, advance_directives, is_minor')
     .eq('code', normalizedCode)
     .eq('status', 'active')
     .maybeSingle();
@@ -642,9 +643,10 @@ app.post('/lookup', lookupLimiter, async (req, res) => {
     failed_attempt: false,
   });
 
-  // Return sanitized profile — never expose pin_hash
-  const { pin_hash, ...safeProfile } = profile;
-  return res.json({ profile: safeProfile });
+  // Return explicit allowlist — internal fields (id, pin_hash) are never sent to the client.
+  // Adding new columns to the profiles table will NOT automatically expose them here.
+  const { id, pin_hash, ...responseProfile } = profile;
+  return res.json({ profile: responseProfile });
 });
 
 // ============================================================
