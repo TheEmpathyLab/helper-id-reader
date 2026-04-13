@@ -239,6 +239,33 @@ alter table access_logs enable row level security;
 -- ip_address IS stored — justified for rate limiting and intrusion detection.
 --
 -- ============================================================
+-- BACKUP AND RECOVERY (documented 2026-04-13)
+-- ============================================================
+-- Plan: Supabase Pro
+-- Scheduled backups: daily, automatic, visible in Project Settings → Backups
+-- PITR (point-in-time recovery): available but deferred — extra cost,
+--   revisit when member count and liability exposure justifies it.
+--
+-- Recovery procedure:
+--   1. Go to supabase.com → Project Settings → Backups
+--   2. Select the backup date to restore from
+--   3. Click Restore — Supabase restores to a new project (does not overwrite live)
+--   4. Update SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in DigitalOcean env vars
+--      to point to the restored project
+--   5. Verify member data and profiles are intact via SQL Editor
+--   6. Re-enable pg_cron purge job (see ACCESS LOG TTL section below)
+--
+-- RPO (Recovery Point Objective) by table:
+--   profiles, members, households — max 24 hours data loss acceptable
+--   access_logs — max 24 hours acceptable (security audit trail, not critical data)
+--
+-- Secondary backup: download manual SQL dump from Backups tab before
+--   any major migration or schema change.
+--
+-- Credentials location: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+--   are in DigitalOcean App Platform → Settings → Environment Variables (encrypted).
+--
+-- ============================================================
 -- ACCESS LOG TTL — AUTOMATED PURGE (run once in Supabase SQL Editor)
 -- ============================================================
 -- Requires pg_cron extension. Enable in Supabase:
