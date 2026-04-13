@@ -184,6 +184,44 @@ alter table access_logs enable row level security;
 -- households: deny all non-service-role direct access for now.
 
 -- ============================================================
+-- DATA RETENTION POLICY (decided 2026-04-13)
+-- ============================================================
+--
+-- access_logs:
+--   Retained for 90 days rolling, then purged.
+--   Rationale: sufficient for intrusion detection review and member
+--   access transparency. Reassess if security incidents require longer.
+--   Implementation: scheduled Supabase function or periodic API job (TODO post-launch).
+--   SQL to purge manually if needed:
+--     DELETE FROM access_logs WHERE accessed_at < now() - interval '90 days';
+--
+-- profiles (lapsed subscription):
+--   On subscription lapse → profile status set to 'pending' (CODE+PIN stops working).
+--   Data retained for 30 days to allow reactivation.
+--   After 30 days with no renewal → profile and all associated data purged.
+--   Member record (members table) retained for billing reconciliation.
+--   On final purge → member receives email with PDF profile export.
+--   Implementation: subscription lapse handling via Stripe webhook
+--   (customer.subscription.deleted event) + scheduled purge job (TODO post-launch).
+--
+-- stripe_customer_id / stripe_subscription_id in members table:
+--   Intentional — links financial identity to account record, not to medical profile.
+--   Medical data lives in profiles, which is a separate table. Acceptable at current scale.
+--   Revisit if HIPAA compliance becomes a requirement.
+--
+-- ============================================================
+-- DATA MINIMIZATION AUDIT (completed 2026-04-13)
+-- ============================================================
+-- All fields in profiles confirmed justified for emergency use:
+--   Required: first_name, last_name, preferred_name, date_of_birth, headshot_url,
+--             ec1_*/ec2_* contacts, blood_type, allergies, medications, conditions,
+--             advance_directives, access_tier, requires_auth, is_minor
+--   Useful but optional (member-controlled): primary_physician,
+--             insurance_provider, insurance_id
+-- user_agent is NOT stored in access_logs (not in schema — no action needed).
+-- ip_address IS stored — justified for rate limiting and intrusion detection.
+--
+-- ============================================================
 -- NEXT STEPS (manual — Supabase dashboard)
 -- ============================================================
 -- 1. Storage → New bucket → name: "headshots" → toggle Private
