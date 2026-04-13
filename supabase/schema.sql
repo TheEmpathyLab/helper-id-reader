@@ -184,6 +184,23 @@ alter table access_logs enable row level security;
 -- households: deny all non-service-role direct access for now.
 
 -- ============================================================
+-- ENCRYPTION AT REST (documented 2026-04-13)
+-- ============================================================
+-- Supabase provides AES-256 encryption at the storage layer via AWS.
+-- All data — including clinical fields (conditions, allergies, medications)
+-- — is encrypted at rest at the infrastructure level.
+--
+-- Field-level application encryption (encrypting values before writing
+-- to Supabase so the DB never stores plaintext clinical data) has been
+-- evaluated and deferred. Decision rationale:
+--   - Adds key management complexity with minimal additional protection
+--     at current scale given RLS + service-role-only access
+--   - Cannot query or filter encrypted fields
+--   - Helper-ID is consent-driven and HIPAA-aligned, not HIPAA compliant
+--   - Members explicitly choose to share their information
+--   - Revisit when member count reaches 1,000
+--
+-- ============================================================
 -- DATA RETENTION POLICY (decided 2026-04-13)
 -- ============================================================
 --
