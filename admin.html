@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Admin</title>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    body { background: #F6F6F6; }
+
+    /* ── Header ── */
+    .admin-header {
+      background: var(--black);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #333;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: white;
+    }
+    .admin-logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .admin-header-logo span { font-weight: 600; font-size: 0.95rem; color: white; }
+    .admin-badge {
+      background: var(--red);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+    .admin-header-right { display: flex; align-items: center; gap: 16px; }
+    .admin-user-label { font-size: 0.82rem; color: #aaa; }
+    .admin-logout { font-size: 0.82rem; color: #aaa; cursor: pointer; text-decoration: underline; }
+    .admin-logout:hover { color: white; }
+
+    /* ── Layout ── */
+    .admin-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Access denied / loading ── */
+    .status-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 40vh;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .status-center h2 { font-family: var(--font-display); font-size: 1.6rem; margin-bottom: 8px; }
+    .status-center p { color: var(--gray-dark); font-size: 0.95rem; }
+
+    /* ── Section title ── */
+    .section-heading {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray-mid);
+      margin-bottom: 12px;
+    }
+
+    /* ── Stat tiles ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat-tile {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--gray-mid);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      line-height: 1;
+      color: var(--black);
+    }
+    .stat-value.red { color: var(--red); }
+    .stat-sub {
+      font-size: 0.78rem;
+      color: var(--gray-mid);
+      margin-top: 4px;
+    }
+
+    /* ── Card wrapper ── */
+    .admin-card {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .admin-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .admin-card-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .admin-card-count {
+      font-size: 0.82rem;
+      color: var(--gray-mid);
+    }
+
+    /* ── Members table ── */
+    .members-table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray-mid);
+      padding: 10px 16px;
+      border-bottom: 1.5px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #F0F0F0;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAFA; }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pill-active { background: #D1FAE5; color: #065F46; }
+    .pill-pending { background: #FEF3C7; color: #92400E; }
+    .pill-none { background: #F3F4F6; color: #6B7280; }
+    .pill-admin { background: #EDE9FE; color: #5B21B6; }
+
+    .action-btn {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--red);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .action-btn:hover { background: var(--red-light); }
+    .action-btn.muted { color: var(--gray-mid); }
+    .action-btn.muted:hover { background: var(--gray-light); color: var(--gray-dark); }
+
+    /* ── Inline edit row ── */
+    .inline-edit-row {
+      display: none;
+      background: #FAFAFA;
+    }
+    .inline-edit-row td {
+      padding: 12px 16px;
+    }
+    .inline-edit-inner {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .inline-edit-inner input {
+      flex: 1;
+      min-width: 200px;
+      padding: 7px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+      font-family: var(--font-body);
+    }
+    .inline-edit-inner input:focus { outline: none; border-color: var(--red); }
+    .save-btn {
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 7px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .save-btn:hover { background: var(--red-dark); }
+    .cancel-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .inline-msg { font-size: 0.82rem; color: var(--gray-mid); }
+    .inline-msg.ok { color: #065F46; }
+    .inline-msg.err { color: var(--red); }
+
+    /* ── Access logs ── */
+    .log-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      border-bottom: 1px solid #F0F0F0;
+      font-size: 0.85rem;
+    }
+    .log-row:last-child { border-bottom: none; }
+    .log-method {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .log-method.nfc { background: #DBEAFE; color: #1D4ED8; }
+    .log-method.cp { background: #F3F4F6; color: #374151; }
+    .log-method.fail { background: #FEE2E2; color: #991B1B; }
+    .log-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log-code { font-family: monospace; font-size: 0.82rem; color: var(--gray-mid); }
+    .log-ip { font-size: 0.78rem; color: var(--gray-mid); flex-shrink: 0; }
+    .log-time { font-size: 0.78rem; color: var(--gray-mid); flex-shrink: 0; text-align: right; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--gray-mid);
+      font-size: 0.9rem;
+    }
+
+    /* ── Refresh btn ── */
+    .refresh-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--gray-dark);
+    }
+    .refresh-btn:hover { border-color: var(--red); color: var(--red); }
+  </style>
+</head>
+<body>
+
+  <header class="admin-header">
+    <a href="/" class="admin-header-logo">
+      <div class="admin-logo-mark">HID</div>
+      <span>Helper-ID</span>
+      <span class="admin-badge">Admin</span>
+    </a>
+    <div class="admin-header-right">
+      <span class="admin-user-label" id="admin-email-label"></span>
+      <span class="admin-logout" onclick="logout()">Log out</span>
+    </div>
+  </header>
+
+  <!-- ── LOADING ── -->
+  <div id="screen-loading" class="screen active">
+    <div class="status-center">
+      <p style="color:var(--gray-mid);">Loading…</p>
+    </div>
+  </div>
+
+  <!-- ── NO SESSION ── -->
+  <div id="screen-no-session" class="screen">
+    <div class="status-center">
+      <h2>Admin Access</h2>
+      <p style="max-width:380px;margin-top:8px;">
+        Open your <a href="dashboard.html" style="color:var(--red);font-weight:600;">member dashboard</a>,
+        then click <strong>Admin Panel</strong> to access this page.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── ACCESS DENIED ── -->
+  <div id="screen-denied" class="screen">
+    <div class="status-center">
+      <h2>Access Denied</h2>
+      <p>Your account does not have admin privileges.</p>
+    </div>
+  </div>
+
+  <!-- ── ADMIN DASHBOARD ── -->
+  <div id="screen-admin" class="screen">
+    <div class="admin-wrap">
+
+      <!-- Stats -->
+      <p class="section-heading">Platform Overview</p>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-tile">
+          <div class="stat-label">Total Members</div>
+          <div class="stat-value" id="stat-total">—</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Active</div>
+          <div class="stat-value" id="stat-active">—</div>
+          <div class="stat-sub" id="stat-pending-sub">— pending</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Lookups (7d)</div>
+          <div class="stat-value" id="stat-lookups7">—</div>
+          <div class="stat-sub" id="stat-lookups30-sub">— last 30 days</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Failed Attempts (7d)</div>
+          <div class="stat-value red" id="stat-failed">—</div>
+        </div>
+      </div>
+
+      <!-- Members -->
+      <div class="admin-card" id="members-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">Members</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="admin-card-count" id="members-count"></span>
+            <button class="refresh-btn" onclick="loadAll()">Refresh</button>
+          </div>
+        </div>
+        <div class="members-table-wrap">
+          <table id="members-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Member</th>
+                <th>Profile</th>
+                <th>Profile Name</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="members-tbody">
+              <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Access Logs -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">Recent Access Logs</div>
+          <span class="admin-card-count">last 50 events</span>
+        </div>
+        <div id="logs-wrap">
+          <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    let _session = null;
+
+    // ============================================================
+    // Init — read session from URL param
+    // ============================================================
+    (async () => {
+      const params  = new URLSearchParams(window.location.search);
+      const session = params.get('session');
+
+      if (!session) {
+        show('screen-no-session');
+        return;
+      }
+
+      _session = session;
+      history.replaceState({}, '', window.location.pathname);
+
+      await loadAll();
+    })();
+
+    // ============================================================
+    // Screens
+    // ============================================================
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // ============================================================
+    // Logout
+    // ============================================================
+    function logout() {
+      _session = null;
+      show('screen-no-session');
+    }
+
+    // ============================================================
+    // Load everything
+    // ============================================================
+    async function loadAll() {
+      try {
+        const [statsRes, membersRes, logsRes] = await Promise.all([
+          fetch(`${API}/admin/stats`,   { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session: _session }) }),
+          fetch(`${API}/admin/members`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session: _session }) }),
+          fetch(`${API}/admin/logs`,    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session: _session }) }),
+        ]);
+
+        if (statsRes.status === 403 || membersRes.status === 403) {
+          show('screen-denied');
+          return;
+        }
+        if (statsRes.status === 401 || membersRes.status === 401) {
+          show('screen-no-session');
+          return;
+        }
+
+        const stats   = await statsRes.json();
+        const members = await membersRes.json();
+        const logs    = await logsRes.json();
+
+        renderStats(stats);
+        renderMembers(members.members || []);
+        renderLogs(logs.logs || []);
+
+        show('screen-admin');
+
+      } catch (err) {
+        console.error('Admin load error:', err);
+        show('screen-no-session');
+      }
+    }
+
+    // ============================================================
+    // Stats
+    // ============================================================
+    function renderStats(s) {
+      document.getElementById('stat-total').textContent       = s.members.total ?? '—';
+      document.getElementById('stat-active').textContent      = s.members.active ?? '—';
+      document.getElementById('stat-pending-sub').textContent = `${s.members.pending ?? 0} pending`;
+      document.getElementById('stat-lookups7').textContent    = s.lookups.last7d ?? '—';
+      document.getElementById('stat-lookups30-sub').textContent = `${s.lookups.last30d ?? 0} last 30 days`;
+      document.getElementById('stat-failed').textContent      = s.security.failedAttempts7d ?? '—';
+    }
+
+    // ============================================================
+    // Members table
+    // ============================================================
+    function renderMembers(members) {
+      document.getElementById('members-count').textContent = `${members.length} total`;
+
+      const tbody = document.getElementById('members-tbody');
+      if (!members.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">No members yet.</div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = members.map(m => {
+        const joined    = m.created_at ? new Date(m.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+        const name      = m.profile ? [m.profile.first_name, m.profile.last_name].filter(Boolean).join(' ') || '—' : '—';
+        const memberPill = statusPill(m.status);
+        const profPill   = statusPill(m.profileStatus);
+        const adminBadge = m.is_admin ? '<span class="status-pill pill-admin" style="margin-left:4px;">Admin</span>' : '';
+        const resendBtn  = m.status === 'pending'
+          ? `<button class="action-btn muted" onclick="resendSetup('${m.id}', this)">Resend Setup</button>`
+          : '';
+
+        return `
+          <tr id="row-${m.id}">
+            <td style="font-family:monospace;font-size:0.82rem;">${escHtml(m.email)}${adminBadge}</td>
+            <td style="text-transform:capitalize;">${m.plan || '—'}</td>
+            <td>${memberPill}</td>
+            <td>${profPill}</td>
+            <td>${escHtml(name)}</td>
+            <td style="white-space:nowrap;">${joined}</td>
+            <td style="white-space:nowrap;">
+              <button class="action-btn" onclick="toggleEdit('${m.id}', '${escHtml(m.email)}')">Edit Email</button>
+              ${resendBtn}
+            </td>
+          </tr>
+          <tr class="inline-edit-row" id="edit-row-${m.id}">
+            <td colspan="7">
+              <div class="inline-edit-inner">
+                <input type="email" id="edit-email-${m.id}" value="${escHtml(m.email)}" placeholder="New email address" />
+                <button class="save-btn" onclick="saveEmail('${m.id}')">Save</button>
+                <button class="cancel-btn" onclick="toggleEdit('${m.id}', '${escHtml(m.email)}')">Cancel</button>
+                <span class="inline-msg" id="edit-msg-${m.id}"></span>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    function statusPill(status) {
+      if (status === 'active')  return '<span class="status-pill pill-active">Active</span>';
+      if (status === 'pending') return '<span class="status-pill pill-pending">Pending</span>';
+      return '<span class="status-pill pill-none">—</span>';
+    }
+
+    function toggleEdit(memberId, currentEmail) {
+      const editRow = document.getElementById(`edit-row-${memberId}`);
+      const isOpen  = editRow.style.display === 'table-row';
+      // Close all open edit rows first
+      document.querySelectorAll('.inline-edit-row').forEach(r => r.style.display = 'none');
+      if (!isOpen) {
+        editRow.style.display = 'table-row';
+        document.getElementById(`edit-email-${memberId}`).focus();
+      }
+    }
+
+    async function saveEmail(memberId) {
+      const input  = document.getElementById(`edit-email-${memberId}`);
+      const msgEl  = document.getElementById(`edit-msg-${memberId}`);
+      const newEmail = input.value.trim();
+      msgEl.textContent = '';
+      msgEl.className   = 'inline-msg';
+      if (!newEmail) { msgEl.textContent = 'Enter an email.'; msgEl.classList.add('err'); return; }
+
+      try {
+        const res = await fetch(`${API}/admin/update-email`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, memberId, newEmail }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Update failed');
+        msgEl.textContent = 'Saved.';
+        msgEl.classList.add('ok');
+        // Update the displayed email in the main row
+        const rowCell = document.querySelector(`#row-${memberId} td:first-child`);
+        if (rowCell) {
+          const adminBadge = rowCell.querySelector('.status-pill');
+          rowCell.childNodes[0].textContent = newEmail;
+          if (!adminBadge) rowCell.textContent = newEmail;
+        }
+        setTimeout(() => { document.getElementById(`edit-row-${memberId}`).style.display = 'none'; }, 1200);
+      } catch (err) {
+        msgEl.textContent = err.message;
+        msgEl.classList.add('err');
+      }
+    }
+
+    async function resendSetup(memberId, btn) {
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await fetch(`${API}/admin/resend-setup`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, memberId }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        btn.textContent = 'Sent ✓';
+        btn.style.color = '#065F46';
+      } catch (err) {
+        btn.textContent = 'Error';
+        btn.style.color = 'var(--red)';
+        btn.disabled = false;
+      }
+    }
+
+    // ============================================================
+    // Access logs
+    // ============================================================
+    function renderLogs(logs) {
+      const wrap = document.getElementById('logs-wrap');
+      if (!logs.length) {
+        wrap.innerHTML = '<div class="empty-state">No access events recorded yet.</div>';
+        return;
+      }
+
+      wrap.innerHTML = logs.map(l => {
+        const name    = l.profile ? [l.profile.first_name, l.profile.last_name].filter(Boolean).join(' ') || '—' : '—';
+        const code    = l.profile?.code || '—';
+        const time    = l.accessed_at ? timeAgo(l.accessed_at) : '—';
+        const method  = l.failed_attempt ? 'fail' : (l.access_method || 'cp');
+        const label   = l.failed_attempt ? 'FAIL' : method.toUpperCase();
+
+        return `
+          <div class="log-row">
+            <span class="log-method ${method}">${escHtml(label)}</span>
+            <span class="log-name">${escHtml(name)}</span>
+            <span class="log-code">${escHtml(code)}</span>
+            <span class="log-ip">${escHtml(l.ip_address || '—')}</span>
+            <span class="log-time">${time}</span>
+          </div>`;
+      }).join('');
+    }
+
+    // ============================================================
+    // Utilities
+    // ============================================================
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function timeAgo(iso) {
+      const diff = Date.now() - new Date(iso).getTime();
+      const m    = Math.floor(diff / 60000);
+      if (m < 1)   return 'just now';
+      if (m < 60)  return `${m}m ago`;
+      const h = Math.floor(m / 60);
+      if (h < 24)  return `${h}h ago`;
+      const d = Math.floor(h / 24);
+      return `${d}d ago`;
+    }
+  </script>
+</body>
+</html>

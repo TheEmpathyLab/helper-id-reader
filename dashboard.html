@@ -677,6 +677,7 @@
         <div id="log-list"><div class="log-empty">No access events yet.</div></div>
       </div>
 
+      <a id="admin-panel-link" href="#" class="logout-link" style="display:none;color:var(--red);" onclick="openAdmin()">Admin Panel →</a>
       <a class="logout-link" onclick="logout()">Log out</a>
 
     </div>
@@ -764,6 +765,11 @@
       _activeProfileId = _ownProfileId;
 
       show('screen-dash');
+
+      // Admin link
+      if (member.is_admin) {
+        document.getElementById('admin-panel-link').style.display = 'block';
+      }
 
       // Header
       const fn = ownProfile?.first_name || '';
@@ -1102,6 +1108,13 @@
             <span class="log-meta">${date} at ${time}${ip}</span>
           </div>`;
       }).join('');
+    }
+
+    // ============================================================
+    // Admin Panel
+    // ============================================================
+    function openAdmin() {
+      window.location.href = `admin.html?session=${encodeURIComponent(_session)}`;
     }
 
     // ============================================================

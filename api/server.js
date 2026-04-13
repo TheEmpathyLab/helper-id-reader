@@ -967,7 +967,7 @@ app.post('/member-data', async (req, res) => {
 
   const { data: member } = await supabase
     .from('members')
-    .select('id, email, plan, status, created_at')
+    .select('id, email, plan, status, is_admin, created_at')
     .eq('id', payload.memberId)
     .maybeSingle();
 
@@ -1389,6 +1389,166 @@ app.post('/admin/provision', async (req, res) => {
   }
 
   return res.json({ memberId: member.id, profileId: newProfile.id, code, pin: rawPin });
+});
+
+// ============================================================
+// ---- ADMIN ROUTES ----
+// ============================================================
+// All admin routes require a valid session token for a member
+// with is_admin = true. Auth is checked via requireAdmin middleware.
+
+async function requireAdmin(req, res, next) {
+  const { session } = req.body;
+  if (!session) return res.status(401).json({ error: 'Missing session' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, email, is_admin')
+    .eq('id', payload.memberId)
+    .maybeSingle();
+
+  if (!member || !member.is_admin) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  req.adminMember = member;
+  next();
+}
+
+// ---- POST /admin/stats ----
+// Platform overview: member counts, profile counts, lookup activity, revenue breakdown.
+app.post('/admin/stats', requireAdmin, async (req, res) => {
+  const [
+    { count: totalMembers },
+    { count: activeMembers },
+    { count: pendingMembers },
+    { count: activeProfiles },
+    { count: lookups7d },
+    { count: lookups30d },
+    { count: failedAttempts7d },
+  ] = await Promise.all([
+    supabase.from('members').select('*', { count: 'exact', head: true }),
+    supabase.from('members').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('members').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('access_logs').select('*', { count: 'exact', head: true })
+      .eq('failed_attempt', false)
+      .gte('accessed_at', new Date(Date.now() - 7  * 86400000).toISOString()),
+    supabase.from('access_logs').select('*', { count: 'exact', head: true })
+      .eq('failed_attempt', false)
+      .gte('accessed_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+    supabase.from('access_logs').select('*', { count: 'exact', head: true })
+      .eq('failed_attempt', true)
+      .gte('accessed_at', new Date(Date.now() - 7  * 86400000).toISOString()),
+  ]);
+
+  return res.json({
+    members: { total: totalMembers, active: activeMembers, pending: pendingMembers },
+    profiles: { active: activeProfiles },
+    lookups:  { last7d: lookups7d, last30d: lookups30d },
+    security: { failedAttempts7d },
+  });
+});
+
+// ---- POST /admin/members ----
+// Full member list with profile status and flags.
+app.post('/admin/members', requireAdmin, async (req, res) => {
+  const { data: members } = await supabase
+    .from('members')
+    .select('id, email, plan, status, is_admin, created_at')
+    .order('created_at', { ascending: false });
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('member_id, first_name, last_name, code, status, headshot_url');
+
+  const profileMap = {};
+  (profiles || []).forEach(p => { profileMap[p.member_id] = p; });
+
+  const result = (members || []).map(m => ({
+    ...m,
+    profile:         profileMap[m.id] || null,
+    hasHeadshot:     !!(profileMap[m.id]?.headshot_url),
+    isTempEmail:     m.email.startsWith('shelton+'),
+    profileStatus:   profileMap[m.id]?.status || 'none',
+  }));
+
+  return res.json({ members: result });
+});
+
+// ---- POST /admin/update-email ----
+// Update a member's email address.
+app.post('/admin/update-email', requireAdmin, async (req, res) => {
+  const { memberId, newEmail } = req.body;
+  if (!memberId || !newEmail) return res.status(400).json({ error: 'Missing memberId or newEmail' });
+
+  const { error } = await supabase
+    .from('members')
+    .update({ email: newEmail.toLowerCase().trim() })
+    .eq('id', memberId);
+
+  if (error) return res.status(500).json({ error: 'Update failed' });
+  return res.json({ success: true });
+});
+
+// ---- POST /admin/resend-setup ----
+// Resend setup link to a pending member.
+app.post('/admin/resend-setup', requireAdmin, async (req, res) => {
+  const { memberId } = req.body;
+  if (!memberId) return res.status(400).json({ error: 'Missing memberId' });
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, email, status')
+    .eq('id', memberId)
+    .maybeSingle();
+
+  if (!member) return res.status(404).json({ error: 'Member not found' });
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('code, pin_hash')
+    .eq('member_id', memberId)
+    .maybeSingle();
+
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+  const token    = generateSetupToken(member.id, '000-000'); // placeholder — member sets PIN on setup
+  const setupUrl = `${SITE_URL}/setup.html?token=${token}`;
+
+  await sendWelcomeEmail({ email: member.email, code: profile.code, pin: '—', setupUrl, plan: 'individual' });
+  return res.json({ success: true });
+});
+
+// ---- POST /admin/logs ----
+// Recent access logs across all profiles.
+app.post('/admin/logs', requireAdmin, async (req, res) => {
+  const { data: logs } = await supabase
+    .from('access_logs')
+    .select('id, profile_id, access_method, ip_address, failed_attempt, accessed_at')
+    .order('accessed_at', { ascending: false })
+    .limit(50);
+
+  // Enrich with profile name
+  const profileIds = [...new Set((logs || []).map(l => l.profile_id))];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, code')
+    .in('id', profileIds);
+
+  const profileMap = {};
+  (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+  const enriched = (logs || []).map(l => ({
+    ...l,
+    profile: profileMap[l.profile_id] || null,
+  }));
+
+  return res.json({ logs: enriched });
 });
 
 // ---- 404 catch-all ----
