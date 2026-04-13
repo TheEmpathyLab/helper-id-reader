@@ -48,36 +48,44 @@
       .hero { grid-template-columns:1fr; gap:32px; }
       .hero h1 { font-size:1.9rem; }
     }
-    .products-inner { max-width: var(--max-width); margin: 0 auto; }
+    .products-inner { max-width: 760px; margin: 0 auto; }
     .products-header { text-align: center; margin-bottom: 40px; }
     .products-header h2 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 8px; }
     .products-header p { color: var(--gray-dark); font-size: 0.95rem; }
-    .product-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .product-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
     .product-card {
       border: 2px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 28px 22px;
+      padding: 28px 24px;
       display: flex; flex-direction: column;
       text-align: center; position: relative;
       transition: box-shadow 0.15s;
     }
     .product-card:hover { box-shadow: var(--shadow-lg); }
-    .product-card.featured { border-color: var(--red); }
+    .product-card.featured { border-color: var(--red); border-width: 2.5px; }
     .product-card.featured::before {
-      content: 'Most Popular';
+      content: '★ Full Service';
       position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
       background: var(--red); color: white;
       font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
       padding: 3px 14px; border-radius: 999px; white-space: nowrap;
     }
+    .product-tier {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 16px; padding: 4px 10px; border-radius: 999px; display: inline-block;
+    }
+    .tier-diy { background: var(--gray-light); color: var(--gray-mid); }
+    .tier-full { background: var(--red-light); color: var(--red-dark); }
     .product-icon { font-size: 2.4rem; margin-bottom: 12px; }
-    .product-name { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
-    .product-price { font-family: var(--font-display); font-size: 2rem; color: var(--red); line-height: 1.1; margin-bottom: 14px; }
+    .product-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+    .product-tagline { font-size: 0.85rem; color: var(--gray-dark); margin-bottom: 14px; line-height: 1.5; }
+    .product-price { font-family: var(--font-display); font-size: 2.2rem; color: var(--red); line-height: 1.1; margin-bottom: 20px; }
     .product-price .sub { font-family: var(--font-body); font-size: 0.78rem; color: var(--gray-mid); font-weight: 400; }
     .product-price.free-price { color: #16A34A; }
-    .product-features { list-style: none; text-align: left; margin-bottom: 20px; flex: 1; }
-    .product-features li { font-size: 0.82rem; color: var(--gray-dark); padding: 4px 0; display: flex; gap: 8px; }
+    .product-features { list-style: none; text-align: left; margin-bottom: 24px; flex: 1; }
+    .product-features li { font-size: 0.85rem; color: var(--gray-dark); padding: 5px 0; display: flex; gap: 8px; line-height: 1.4; }
     .product-features li::before { content: '✓'; color: var(--red); font-weight: 700; flex-shrink: 0; }
+    .product-features li.highlight { font-weight: 600; color: var(--black); }
     .why-section { background: var(--black); padding: 56px 24px; color: white; }
     .why-inner { max-width: var(--max-width); margin: 0 auto; }
     .why-inner .hid-section-label { color: #F87171; }
@@ -86,7 +94,7 @@
     .why-item h4 { font-size: 0.95rem; color: white; margin-bottom: 6px; }
     .why-item p { font-size: 0.85rem; color: #aaa; line-height: 1.55; }
     .why-icon { width:40px;height:40px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:12px; }
-    @media(max-width:720px) {
+    @media(max-width:620px) {
       .product-grid { grid-template-columns:1fr; }
       .why-grid { grid-template-columns:1fr; gap:20px; }
     }
@@ -144,18 +152,53 @@
     <div class="products-inner">
       <div class="products-header">
         <span class="hid-section-label">Choose Your Path</span>
-        <h2>Three ways to be ready</h2>
-        <p>Pick the plan that fits. No lock-in on the one-time options.</p>
+        <h2>How do you want to be ready?</h2>
+        <p>Start free and do it yourself — or let us handle everything from setup to delivery.</p>
       </div>
       <div class="product-grid">
 
+        <!-- ── FREE PDF ── -->
         <div class="product-card">
+          <span class="product-tier tier-diy">DIY — Self-Guided</span>
+          <div class="product-icon">📄</div>
+          <div class="product-name">Free PDF Profile</div>
+          <div class="product-tagline">Download, fill out, and manage your own emergency profile. You bring the tools.</div>
+          <div class="product-price free-price">Free</div>
+          <ul class="product-features">
+            <li>Pre-formatted emergency profile template</li>
+            <li>Print it, laminate it, keep it in your wallet</li>
+            <li>Works with any NFC tag you source yourself</li>
+            <li>No account, no subscription — ever</li>
+          </ul>
+          <a href="pdf.html" class="hid-btn hid-btn-outline hid-btn-full">Create Your Free PDF →</a>
+        </div>
+
+        <!-- ── FULL MEMBERSHIP ── -->
+        <div class="product-card featured">
+          <span class="product-tier tier-full">Full Service — We Do It For You</span>
+          <div class="product-icon">🤝</div>
+          <div class="product-name">Full Membership</div>
+          <div class="product-tagline">We set it up, ship you the tags, and keep your profile live and ready — 24/7.</div>
+          <div class="product-price">$55 <span class="sub">per year</span></div>
+          <ul class="product-features">
+            <li class="highlight">Live hosted profile — CODE + PIN access</li>
+            <li class="highlight">First responders can pull your profile anywhere, instantly</li>
+            <li>NFC tags shipped to your door</li>
+            <li>Member dashboard — update your profile anytime</li>
+            <li>We handle setup, hosting, and support</li>
+          </ul>
+          <a href="#" data-stripe="fullMembership" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Join Now →</a>
+        </div>
+
+        <!-- ── HIDDEN DIY TIERS — restore when video tutorials are ready ──
+        <div class="product-card">
+          <span class="product-tier tier-diy">DIY — Self-Guided</span>
           <div class="product-icon">📥</div>
           <div class="product-name">Digital Download</div>
           <div class="product-price">$9 <span class="sub">one-time</span></div>
           <ul class="product-features">
             <li>Profile URL generated and emailed</li>
-            <li>Step-by-step NFC writing guide included</li>
+            <li>Step-by-step video tutorial included</li>
             <li>Works on any modern smartphone</li>
             <li>No subscription ever</li>
           </ul>
@@ -163,35 +206,21 @@
         </div>
 
         <div class="product-card">
+          <span class="product-tier tier-diy">DIY — We Ship the Hardware</span>
           <div class="product-icon">🏷️</div>
-          <div class="product-name">NFC Pack + Digital Download</div>
+          <div class="product-name">NFC Kit</div>
           <div class="product-price">$35 <span class="sub">one-time</span></div>
           <ul class="product-features">
-            <li>NFC tags shipped to you</li>
-            <li>Profile URL + writing guide included</li>
-            <li>Works on any modern smartphone</li>
+            <li>NFC tags and stickers shipped to you</li>
+            <li>You write the tag yourself (iOS/Android app)</li>
+            <li>Step-by-step video tutorial included</li>
             <li>No subscription ever</li>
           </ul>
-          <a href="#" data-stripe="nfcPack" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Get the Pack →</a>
+          <a href="#" data-stripe="nfcPack" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Get the Kit →</a>
         </div>
-
-        <div class="product-card featured">
-          <div class="product-icon">🤝</div>
-          <div class="product-name">Full Membership</div>
-          <div class="product-price">$55 <span class="sub">per year</span></div>
-          <ul class="product-features">
-            <li>Hosted CODE+PIN profile</li>
-            <li>NFC Pack included</li>
-            <li>Ongoing support &amp; updates</li>
-            <li>Includes NFC tag + hosted profile</li>
-          </ul>
-          <a href="#" data-stripe="fullMembership" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Join Now →</a>
-        </div>
+        ── END HIDDEN DIY TIERS ── -->
 
       </div>
-      <p style="text-align:center;margin-top:20px;font-size:0.85rem;color:var(--gray-mid);">
-        Just need the basics? <a href="pdf.html" style="color:var(--red);text-decoration:none;font-weight:600;">Create a free PDF →</a>
-      </p>
     </div>
   </section>
 
