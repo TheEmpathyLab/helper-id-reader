@@ -600,6 +600,11 @@ app.post('/lookup', lookupLimiter, async (req, res) => {
 
   const normalizedCode = code.trim().toUpperCase();
 
+  // Reject demo codes — demo profiles are client-side only and must never hit this endpoint
+  if (normalizedCode.startsWith('DEMO-') || normalizedCode === 'DEMO') {
+    return res.status(404).json({ error: 'Profile not found' });
+  }
+
   // Code-based lockout check — catches distributed brute-force across IPs
   if (isCodeLocked(normalizedCode)) {
     return res.status(429).json({ error: 'Too many failed attempts for this code. Please try again in 15 minutes.' });
