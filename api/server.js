@@ -1002,7 +1002,7 @@ app.post('/member-data', async (req, res) => {
 
   const { data: logs } = await supabase
     .from('access_logs')
-    .select('access_method, ip_address, accessed_at, profile_id')
+    .select('access_method, ip_address, accessed_at, profile_id, failed_attempt')
     .in('profile_id', profiles.map(p => p.id))
     .order('accessed_at', { ascending: false })
     .limit(10);

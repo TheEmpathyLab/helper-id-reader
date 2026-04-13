@@ -222,6 +222,29 @@ alter table access_logs enable row level security;
 -- ip_address IS stored — justified for rate limiting and intrusion detection.
 --
 -- ============================================================
+-- ACCESS LOG TTL — AUTOMATED PURGE (run once in Supabase SQL Editor)
+-- ============================================================
+-- Requires pg_cron extension. Enable in Supabase:
+--   Dashboard → Database → Extensions → search "pg_cron" → Enable
+--
+-- Then run this to schedule the nightly purge:
+--
+--   select cron.schedule(
+--     'purge-old-access-logs',       -- job name
+--     '0 3 * * *',                   -- runs at 3am UTC daily
+--     $$
+--       delete from access_logs
+--       where accessed_at < now() - interval '90 days';
+--     $$
+--   );
+--
+-- To verify it was scheduled:
+--   select * from cron.job;
+--
+-- To remove the job if needed:
+--   select cron.unschedule('purge-old-access-logs');
+--
+-- ============================================================
 -- NEXT STEPS (manual — Supabase dashboard)
 -- ============================================================
 -- 1. Storage → New bucket → name: "headshots" → toggle Private
