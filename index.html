@@ -120,9 +120,11 @@
 
     <!-- Left: brand copy -->
     <div class="hero-copy">
-      <div class="hero-eyebrow">Emergency ID</div>
-      <h1>It is time<br /><em>to be a Helper!</em></h1>
-      <p class="hero-desc">We were told to look for the helpers and guess what, <b>here you are!</b> Welcome Helper!<br /><br />If this is an emergency, please call 911.</p>
+      <div class="hero-eyebrow">Emergency Information</div>
+      <h1>Look for the helpers.<br /><em>By the way, it's you!</em></h1>
+      <p class="hero-desc">Fred Rogers said that when things get scary, look for the helpers. You showed up.
+The person in front of you is a Helper-ID member. Their medical information, emergency contacts, and care instructions are one step away. Thanks for being their Helper.
+<br><br>If this is an emergency, call 911 first.</p>
       <div class="hero-cta-row">
         <a href="#products" class="hid-btn hid-btn-outline">Join the Helpers →</a>
       </div>
@@ -130,8 +132,8 @@
 
     <!-- Right: CODE+PIN lookup card -->
     <div class="hero-form-card">
-      <h3>Start Helping</h3>
-      <p>Enter their CODE and PIN <br>or<br> Scan their key tag or NFC card with your phone.</p>
+      <h2>Be the Helper</h2>
+      <p>Enter their CODE and PIN — or scan their card or key tag with your phone.</p>
       <input class="hid-input" type="text" id="hero-code" placeholder="CODE (e.g. A3BX7K)"
              autocomplete="off" autocapitalize="characters"
              onkeydown="if(event.key==='Enter')heroLookup()" />
@@ -141,6 +143,7 @@
       <button class="hid-btn hid-btn-primary hid-btn-full" onclick="heroLookup()">
         Access Their Profile
       </button>
+      <p><i><br>Want a demonstration?<br>Enter Code: 323232 / PIN: 323232</i></p>
       <div id="hero-error">Invalid CODE or PIN format. Please try again.</div>
       <div class="hero-divider">or</div>
       <a href="reader.html" class="hid-btn hid-btn-outline hid-btn-full" style="font-size:0.85rem;">Open Tag Reader</a>
