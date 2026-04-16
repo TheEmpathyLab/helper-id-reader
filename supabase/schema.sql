@@ -50,6 +50,10 @@ create table members (
 create unique index members_email_idx       on members(email);
 create index members_stripe_customer_id_idx on members(stripe_customer_id);
 
+-- is_admin column added 2026-04-13 via Supabase SQL Editor:
+--   alter table members add column is_admin boolean not null default false;
+-- Shelton's admin account (shelton@helper-id.com) has is_admin = true.
+
 
 -- ---- households ----
 -- One admin member (guardian) manages multiple profiles.
@@ -139,6 +143,33 @@ create table access_logs (
 );
 
 create index access_logs_profile_id_idx on access_logs(profile_id);
+
+
+-- ---- nfc_tokens ----
+-- One row per physical NFC tag. Tied to profile_id (not member_id)
+-- so household members each get their own independent tokens.
+-- Token is a 12-char system-generated alphanumeric string (crypto.randomBytes).
+-- NFC URL format: https://helper-id.com/reader.html?token=TOKEN
+-- Revoking a token does not affect the profile, PIN, or other tokens.
+-- PIN regeneration does not affect NFC tokens — independent credentials.
+
+create table nfc_tokens (
+  id               uuid primary key default uuid_generate_v4(),
+  profile_id       uuid not null references profiles(id) on delete cascade,
+  token            varchar(16) not null unique,
+  label            text,        -- e.g. "keychain tag", "wallet card", "lanyard"
+  status           text not null default 'active' check (status in ('active', 'revoked')),
+  created_at       timestamptz not null default now(),
+  revoked_at       timestamptz,
+  last_accessed_at timestamptz
+);
+
+create index idx_nfc_tokens_token      on nfc_tokens(token);
+create index idx_nfc_tokens_profile_id on nfc_tokens(profile_id);
+
+alter table nfc_tokens enable row level security;
+-- No permissive policies = deny all non-service-role access.
+-- All reads and writes go through server.js using the service role key.
 
 
 -- ============================================================
