@@ -1528,6 +1528,57 @@ async function requireAdmin(req, res, next) {
   next();
 }
 
+// ---- POST /admin/nfc/provision ----
+// Generates a token for a profile and returns the NFC-ready URL.
+// Admin only. A profile can have multiple tokens (one per physical tag).
+app.post('/admin/nfc/provision', requireAdmin, async (req, res) => {
+  const { profileId, label } = req.body;
+  if (!profileId) return res.status(400).json({ error: 'Missing profileId' });
+
+  // Verify profile exists
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+  // Generate unique 12-char alphanumeric token
+  let token;
+  let attempts = 0;
+  while (attempts < 10) {
+    const raw = crypto.randomBytes(9).toString('base64url').slice(0, 12).toUpperCase();
+    const { data: existing } = await supabase
+      .from('nfc_tokens')
+      .select('id')
+      .eq('token', raw)
+      .maybeSingle();
+    if (!existing) { token = raw; break; }
+    attempts++;
+  }
+
+  if (!token) return res.status(500).json({ error: 'Failed to generate unique token' });
+
+  const { error: insertErr } = await supabase
+    .from('nfc_tokens')
+    .insert({
+      profile_id: profileId,
+      token,
+      label:  label || null,
+      status: 'active',
+    });
+
+  if (insertErr) {
+    console.error('/admin/nfc/provision insert failed:', insertErr.message);
+    return res.status(500).json({ error: 'Failed to provision token' });
+  }
+
+  const url = `https://helper-id.com/reader.html?token=${token}`;
+  console.log(`/admin/nfc/provision: token ${token} provisioned for profile ${profileId}`);
+  return res.json({ token, url, label: label || null });
+});
+
 // ---- POST /admin/stats ----
 // Platform overview: member counts, profile counts, lookup activity, revenue breakdown.
 app.post('/admin/stats', requireAdmin, async (req, res) => {
