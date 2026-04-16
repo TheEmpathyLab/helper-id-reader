@@ -655,6 +655,67 @@ app.post('/lookup', lookupLimiter, async (req, res) => {
 });
 
 // ============================================================
+// ---- GET /nfc/:token ----
+// ============================================================
+// Called by reader.html when a NFC tag is tapped (?token= path).
+// No auth required — the token IS the credential.
+// Returns the profile directly (no PIN prompt) or a revoked status.
+
+app.get('/nfc/:token', lookupLimiter, async (req, res) => {
+  const { token } = req.params;
+
+  if (!token) return res.status(400).json({ error: 'Missing token' });
+
+  // Look up the token
+  const { data: nfcToken, error: tokenErr } = await supabase
+    .from('nfc_tokens')
+    .select('id, profile_id, status')
+    .eq('token', token.trim())
+    .maybeSingle();
+
+  if (tokenErr || !nfcToken) {
+    return res.status(404).json({ error: 'Tag not found' });
+  }
+
+  // Revoked — return status only, no profile data
+  if (nfcToken.status === 'revoked') {
+    return res.status(200).json({ status: 'revoked' });
+  }
+
+  // Active — fetch profile using same field allowlist as /lookup
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select('id, code, first_name, last_name, preferred_name, date_of_birth, headshot_url, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, blood_type, allergies, medications, conditions, primary_physician, insurance_provider, insurance_id, advance_directives, is_minor')
+    .eq('id', nfcToken.profile_id)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (profileErr || !profile) {
+    return res.status(404).json({ error: 'Profile not found' });
+  }
+
+  // Update last_accessed_at on the token (fire and forget — don't block response)
+  supabase
+    .from('nfc_tokens')
+    .update({ last_accessed_at: new Date().toISOString() })
+    .eq('id', nfcToken.id)
+    .then(() => {})
+    .catch(err => console.error('nfc last_accessed_at update failed:', err.message));
+
+  // Write access log
+  supabase.from('access_logs').insert({
+    profile_id:     profile.id,
+    access_method:  'nfc',
+    ip_address:     req.headers['x-forwarded-for'] || req.ip || null,
+    failed_attempt: false,
+  }).then(() => {}).catch(err => console.error('nfc access_log insert failed:', err.message));
+
+  // Return profile — id excluded (internal), no pin_hash (not fetched)
+  const { id, ...responseProfile } = profile;
+  return res.json({ status: 'active', profile: responseProfile });
+});
+
+// ============================================================
 // ---- POST /validate-token ----
 // ============================================================
 // Validates a setup token from the welcome email.
