@@ -1453,6 +1453,54 @@ app.post('/admin/provision', async (req, res) => {
 });
 
 // ============================================================
+// ---- POST /nfc/revoke ----
+// ============================================================
+// Member-authenticated. Member can only revoke tokens belonging
+// to their own profiles. Idempotent — revoking an already-revoked
+// token returns success.
+
+app.post('/nfc/revoke', async (req, res) => {
+  const { session, token } = req.body;
+  if (!session || !token) return res.status(400).json({ error: 'Missing session or token' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  // Look up token + verify it belongs to this member via profile ownership
+  const { data: nfcToken, error: tokenErr } = await supabase
+    .from('nfc_tokens')
+    .select('id, status, profile_id')
+    .eq('token', token.trim())
+    .maybeSingle();
+
+  if (tokenErr || !nfcToken) return res.status(404).json({ error: 'Token not found' });
+
+  // Confirm the profile belongs to the requesting member
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, member_id')
+    .eq('id', nfcToken.profile_id)
+    .eq('member_id', payload.memberId)
+    .maybeSingle();
+
+  if (!profile) return res.status(403).json({ error: 'Access denied' });
+
+  // Already revoked — idempotent success
+  if (nfcToken.status === 'revoked') return res.json({ success: true });
+
+  // Revoke it
+  const { error: revokeErr } = await supabase
+    .from('nfc_tokens')
+    .update({ status: 'revoked', revoked_at: new Date().toISOString() })
+    .eq('id', nfcToken.id);
+
+  if (revokeErr) return res.status(500).json({ error: 'Revocation failed' });
+
+  return res.json({ success: true });
+});
+
+// ============================================================
 // ---- ADMIN ROUTES ----
 // ============================================================
 // All admin routes require a valid session token for a member
