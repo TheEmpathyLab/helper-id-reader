@@ -328,6 +328,35 @@
       margin-bottom: 24px;
     }
 
+    /* ── Revoked / invalid tag screens ── */
+    .tag-status-screen {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .tag-status-screen .status-icon {
+      font-size: 3.2rem;
+      margin-bottom: 20px;
+    }
+    .tag-status-screen h2 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .tag-status-screen p {
+      color: var(--gray-dark);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-bottom: 28px;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .tag-status-screen.revoked h2 { color: var(--gray-dark); }
+
     /* ── Responsive ── */
     @media (max-width: 600px) {
       .entry-split { grid-template-columns: 1fr; }
@@ -486,6 +515,22 @@
     <h2>Couldn't Read Profile</h2>
     <p>This tag may be damaged or was written with an older format. Please contact the tag owner.</p>
     <a href="index.html" class="hid-btn hid-btn-primary">Back to Home</a>
+  </div>
+
+  <!-- REVOKED TAG STATE -->
+  <div class="tag-status-screen revoked" id="revoked-state">
+    <div class="status-icon">🔒</div>
+    <h2>This tag has been reported lost or replaced.</h2>
+    <p>If you found this tag, no personal information is accessible. The owner has deactivated it.</p>
+    <a href="index.html" class="hid-btn hid-btn-outline">Back to Home</a>
+  </div>
+
+  <!-- INVALID TAG STATE -->
+  <div class="tag-status-screen" id="invalid-state">
+    <div class="status-icon">❓</div>
+    <h2>This tag could not be found.</h2>
+    <p>It may be expired or invalid. Visit helper-id.com for help, or contact the tag owner.</p>
+    <a href="index.html" class="hid-btn hid-btn-outline">Back to Home</a>
   </div>
 
   <footer class="hid-footer">
@@ -662,12 +707,52 @@
     render();
     window.addEventListener('hashchange', render);
 
+    // ── NFC token lookup ─────────────────────────────────────────────
+    // Called when ?token= is present in the URL (Full Membership NFC tap path).
+    // Fetches profile directly — no PIN prompt. Existing hash + CODE+PIN paths
+    // are completely unchanged.
+
+    (function tokenLookup() {
+      const params = new URLSearchParams(window.location.search);
+      const token  = params.get('token');
+      if (!token || window.location.hash) return;
+
+      // Hide entry screen while loading
+      document.getElementById('entry-screen').style.display = 'none';
+
+      fetch('/api/nfc/' + encodeURIComponent(token))
+        .then(res => res.json().then(data => ({ status: res.status, data })))
+        .then(({ status, data }) => {
+          if (status === 404) {
+            document.getElementById('invalid-state').style.display = 'block';
+            return;
+          }
+          if (data.status === 'revoked') {
+            document.getElementById('revoked-state').style.display = 'block';
+            return;
+          }
+          if (data.status === 'active' && data.profile) {
+            const profile = normalizeSupabaseProfile(data.profile);
+            document.getElementById('emg-banner').style.display = 'block';
+            document.getElementById('page-body').style.display  = 'block';
+            renderProfile(profile);
+            return;
+          }
+          // Unexpected response
+          document.getElementById('invalid-state').style.display = 'block';
+        })
+        .catch(() => {
+          document.getElementById('invalid-state').style.display = 'block';
+        });
+    })();
+
     // Auto-submit CODE+PIN if passed as URL params (from setup.html success screen)
     (function autoLookup() {
       const params = new URLSearchParams(window.location.search);
       const code   = params.get('code');
       const pin    = params.get('pin');
-      if (!code || window.location.hash) return;
+      // Skip if token lookup is handling this page load
+      if (!code || window.location.hash || params.get('token')) return;
       document.getElementById('cp-code').value = code;
       if (pin) {
         document.getElementById('cp-pin').value = pin;
