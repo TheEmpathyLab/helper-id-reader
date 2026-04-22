@@ -44,15 +44,16 @@
   --space-8: 32px;
   --space-10: 40px;
 
-  /* --- Typography scale --- */
-  --text-xs: 0.72rem;    /* badges, fine print */
-  --text-sm: 0.82rem;    /* hints, metadata, footer */
-  --text-base: 1rem;     /* body copy, inputs */
-  --text-md: 1.1rem;     /* subheadings, large buttons */
-  --text-lg: 1.25rem;    /* card headings */
-  --text-xl: 1.5rem;     /* page subtitles */
-  --text-2xl: 2rem;      /* page titles (h1) */
-  --text-display: 2.5rem; /* hero / marketing headline */
+  /* --- Typography scale (16px html base) --- */
+  --text-2xs: 0.6875rem;  /* 11px — wallet fine print */
+  --text-xs:  0.75rem;    /* 12px — badges, section labels */
+  --text-sm:  0.875rem;   /* 14px — hints, metadata, nav */
+  --text-base: 1.125rem;  /* 18px — body copy, inputs (accessible) */
+  --text-md:  1.25rem;    /* 20px — subheadings, large buttons */
+  --text-lg:  1.5rem;     /* 24px — card headings */
+  --text-xl:  1.875rem;   /* 30px — page subtitles */
+  --text-2xl: 2.25rem;    /* 36px — page titles (h1) */
+  --text-display: 3rem;   /* 48px — hero / marketing headline */
 
   /* --- Line heights --- */
   --leading-tight: 1.1;
@@ -76,9 +77,10 @@
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 18px; -webkit-text-size-adjust: 100%; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
 body {
   font-family: var(--font-body);
+  font-size: var(--text-base);
   color: var(--black);
   background: var(--white);
   line-height: 1.6;
@@ -119,7 +121,7 @@ body {
   justify-content: center;
   color: white;
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--text-sm);
   letter-spacing: -0.5px;
   flex-shrink: 0;
 }
@@ -127,7 +129,7 @@ body {
 .hid-logo-text {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: var(--text-md);
   color: var(--black);
   letter-spacing: -0.3px;
 }
@@ -143,7 +145,7 @@ body {
 }
 
 .hid-nav a {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--gray-dark);
   text-decoration: none;
@@ -169,7 +171,7 @@ body {
   color: #999;
   padding: 28px 24px;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
 }
 
 .hid-footer a {
@@ -190,12 +192,12 @@ body {
 .hid-footer-logo .hid-logo-mark {
   width: 28px;
   height: 28px;
-  font-size: 11px;
+  font-size: var(--text-2xs);
 }
 
 .hid-footer-logo span {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
   color: var(--white);
 }
 
@@ -219,14 +221,14 @@ body {
 
 .hid-page-title h1 {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: var(--text-2xl);
   color: var(--black);
   line-height: 1.2;
   margin-bottom: 8px;
 }
 
 .hid-page-title p {
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--gray-dark);
   max-width: 560px;
 }
@@ -242,7 +244,7 @@ body {
 }
 
 .hid-card-title {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -257,7 +259,7 @@ body {
 
 .hid-label {
   display: block;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--black);
   margin-bottom: 6px;
@@ -266,7 +268,7 @@ body {
 .hid-label .hid-hint {
   font-weight: 400;
   color: var(--gray-mid);
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
 }
 
 .hid-input,
@@ -274,7 +276,7 @@ body {
 .hid-textarea {
   width: 100%;
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--black);
   background: var(--white);
   border: 1.5px solid var(--border);
@@ -312,7 +314,7 @@ body {
   justify-content: center;
   gap: 8px;
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   border: none;
   border-radius: var(--radius);
@@ -356,7 +358,7 @@ body {
 .hid-btn-full { width: 100%; }
 
 .hid-btn-lg {
-  font-size: 1.1rem;
+  font-size: var(--text-md);
   padding: 16px 32px;
   border-radius: 12px;
 }
@@ -364,7 +366,7 @@ body {
 /* ---- Badges / Tags ---- */
 .hid-badge {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -389,7 +391,7 @@ body {
   gap: 12px;
   padding: 14px 16px;
   border-radius: var(--radius);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   margin-bottom: 20px;
 }
 
@@ -419,7 +421,7 @@ body {
 
 /* ---- Section headers ---- */
 .hid-section-label {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -430,7 +432,7 @@ body {
 /* ---- Profile display (reader view) ---- */
 .hid-profile-name {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: var(--text-2xl);
   color: var(--black);
   line-height: 1.1;
 }
@@ -459,13 +461,13 @@ body {
   justify-content: center;
   flex-shrink: 0;
   color: var(--red);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .hid-contact-info { flex: 1; }
-.hid-contact-name { font-weight: 600; font-size: 1rem; }
-.hid-contact-rel { font-size: 0.82rem; color: var(--gray-mid); }
-.hid-contact-phone { font-size: 0.95rem; color: var(--gray-dark); margin-top: 2px; }
+.hid-contact-name { font-weight: 600; font-size: var(--text-base); }
+.hid-contact-rel { font-size: var(--text-sm); color: var(--gray-mid); }
+.hid-contact-phone { font-size: var(--text-base); color: var(--gray-dark); margin-top: 2px; }
 
 /* ---- URL output box ---- */
 .hid-url-box {
@@ -474,7 +476,7 @@ body {
   border-radius: var(--radius);
   padding: 14px 16px;
   font-family: monospace;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--gray-dark);
   word-break: break-all;
   line-height: 1.5;
@@ -494,7 +496,7 @@ body {
   flex: 1;
   padding: 12px 8px;
   text-align: center;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--gray-mid);
   background: var(--gray-light);
@@ -516,7 +518,7 @@ body {
 
 .hid-step-num {
   display: block;
-  font-size: 1.1rem;
+  font-size: var(--text-md);
   font-weight: 700;
   margin-bottom: 2px;
 }
@@ -545,7 +547,7 @@ body {
 }
 .hid-field-error-msg {
   color: var(--red);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   margin-top: 4px;
 }
 
@@ -561,7 +563,7 @@ body {
 .hid-credential-row { margin-bottom: 20px; }
 .hid-credential-row:last-child { margin-bottom: 0; }
 .hid-credential-label {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -570,7 +572,7 @@ body {
 }
 .hid-credential-value {
   font-family: 'DM Mono', 'Courier New', monospace;
-  font-size: 2rem;
+  font-size: var(--text-2xl);
   font-weight: 700;
   letter-spacing: 0.15em;
   color: var(--black);
@@ -595,7 +597,7 @@ body {
 /* ---- Section heading (display font sub-header with underline) ---- */
 .hid-section-heading {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: var(--text-md);
   color: var(--black);
   margin: 24px 0 14px;
   padding-bottom: 8px;
@@ -610,7 +612,7 @@ body {
   margin-bottom: 12px;
 }
 .hid-contact-block-label {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -626,7 +628,7 @@ body {
   box-shadow: 0 1px 6px rgba(0,0,0,0.06);
 }
 .hid-info-card-title {
-  font-size: 0.62rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -636,7 +638,7 @@ body {
 
 /* ---- Profile section label (compact, muted — reader view) ---- */
 .hid-profile-section-label {
-  font-size: 0.62rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -670,19 +672,19 @@ body {
 .hid-wc-logo-mark {
   background: var(--red);
   color: var(--white);
-  font-size: 0.68rem;
+  font-size: var(--text-2xs);
   font-weight: 900;
   padding: 3px 6px;
   border-radius: 4px;
   letter-spacing: 0.04em;
   flex-shrink: 0;
 }
-.hid-wc-logo-text { font-size: 0.82rem; font-weight: 700; color: var(--black); flex: 1; }
-.hid-wc-url { font-size: 0.68rem; color: var(--gray-mid); }
+.hid-wc-logo-text { font-size: var(--text-sm); font-weight: 700; color: var(--black); flex: 1; }
+.hid-wc-url { font-size: var(--text-2xs); color: var(--gray-mid); }
 .hid-wc-cred { margin-bottom: 12px; }
 .hid-wc-cred:last-of-type { margin-bottom: 0; }
 .hid-wc-cred-label {
-  font-size: 0.62rem;
+  font-size: var(--text-2xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -691,7 +693,7 @@ body {
 }
 .hid-wc-cred-value {
   font-family: 'DM Mono', 'Courier New', monospace;
-  font-size: 1.5rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--black);
@@ -700,19 +702,17 @@ body {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--border);
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
   color: var(--gray-mid);
 }
 
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
-  html { font-size: 16px; }
-
   .hid-header { padding: 0 16px; }
 
-  .hid-nav a { 
-    font-size: 0.78rem; 
-    padding: 5px 8px; 
+  .hid-nav a {
+    font-size: var(--text-xs);
+    padding: 5px 8px;
   }
 
   .hid-main { padding: 24px 16px; }
@@ -723,7 +723,7 @@ body {
 
   .hid-page-title h1 { font-size: 1.6rem; }
 
-  .hid-btn-lg { font-size: 1rem; padding: 14px 24px; }
+  .hid-btn-lg { font-size: var(--text-base); padding: 14px 24px; }
 
   .hid-steps { flex-direction: column; }
   .hid-step { border-right: none; border-bottom: 1.5px solid var(--border); }

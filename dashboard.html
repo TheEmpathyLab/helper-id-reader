@@ -32,12 +32,12 @@
     }
     .login-box h1 {
       font-family: var(--font-display);
-      font-size: 1.8rem;
+      font-size: var(--text-2xl);
       margin-bottom: 8px;
     }
     .login-box p {
       color: var(--gray-dark);
-      font-size: 0.95rem;
+      font-size: var(--text-sm);
       margin-bottom: 28px;
     }
     .login-sent {
@@ -47,7 +47,7 @@
       margin-top: 20px;
     }
     .login-sent .sent-icon { font-size: 2.4rem; margin-bottom: 12px; }
-    .login-sent p { color: var(--gray-dark); margin: 0; font-size: 0.9rem; }
+    .login-sent p { color: var(--gray-dark); margin: 0; font-size: var(--text-sm); }
 
     /* ── Dashboard header ── */
     .dash-header {
@@ -98,7 +98,7 @@
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 0.7rem;
+      font-size: var(--text-2xs);
       font-weight: 700;
       letter-spacing: 0.05em;
       opacity: 0;
@@ -116,11 +116,11 @@
     }
     .dash-name h2 {
       font-family: var(--font-display);
-      font-size: 1.6rem;
+      font-size: var(--text-xl);
       margin-bottom: 2px;
     }
     .dash-name .dash-email {
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       color: var(--gray-mid);
     }
     /* ── Dependent credentials block ── */
@@ -137,7 +137,7 @@
     }
     .dep-cred-item { }
     .dep-cred-label {
-      font-size: 0.68rem;
+      font-size: var(--text-2xs);
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -146,7 +146,7 @@
     }
     .dep-cred-value {
       font-family: 'DM Mono', monospace;
-      font-size: 1.2rem;
+      font-size: var(--text-md);
       font-weight: 700;
       letter-spacing: 0.12em;
       color: var(--black);
@@ -155,7 +155,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.82rem;
+      font-size: var(--text-xs);
       font-weight: 700;
       color: var(--red);
       text-decoration: none;
@@ -199,7 +199,7 @@
     .dep-info { flex: 1; min-width: 0; }
     .dep-name {
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: var(--text-sm);
       color: var(--black);
       white-space: nowrap;
       overflow: hidden;
@@ -207,7 +207,7 @@
     }
     .dep-code {
       font-family: 'DM Mono', monospace;
-      font-size: 0.8rem;
+      font-size: var(--text-xs);
       color: var(--gray-mid);
       margin-top: 2px;
     }
@@ -216,7 +216,7 @@
       color: var(--red);
       font-family: var(--font-body);
       font-weight: 600;
-      font-size: 0.82rem;
+      font-size: var(--text-xs);
       padding: 7px 14px;
       border: 1.5px solid var(--red);
       border-radius: var(--radius);
@@ -238,12 +238,12 @@
       border-radius: var(--radius);
       padding: 10px 14px;
       margin-bottom: 16px;
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       color: var(--black);
     }
     .editing-banner strong { color: var(--red); }
     .editing-banner-back {
-      font-size: 0.8rem;
+      font-size: var(--text-xs);
       color: var(--red);
       cursor: pointer;
       text-decoration: underline;
@@ -254,7 +254,7 @@
     /* ── PIN regen ── */
     .pin-new-reveal {
       font-family: 'DM Mono', monospace;
-      font-size: 1.6rem;
+      font-size: var(--text-xl);
       font-weight: 700;
       letter-spacing: 0.2em;
       color: var(--red);
@@ -268,14 +268,14 @@
       align-items: center;
       padding: 10px 0;
       border-bottom: 1px solid var(--border);
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
     }
     .log-row:last-child { border-bottom: none; }
     .log-method { font-weight: 600; color: var(--black); }
-    .log-meta { color: var(--gray-mid); font-size: 0.78rem; }
+    .log-meta { color: var(--gray-mid); font-size: var(--text-xs); }
     .log-empty {
       color: var(--gray-mid);
-      font-size: 0.88rem;
+      font-size: var(--text-sm);
       text-align: center;
       padding: 16px 0;
     }
@@ -285,19 +285,19 @@
     /* ── Misc ── */
     .err-msg {
       color: var(--red);
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       margin-top: 8px;
       min-height: 20px;
     }
     .success-msg {
       color: var(--color-success);
-      font-size: 0.85rem;
+      font-size: var(--text-sm);
       margin-top: 8px;
     }
     .logout-link {
       display: block;
       text-align: center;
-      font-size: 0.83rem;
+      font-size: var(--text-sm);
       color: var(--gray-mid);
       cursor: pointer;
       margin-top: 32px;
@@ -310,7 +310,7 @@
       margin-top: 6px;
       background: var(--color-success-bg);
       color: var(--color-success);
-      font-size: 0.72rem;
+      font-size: var(--text-xs);
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
