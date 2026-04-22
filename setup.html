@@ -12,6 +12,8 @@
     gtag('js', new Date());
     gtag('config', 'G-588PV5KMPT');
   </script>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
   <link rel="stylesheet" href="hid-style.css" />
   <style>
     .setup-wrap {
@@ -19,22 +21,6 @@
       margin: 0 auto;
       padding: 32px 20px 64px;
     }
-
-    /* ── Progress bar ── */
-    .progress-bar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 32px;
-    }
-    .progress-step {
-      flex: 1;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      transition: background 0.3s;
-    }
-    .progress-step.active  { background: var(--red); }
-    .progress-step.done    { background: var(--black); }
 
     /* ── Screen ── */
     .screen { display: none; }
@@ -54,43 +40,6 @@
       color: var(--gray-dark);
       font-size: 0.95rem;
     }
-    .credential-card {
-      background: var(--white);
-      border: 2px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px 24px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-    }
-    .credential-row {
-      margin-bottom: 20px;
-    }
-    .credential-row:last-child { margin-bottom: 0; }
-    .credential-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--red);
-      margin-bottom: 6px;
-    }
-    .credential-value {
-      font-family: 'DM Mono', monospace;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: var(--black);
-    }
-    .write-it-down {
-      background: var(--red-light);
-      border: 1px solid #FCA5A5;
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      font-size: 0.85rem;
-      color: var(--red-dark);
-      margin-bottom: 24px;
-    }
-    .write-it-down strong { display: block; margin-bottom: 4px; }
 
     /* ── Screen 2: Profile builder ── */
     .transparency-notice {
@@ -103,20 +52,6 @@
       margin-bottom: 24px;
       line-height: 1.5;
     }
-    .section-heading {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      margin: 24px 0 14px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--border);
-    }
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    .field-row.single { grid-template-columns: 1fr; }
     .field-group { display: flex; flex-direction: column; gap: 5px; }
     .field-group label {
       font-size: 0.78rem;
@@ -133,21 +68,6 @@
       color: var(--gray-mid);
       font-size: 0.78rem;
     }
-    .contact-block {
-      background: var(--gray-light);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-bottom: 12px;
-    }
-    .contact-block-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--gray-mid);
-      margin-bottom: 10px;
-    }
-
     /* ── Screen 3: Review ── */
     .review-intro {
       text-align: center;
@@ -225,9 +145,15 @@
     }
     .screen-error p { color: var(--gray-dark); margin-bottom: 20px; }
 
+    @media print {
+      body > * { display: none !important; }
+      #wallet-print-area { display: block !important; padding: 48px; }
+      #wallet-print-area .hid-wallet-card { border: 2px solid #ccc; max-width: 340px; }
+    }
+
     @media (max-width: 480px) {
-      .field-row { grid-template-columns: 1fr; }
-      .credential-value { font-size: 1.6rem; }
+      .hid-input-row { grid-template-columns: 1fr; }
+      .hid-credential-value { font-size: 1.6rem; }
     }
   </style>
 </head>
@@ -236,10 +162,10 @@
   <div class="setup-wrap">
 
     <!-- Progress bar -->
-    <div class="progress-bar">
-      <div class="progress-step active" id="step-1"></div>
-      <div class="progress-step" id="step-2"></div>
-      <div class="progress-step" id="step-3"></div>
+    <div class="hid-progress-bar">
+      <div class="hid-progress-step active" id="step-1"></div>
+      <div class="hid-progress-step" id="step-2"></div>
+      <div class="hid-progress-step" id="step-3"></div>
     </div>
 
     <!-- ── LOADING ── -->
@@ -280,21 +206,23 @@
         <p>Write down your CODE and PIN before continuing. These are how anyone accesses your emergency profile.</p>
       </div>
 
-      <div class="credential-card">
-        <div class="credential-row">
-          <div class="credential-label">Your CODE</div>
-          <div class="credential-value" id="reveal-code">———</div>
+      <div class="hid-credential-card">
+        <div class="hid-credential-row">
+          <div class="hid-credential-label">Your CODE</div>
+          <div class="hid-credential-value" id="reveal-code">———</div>
         </div>
-        <div class="credential-row">
-          <div class="credential-label">Your PIN</div>
-          <div class="credential-value" id="reveal-pin">———</div>
+        <div class="hid-credential-row">
+          <div class="hid-credential-label">Your PIN</div>
+          <div class="hid-credential-value" id="reveal-pin">———</div>
         </div>
       </div>
 
-      <div class="write-it-down">
+      <div class="hid-alert hid-alert-error">
         <strong>Write these down now.</strong>
-        Store your CODE and PIN somewhere physical — a card in your wallet, your fridge, or with a trusted family member. Do not rely on this email as your only copy.
+        Store your CODE and PIN somewhere physical — a card in your wallet, your fridge, or with a trusted family member. Keep the welcome email as your permanent record.
       </div>
+
+      <button class="hid-btn hid-btn-outline hid-btn-full" style="margin-bottom:12px;" onclick="printSetupCard()">Print Your Wallet Card</button>
 
       <button class="hid-btn hid-btn-primary hid-btn-full" onclick="goToScreen(2)">
         I've written it down — Build My Profile →
@@ -309,7 +237,7 @@
       </div>
 
       <!-- Photo -->
-      <div class="section-heading">Photo <span style="font-weight:400;font-size:0.85rem;color:var(--gray-mid)">(optional)</span></div>
+      <div class="hid-section-heading">Photo <span style="font-weight:400;font-size:0.85rem;color:var(--gray-mid)">(optional)</span></div>
       <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
         <img class="photo-preview" id="photo-preview" alt="Preview" />
         <div class="photo-upload-label" id="photo-upload-label">
@@ -320,8 +248,8 @@
       </div>
 
       <!-- Personal -->
-      <div class="section-heading">Personal Information</div>
-      <div class="field-row">
+      <div class="hid-section-heading">Personal Information</div>
+      <div class="hid-input-row">
         <div class="field-group">
           <label for="s-first">First Name <span class="req">*</span></label>
           <input class="hid-input" type="text" id="s-first" autocomplete="given-name" />
@@ -331,7 +259,7 @@
           <input class="hid-input" type="text" id="s-last" autocomplete="family-name" />
         </div>
       </div>
-      <div class="field-row">
+      <div class="hid-input-row">
         <div class="field-group">
           <label for="s-pref">Preferred Name <span class="hint">(optional)</span></label>
           <input class="hid-input" type="text" id="s-pref" placeholder="Goes by…" />
@@ -343,10 +271,10 @@
       </div>
 
       <!-- Emergency Contacts -->
-      <div class="section-heading">Emergency Contacts</div>
-      <div class="contact-block">
-        <div class="contact-block-label">Contact 1</div>
-        <div class="field-row">
+      <div class="hid-section-heading">Emergency Contacts</div>
+      <div class="hid-contact-block">
+        <div class="hid-contact-block-label">Contact 1</div>
+        <div class="hid-input-row">
           <div class="field-group">
             <label>Name</label>
             <input class="hid-input" type="text" id="s-ec1-name" placeholder="Full name" />
@@ -361,16 +289,16 @@
             </select>
           </div>
         </div>
-        <div class="field-row single">
+        <div class="hid-input-row full">
           <div class="field-group">
             <label>Phone</label>
             <input class="hid-input" type="tel" id="s-ec1-phone" />
           </div>
         </div>
       </div>
-      <div class="contact-block">
-        <div class="contact-block-label">Contact 2 <span style="font-weight:400;color:var(--gray-mid)">(optional)</span></div>
-        <div class="field-row">
+      <div class="hid-contact-block">
+        <div class="hid-contact-block-label">Contact 2 <span style="font-weight:400;color:var(--gray-mid)">(optional)</span></div>
+        <div class="hid-input-row">
           <div class="field-group">
             <label>Name</label>
             <input class="hid-input" type="text" id="s-ec2-name" placeholder="Full name" />
@@ -385,7 +313,7 @@
             </select>
           </div>
         </div>
-        <div class="field-row single">
+        <div class="hid-input-row full">
           <div class="field-group">
             <label>Phone</label>
             <input class="hid-input" type="tel" id="s-ec2-phone" />
@@ -394,8 +322,8 @@
       </div>
 
       <!-- Medical -->
-      <div class="section-heading">Medical Information</div>
-      <div class="field-row single">
+      <div class="hid-section-heading">Medical Information</div>
+      <div class="hid-input-row full">
         <div class="field-group">
           <label for="s-blood">Blood Type</label>
           <select class="hid-select" id="s-blood">
@@ -407,25 +335,25 @@
           </select>
         </div>
       </div>
-      <div class="field-row single">
+      <div class="hid-input-row full">
         <div class="field-group">
           <label for="s-allergies">Allergies <span class="hint">— separate with commas</span></label>
           <textarea class="hid-textarea" id="s-allergies" placeholder="Penicillin, shellfish…" rows="2"></textarea>
         </div>
       </div>
-      <div class="field-row single">
+      <div class="hid-input-row full">
         <div class="field-group">
           <label for="s-meds">Current Medications <span class="hint">— name and dosage if known</span></label>
           <textarea class="hid-textarea" id="s-meds" placeholder="Lisinopril 10mg, Metformin 500mg…" rows="2"></textarea>
         </div>
       </div>
-      <div class="field-row single">
+      <div class="hid-input-row full">
         <div class="field-group">
           <label for="s-conditions">Medical Conditions</label>
           <textarea class="hid-textarea" id="s-conditions" placeholder="Type 2 diabetes, hypertension…" rows="2"></textarea>
         </div>
       </div>
-      <div class="field-row single">
+      <div class="hid-input-row full">
         <div class="field-group">
           <label for="s-physician">Primary Physician <span class="hint">(optional)</span></label>
           <input class="hid-input" type="text" id="s-physician" placeholder="Dr. Name — (404) 555-0177" />
@@ -433,8 +361,8 @@
       </div>
 
       <!-- Insurance -->
-      <div class="section-heading">Health Insurance <span style="font-weight:400;font-size:0.85rem;color:var(--gray-mid)">(optional)</span></div>
-      <div class="field-row">
+      <div class="hid-section-heading">Health Insurance <span style="font-weight:400;font-size:0.85rem;color:var(--gray-mid)">(optional)</span></div>
+      <div class="hid-input-row">
         <div class="field-group">
           <label for="s-ins-prov">Provider</label>
           <input class="hid-input" type="text" id="s-ins-prov" placeholder="Medicare / Blue Cross" />
@@ -446,8 +374,8 @@
       </div>
 
       <!-- Advance Directives -->
-      <div class="section-heading">Advance Directives <span style="font-weight:400;font-size:0.85rem;color:var(--gray-mid)">(optional)</span></div>
-      <div class="field-row single">
+      <div class="hid-section-heading">Advance Directives <span style="font-weight:400;font-size:0.85rem;color:var(--gray-mid)">(optional)</span></div>
+      <div class="hid-input-row full">
         <div class="field-group">
           <label for="s-directives">Instructions for care <span class="hint">— DNR, organ donor, etc.</span></label>
           <textarea class="hid-textarea" id="s-directives" placeholder="Do not resuscitate. Organ donor." rows="3"></textarea>
@@ -495,6 +423,26 @@
     </div>
 
   </div><!-- /.setup-wrap -->
+
+  <!-- Wallet card — printed by @media print (body-level so print CSS can isolate it) -->
+  <div id="wallet-print-area" style="display:none;">
+    <div class="hid-wallet-card">
+      <div class="hid-wc-brand">
+        <div class="hid-wc-logo-mark">HID</div>
+        <span class="hid-wc-logo-text">Helper-ID</span>
+        <span class="hid-wc-url">helper-id.com</span>
+      </div>
+      <div class="hid-wc-cred">
+        <div class="hid-wc-cred-label">CODE</div>
+        <div class="hid-wc-cred-value" id="wc-code">—</div>
+      </div>
+      <div class="hid-wc-cred">
+        <div class="hid-wc-cred-label">PIN</div>
+        <div class="hid-wc-cred-value" id="wc-pin">—</div>
+      </div>
+      <div class="hid-wc-footer">Emergency identification · helper-id.com</div>
+    </div>
+  </div>
 
   <script src="hid-form-fields.js"></script>
   <script>
@@ -559,7 +507,7 @@
     function setProgress(active) {
       [1, 2, 3].forEach(n => {
         const el = document.getElementById('step-' + n);
-        el.className = 'progress-step' + (n < active ? ' done' : n === active ? ' active' : '');
+        el.className = 'hid-progress-step' + (n < active ? ' done' : n === active ? ' active' : '');
       });
     }
 
@@ -729,6 +677,13 @@
         btn.textContent = 'Activate My Profile ✓';
         btn.disabled = false;
       }
+    }
+
+    // ── Print wallet card ────────────────────────────────────────────
+    function printSetupCard() {
+      document.getElementById('wc-code').textContent = _code;
+      document.getElementById('wc-pin').textContent  = _pin;
+      window.print();
     }
 
     // ── Resend setup email ───────────────────────────────────────────

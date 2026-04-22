@@ -123,63 +123,6 @@
       font-size: 0.85rem;
       color: var(--gray-mid);
     }
-    .dash-name .dash-status {
-      display: inline-block;
-      margin-top: 6px;
-      background: #D1FAE5;
-      color: #065F46;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 999px;
-    }
-
-    /* ── Credential card ── */
-    .credential-card {
-      background: var(--white);
-      border: 2px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-    }
-    .credential-row { margin-bottom: 16px; }
-    .credential-row:last-child { margin-bottom: 0; }
-    .credential-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--red);
-      margin-bottom: 4px;
-    }
-    .credential-value {
-      font-family: 'DM Mono', monospace;
-      font-size: 1.7rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: var(--black);
-    }
-
-    /* ── Section cards ── */
-    .section-card {
-      background: var(--white);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .section-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--gray-mid);
-      margin-bottom: 16px;
-    }
-
     /* ── Dependent credentials block ── */
     .dep-credentials {
       background: var(--gray-light);
@@ -291,7 +234,7 @@
       align-items: center;
       justify-content: space-between;
       background: var(--red-light);
-      border: 1px solid #FCA5A5;
+      border: 1px solid var(--red-border);
       border-radius: var(--radius);
       padding: 10px 14px;
       margin-bottom: 16px;
@@ -306,42 +249,6 @@
       text-decoration: underline;
       white-space: nowrap;
       margin-left: 12px;
-    }
-    .field-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    .field-group.full { grid-template-columns: 1fr; }
-    .field-label {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--gray-dark);
-      margin-bottom: 4px;
-    }
-    .field-input {
-      width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      font-size: 0.9rem;
-      font-family: var(--font-body);
-      color: var(--black);
-      background: var(--white);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .field-input:focus { border-color: var(--red); }
-    textarea.field-input { resize: vertical; min-height: 72px; }
-    .field-input.field-error {
-      border-color: var(--red) !important;
-      background: var(--red-light);
-    }
-    .field-error-msg {
-      color: var(--red);
-      font-size: 0.78rem;
-      margin-top: 4px;
     }
 
     /* ── PIN regen ── */
@@ -373,37 +280,6 @@
       padding: 16px 0;
     }
 
-    /* ── Buttons ── */
-    .btn-primary {
-      display: inline-block;
-      background: var(--red);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 700;
-      font-size: 0.95rem;
-      padding: 13px 28px;
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: background 0.2s;
-      width: 100%;
-      text-align: center;
-    }
-    .btn-primary:hover { background: var(--red-dark); }
-    .btn-primary:disabled { background: var(--gray-mid); cursor: not-allowed; }
-    .btn-danger {
-      background: transparent;
-      color: var(--red);
-      font-family: var(--font-body);
-      font-weight: 600;
-      font-size: 0.85rem;
-      padding: 9px 20px;
-      border: 1.5px solid var(--red);
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-    .btn-danger:hover { background: var(--red); color: white; }
     .btn-row { display: flex; gap: 10px; margin-top: 16px; }
 
     /* ── Misc ── */
@@ -414,14 +290,9 @@
       min-height: 20px;
     }
     .success-msg {
-      color: #065F46;
+      color: var(--color-success);
       font-size: 0.85rem;
       margin-top: 8px;
-    }
-    .divider {
-      border: none;
-      border-top: 1.5px solid var(--border);
-      margin: 28px 0;
     }
     .logout-link {
       display: block;
@@ -434,9 +305,28 @@
     }
     .logout-link:hover { color: var(--red); }
 
+    .dash-name .dash-status {
+      display: inline-block;
+      margin-top: 6px;
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    @media print {
+      body > * { display: none !important; }
+      #wallet-print-area { display: block !important; padding: 48px; }
+      #wallet-print-area .hid-wallet-card { border: 2px solid #ccc; max-width: 340px; }
+    }
+
     @media (max-width: 480px) {
-      .field-group { grid-template-columns: 1fr; }
-      .credential-value { font-size: 1.4rem; }
+      .hid-input-row { grid-template-columns: 1fr; }
+      .hid-credential-value { font-size: 1.4rem; }
       .dep-card { flex-wrap: wrap; }
       .dep-edit-btn { width: 100%; text-align: center; }
     }
@@ -458,13 +348,13 @@
       <p>Enter your email address and we'll send you a secure login link. No password needed.</p>
 
       <div id="login-form-wrap">
-        <div class="field-group full">
-          <label class="field-label" for="login-email">Email address</label>
-          <input class="field-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
+        <div class="hid-input-row full">
+          <label class="hid-label" for="login-email">Email address</label>
+          <input class="hid-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
         </div>
         <div class="err-msg" id="login-err"></div>
         <div class="btn-row">
-          <button class="btn-primary" id="login-btn" onclick="requestLogin()">Send Login Link</button>
+          <button class="hid-btn hid-btn-primary hid-btn-full" id="login-btn" onclick="requestLogin()">Send Login Link</button>
         </div>
       </div>
 
@@ -496,32 +386,69 @@
       </div>
 
       <!-- Own credentials -->
-      <div class="credential-card">
-        <div class="credential-row">
-          <div class="credential-label">Your CODE</div>
-          <div class="credential-value" id="dash-code">—</div>
+      <div class="hid-credential-card">
+        <div class="hid-credential-row">
+          <div class="hid-credential-label">Your CODE</div>
+          <div class="hid-credential-value" id="dash-code">—</div>
         </div>
-        <div class="credential-row">
-          <div class="credential-label">PIN</div>
+        <div class="hid-credential-row">
+          <div class="hid-credential-label">PIN</div>
           <div style="font-size:0.85rem;color:var(--gray-dark);">
             Your PIN is not stored — only a secure hash is kept. Use <strong>Regenerate PIN</strong> in your profile section if you've lost it.
           </div>
         </div>
       </div>
 
+      <!-- Print My Card -->
+      <div class="hid-card" style="margin-bottom:20px;">
+        <div class="hid-card-title">Print My Card</div>
+        <p style="font-size:0.88rem;color:var(--gray-dark);margin-bottom:16px;">
+          Enter your PIN to generate a printable wallet card. Your PIN is never sent to our servers. Use the PIN from your welcome email, or regenerate it below if you've lost it.
+        </p>
+        <div id="print-pin-form">
+          <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div style="flex:1;">
+              <div class="hid-label" style="margin-bottom:4px;">Your PIN</div>
+              <input class="hid-input" type="text" id="print-pin-input" placeholder="e.g. 482-931" maxlength="10" />
+            </div>
+            <button class="hid-btn hid-btn-primary" onclick="generateWalletCard()">Generate Card</button>
+          </div>
+          <div class="err-msg" id="print-pin-err" style="min-height:0;margin-top:6px;"></div>
+        </div>
+        <div id="print-card-preview" style="display:none;margin-top:16px;">
+          <div class="hid-wallet-card" style="margin-bottom:14px;">
+            <div class="hid-wc-brand">
+              <div class="hid-wc-logo-mark">HID</div>
+              <span class="hid-wc-logo-text">Helper-ID</span>
+              <span class="hid-wc-url">helper-id.com</span>
+            </div>
+            <div class="hid-wc-cred">
+              <div class="hid-wc-cred-label">CODE</div>
+              <div class="hid-wc-cred-value" id="preview-code">—</div>
+            </div>
+            <div class="hid-wc-cred">
+              <div class="hid-wc-cred-label">PIN</div>
+              <div class="hid-wc-cred-value" id="preview-pin">—</div>
+            </div>
+            <div class="hid-wc-footer">Emergency identification · helper-id.com</div>
+          </div>
+          <button class="hid-btn hid-btn-primary hid-btn-full" onclick="printDashCard()">Print This Card →</button>
+        </div>
+      </div>
+
       <!-- Household members — shown only for household admins -->
       <div id="household-section" style="display:none;">
-        <div class="section-card">
-          <div class="section-title" id="household-title">Household</div>
+        <div class="hid-card">
+          <div class="hid-card-title" id="household-title">Household</div>
           <div id="household-members"></div>
         </div>
       </div>
 
-      <hr class="divider" />
+      <hr class="hid-divider" />
 
       <!-- Profile edit — shared for own + dependents -->
-      <div class="section-card">
-        <div class="section-title" id="profile-section-title">Your Profile</div>
+      <div class="hid-card">
+        <div class="hid-card-title" id="profile-section-title">Your Profile</div>
 
         <!-- Banner shown when editing a dependent -->
         <div id="editing-banner" class="editing-banner" style="display:none;">
@@ -531,7 +458,7 @@
 
         <!-- Photo upload button — shown when editing any profile -->
         <div id="edit-photo-row" style="display:none;margin-bottom:16px;">
-          <button class="btn-secondary" style="width:auto;padding:8px 16px;font-size:0.85rem;" onclick="triggerAvatarUpload()">📷 Update Photo</button>
+          <button class="hid-btn hid-btn-secondary" onclick="triggerAvatarUpload()">📷 Update Photo</button>
         </div>
 
         <!-- Dependent credentials — shown when editing a dependent -->
@@ -547,139 +474,159 @@
           <a id="dep-view-link" href="#" target="_blank" class="view-profile-link" style="display:none;">View Profile ↗</a>
         </div>
 
-        <div class="field-group">
+        <div class="hid-input-row">
           <div>
-            <div class="field-label">First Name</div>
-            <input class="field-input" type="text" id="f-fn" />
+            <div class="hid-label">First Name</div>
+            <input class="hid-input" type="text" id="f-fn" />
           </div>
           <div>
-            <div class="field-label">Last Name</div>
-            <input class="field-input" type="text" id="f-ln" />
-          </div>
-        </div>
-
-        <div class="field-group full" style="margin-bottom:12px;">
-          <div>
-            <div class="field-label">Preferred Name</div>
-            <input class="field-input" type="text" id="f-pref" placeholder="Optional — shown at top of reader" />
+            <div class="hid-label">Last Name</div>
+            <input class="hid-input" type="text" id="f-ln" />
           </div>
         </div>
 
-        <div class="field-group">
+        <div class="hid-input-row full" style="margin-bottom:12px;">
           <div>
-            <div class="field-label">Date of Birth</div>
-            <input class="field-input" type="text" id="f-dob" placeholder="MM/DD/YYYY"
+            <div class="hid-label">Preferred Name</div>
+            <input class="hid-input" type="text" id="f-pref" placeholder="Optional — shown at top of reader" />
+          </div>
+        </div>
+
+        <div class="hid-input-row">
+          <div>
+            <div class="hid-label">Date of Birth</div>
+            <input class="hid-input" type="text" id="f-dob" placeholder="MM/DD/YYYY"
               oninput="formatDobInput(this)" onfocus="clearFieldError('f-dob')" maxlength="10" />
-            <div class="field-error-msg" id="f-dob-err" style="display:none;"></div>
+            <div class="hid-field-error-msg" id="f-dob-err" style="display:none;"></div>
           </div>
           <div>
-            <div class="field-label">Blood Type</div>
-            <input class="field-input" type="text" id="f-bt" placeholder="e.g. O+" />
-          </div>
-        </div>
-
-        <hr class="divider" style="margin:16px 0;" />
-        <div class="section-title" style="margin-bottom:12px;">Emergency Contact 1</div>
-        <div class="field-group">
-          <div>
-            <div class="field-label">Name</div>
-            <input class="field-input" type="text" id="f-ec1n" />
-          </div>
-          <div>
-            <div class="field-label">Relationship</div>
-            <input class="field-input" type="text" id="f-ec1r" />
-          </div>
-        </div>
-        <div class="field-group full" style="margin-bottom:12px;">
-          <div>
-            <div class="field-label">Phone</div>
-            <input class="field-input" type="tel" id="f-ec1p" />
+            <div class="hid-label">Blood Type</div>
+            <input class="hid-input" type="text" id="f-bt" placeholder="e.g. O+" />
           </div>
         </div>
 
-        <div class="section-title" style="margin-bottom:12px;">Emergency Contact 2</div>
-        <div class="field-group">
+        <hr class="hid-divider" style="margin:16px 0;" />
+        <div class="hid-card-title" style="margin-bottom:12px;">Emergency Contact 1</div>
+        <div class="hid-input-row">
           <div>
-            <div class="field-label">Name</div>
-            <input class="field-input" type="text" id="f-ec2n" />
+            <div class="hid-label">Name</div>
+            <input class="hid-input" type="text" id="f-ec1n" />
           </div>
           <div>
-            <div class="field-label">Relationship</div>
-            <input class="field-input" type="text" id="f-ec2r" />
+            <div class="hid-label">Relationship</div>
+            <input class="hid-input" type="text" id="f-ec1r" />
           </div>
         </div>
-        <div class="field-group full" style="margin-bottom:12px;">
+        <div class="hid-input-row full" style="margin-bottom:12px;">
           <div>
-            <div class="field-label">Phone</div>
-            <input class="field-input" type="tel" id="f-ec2p" />
+            <div class="hid-label">Phone</div>
+            <input class="hid-input" type="tel" id="f-ec1p" />
           </div>
         </div>
 
-        <hr class="divider" style="margin:16px 0;" />
-        <div class="section-title" style="margin-bottom:12px;">Medical</div>
+        <div class="hid-card-title" style="margin-bottom:12px;">Emergency Contact 2</div>
+        <div class="hid-input-row">
+          <div>
+            <div class="hid-label">Name</div>
+            <input class="hid-input" type="text" id="f-ec2n" />
+          </div>
+          <div>
+            <div class="hid-label">Relationship</div>
+            <input class="hid-input" type="text" id="f-ec2r" />
+          </div>
+        </div>
+        <div class="hid-input-row full" style="margin-bottom:12px;">
+          <div>
+            <div class="hid-label">Phone</div>
+            <input class="hid-input" type="tel" id="f-ec2p" />
+          </div>
+        </div>
 
-        <div class="field-group full" style="margin-bottom:12px;">
+        <hr class="hid-divider" style="margin:16px 0;" />
+        <div class="hid-card-title" style="margin-bottom:12px;">Medical</div>
+
+        <div class="hid-input-row full" style="margin-bottom:12px;">
           <div>
-            <div class="field-label">Allergies</div>
-            <textarea class="field-input" id="f-al" placeholder="Separate with commas"></textarea>
+            <div class="hid-label">Allergies</div>
+            <textarea class="hid-textarea" id="f-al" placeholder="Separate with commas"></textarea>
           </div>
         </div>
-        <div class="field-group full" style="margin-bottom:12px;">
+        <div class="hid-input-row full" style="margin-bottom:12px;">
           <div>
-            <div class="field-label">Medications</div>
-            <textarea class="field-input" id="f-med" placeholder="Separate with commas"></textarea>
+            <div class="hid-label">Medications</div>
+            <textarea class="hid-textarea" id="f-med" placeholder="Separate with commas"></textarea>
           </div>
         </div>
-        <div class="field-group full" style="margin-bottom:12px;">
+        <div class="hid-input-row full" style="margin-bottom:12px;">
           <div>
-            <div class="field-label">Conditions</div>
-            <textarea class="field-input" id="f-cond" placeholder="Separate with commas"></textarea>
+            <div class="hid-label">Conditions</div>
+            <textarea class="hid-textarea" id="f-cond" placeholder="Separate with commas"></textarea>
           </div>
         </div>
-        <div class="field-group full" style="margin-bottom:12px;">
+        <div class="hid-input-row full" style="margin-bottom:12px;">
           <div>
-            <div class="field-label">Primary Physician</div>
-            <input class="field-input" type="text" id="f-doc" placeholder="Name · Phone" />
+            <div class="hid-label">Primary Physician</div>
+            <input class="hid-input" type="text" id="f-doc" placeholder="Name · Phone" />
           </div>
         </div>
-        <div class="field-group full" style="margin-bottom:12px;">
+        <div class="hid-input-row full" style="margin-bottom:12px;">
           <div>
-            <div class="field-label">Advance Directives / Notes</div>
-            <textarea class="field-input" id="f-notes" placeholder="DNR, organ donor, etc."></textarea>
+            <div class="hid-label">Advance Directives / Notes</div>
+            <textarea class="hid-textarea" id="f-notes" placeholder="DNR, organ donor, etc."></textarea>
           </div>
         </div>
 
         <div class="err-msg" id="profile-err"></div>
         <div class="success-msg" id="profile-ok" style="display:none;">Profile saved.</div>
         <div class="btn-row">
-          <button class="btn-primary" id="save-btn" onclick="saveProfile()">Save Changes</button>
+          <button class="hid-btn hid-btn-primary hid-btn-full" id="save-btn" onclick="saveProfile()">Save Changes</button>
         </div>
       </div>
 
       <!-- PIN management — works for active profile (own or dependent) -->
-      <div class="section-card">
-        <div class="section-title">PIN Management</div>
+      <div class="hid-card">
+        <div class="hid-card-title">PIN Management</div>
         <p style="font-size:0.88rem;color:var(--gray-dark);margin-bottom:14px;" id="pin-context-label">
           If you've lost your PIN, generate a new one. Write it down immediately — it won't be shown again.
         </p>
         <div id="pin-new-wrap" style="display:none;">
-          <div class="credential-label">New PIN</div>
+          <div class="hid-credential-label">New PIN</div>
           <div class="pin-new-reveal" id="pin-new-value">—</div>
           <p style="font-size:0.8rem;color:var(--gray-dark);margin-bottom:12px;">Write this down now. It will not be shown again.</p>
         </div>
         <div class="err-msg" id="pin-err"></div>
-        <button class="btn-danger" onclick="regeneratePin()">Regenerate PIN</button>
+        <button class="hid-btn hid-btn-danger" onclick="regeneratePin()">Regenerate PIN</button>
       </div>
 
       <!-- Access log -->
-      <div class="section-card">
-        <div class="section-title">Recent Access Log</div>
+      <div class="hid-card">
+        <div class="hid-card-title">Recent Access Log</div>
         <div id="log-list"><div class="log-empty">No access events yet.</div></div>
       </div>
 
       <a id="admin-panel-link" href="#" class="logout-link" style="display:none;color:var(--red);" onclick="openAdmin()">Admin Panel →</a>
       <a class="logout-link" onclick="logout()">Log out</a>
 
+    </div>
+  </div>
+
+  <!-- Wallet card — printed by @media print (body-level so print CSS can isolate it) -->
+  <div id="wallet-print-area" style="display:none;">
+    <div class="hid-wallet-card">
+      <div class="hid-wc-brand">
+        <div class="hid-wc-logo-mark">HID</div>
+        <span class="hid-wc-logo-text">Helper-ID</span>
+        <span class="hid-wc-url">helper-id.com</span>
+      </div>
+      <div class="hid-wc-cred">
+        <div class="hid-wc-cred-label">CODE</div>
+        <div class="hid-wc-cred-value" id="wc-code">—</div>
+      </div>
+      <div class="hid-wc-cred">
+        <div class="hid-wc-cred-label">PIN</div>
+        <div class="hid-wc-cred-value" id="wc-pin">—</div>
+      </div>
+      <div class="hid-wc-footer">Emergency identification · helper-id.com</div>
     </div>
   </div>
 
@@ -863,6 +810,7 @@
       document.getElementById('pin-new-wrap').style.display = 'none';
 
       populateForm(profile);
+      resetPrintCard();
       document.getElementById('editing-banner').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -885,6 +833,7 @@
 
       const ownProfile = _allProfiles.find(p => p.id === _ownProfileId);
       if (ownProfile) populateForm(ownProfile);
+      resetPrintCard();
     }
 
     // ============================================================
@@ -923,13 +872,13 @@
     // Field error helpers
     // ============================================================
     function showFieldError(fieldId, msg) {
-      document.getElementById(fieldId).classList.add('field-error');
+      document.getElementById(fieldId).classList.add('hid-field-error');
       const errEl = document.getElementById(`${fieldId}-err`);
       if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
     }
 
     function clearFieldError(fieldId) {
-      document.getElementById(fieldId)?.classList.remove('field-error');
+      document.getElementById(fieldId)?.classList.remove('hid-field-error');
       const errEl = document.getElementById(`${fieldId}-err`);
       if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
     }
@@ -1108,6 +1057,40 @@
             <span class="log-meta">${date} at ${time}${ip}</span>
           </div>`;
       }).join('');
+    }
+
+    // ============================================================
+    // Print wallet card
+    // ============================================================
+    function generateWalletCard() {
+      const pin   = document.getElementById('print-pin-input').value.trim();
+      const errEl = document.getElementById('print-pin-err');
+      errEl.textContent = '';
+
+      if (!pin) {
+        errEl.textContent = 'Enter your PIN to generate your card.';
+        return;
+      }
+
+      const profile = _allProfiles.find(p => p.id === _activeProfileId);
+      const code = profile?.code || '—';
+
+      document.getElementById('preview-code').textContent = code;
+      document.getElementById('preview-pin').textContent  = pin;
+      document.getElementById('print-card-preview').style.display = 'block';
+
+      document.getElementById('wc-code').textContent = code;
+      document.getElementById('wc-pin').textContent  = pin;
+    }
+
+    function printDashCard() {
+      window.print();
+    }
+
+    function resetPrintCard() {
+      document.getElementById('print-pin-input').value = '';
+      document.getElementById('print-pin-err').textContent = '';
+      document.getElementById('print-card-preview').style.display = 'none';
     }
 
     // ============================================================

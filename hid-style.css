@@ -521,6 +521,189 @@ body {
   margin-bottom: 2px;
 }
 
+/* ---- Input row: full-width (single column) modifier ---- */
+.hid-input-row.full { grid-template-columns: 1fr; }
+
+/* ---- Button: danger variant ---- */
+.hid-btn-danger {
+  background: transparent;
+  color: var(--red);
+  border: 1.5px solid var(--red);
+}
+.hid-btn-danger:hover { background: var(--red); color: var(--white); }
+
+/* ---- Button: disabled state ---- */
+.hid-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.hid-btn-primary:disabled { background: var(--gray-mid); opacity: 1; }
+
+/* ---- Form: field-level error state ---- */
+.hid-input.hid-field-error,
+.hid-select.hid-field-error,
+.hid-textarea.hid-field-error {
+  border-color: var(--red);
+  background: var(--red-light);
+}
+.hid-field-error-msg {
+  color: var(--red);
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+/* ---- Credential card (setup / dashboard) ---- */
+.hid-credential-card {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.hid-credential-row { margin-bottom: 20px; }
+.hid-credential-row:last-child { margin-bottom: 0; }
+.hid-credential-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 6px;
+}
+.hid-credential-value {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--black);
+}
+
+/* ---- Progress bar (dot/pip style for multi-step flows) ---- */
+.hid-progress-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 32px;
+}
+.hid-progress-step {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+.hid-progress-step.active { background: var(--red); }
+.hid-progress-step.done   { background: var(--black); }
+
+/* ---- Section heading (display font sub-header with underline) ---- */
+.hid-section-heading {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--black);
+  margin: 24px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+/* ---- Contact block (grouped contact fields) ---- */
+.hid-contact-block {
+  background: var(--gray-light);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.hid-contact-block-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-mid);
+  margin-bottom: 10px;
+}
+
+/* ---- Info card (compact, reader view) ---- */
+.hid-info-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.hid-info-card-title {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-mid);
+  margin-bottom: 8px;
+}
+
+/* ---- Profile section label (compact, muted — reader view) ---- */
+.hid-profile-section-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray-mid);
+  margin-bottom: 8px;
+}
+
+/* ---- Profile divider (inset, reader view) ---- */
+.hid-profile-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 16px;
+}
+
+/* ---- Wallet card ---- */
+.hid-wallet-card {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  background: var(--white);
+  max-width: 320px;
+}
+.hid-wc-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.hid-wc-logo-mark {
+  background: var(--red);
+  color: var(--white);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 3px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.hid-wc-logo-text { font-size: 0.82rem; font-weight: 700; color: var(--black); flex: 1; }
+.hid-wc-url { font-size: 0.68rem; color: var(--gray-mid); }
+.hid-wc-cred { margin-bottom: 12px; }
+.hid-wc-cred:last-of-type { margin-bottom: 0; }
+.hid-wc-cred-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 2px;
+}
+.hid-wc-cred-value {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--black);
+}
+.hid-wc-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.65rem;
+  color: var(--gray-mid);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
   html { font-size: 16px; }

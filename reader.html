@@ -91,7 +91,7 @@
     /* ── Emergency banner ── */
     .emg-banner {
       background: var(--red-light);
-      border-bottom: 1.5px solid #FCA5A5;
+      border-bottom: 1.5px solid var(--red-border);
       padding: 7px 20px;
       text-align: center;
       font-size: 10.5px;
@@ -177,23 +177,8 @@
       line-height: 1.5;
     }
 
-    /* Divider */
-    .prof-divider {
-      height: 1px;
-      background: #EBEBEB;
-      margin: 0 16px;
-    }
-
-    /* Section */
-    .prof-section { padding: 14px 16px; }
-    .prof-section-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #c0c0c0;
-      margin-bottom: 8px;
-    }
+    /* Section — padding override for compact reader layout */
+    .hid-profile-section { padding: 14px 16px; }
 
     /* Critical fields */
     .critical-name {
@@ -217,7 +202,7 @@
     .alert-pill {
       display: inline-block;
       background: var(--red-light);
-      border: 1px solid #FCA5A5;
+      border: 1px solid var(--red-border);
       border-radius: 6px;
       padding: 4px 10px;
       font-size: 13px;
@@ -237,18 +222,12 @@
       margin: 3px 3px 3px 0;
     }
 
-    /* Contacts */
-    .contact-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 9px 0;
-      border-bottom: 1px solid #EBEBEB;
-    }
-    .contact-item:last-child { border-bottom: none; }
-    .contact-text { flex: 1; }
-    .contact-name-line { font-size: 14px; color: var(--black); }
-    .contact-sub { font-size: 12px; color: var(--gray-mid); margin-top: 1px; }
+    /* Contacts — compact variants for reader */
+    .hid-contact-item { align-items: center; padding: 9px 0; border-bottom-color: #EBEBEB; }
+    .hid-contact-item:last-child { border-bottom: none; }
+    .hid-contact-info { flex: 1; }
+    .hid-contact-name { font-size: 14px; }
+    .hid-contact-rel { font-size: 12px; margin-top: 1px; }
     .call-btn {
       flex-shrink: 0;
       background: var(--red);
@@ -275,20 +254,6 @@
       gap: 10px;
       margin-bottom: 10px;
       width: 100%;
-    }
-    .info-card {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: 14px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-    }
-    .info-card-title {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #c0c0c0;
-      margin-bottom: 8px;
     }
     .info-row {
       font-size: 12.5px;
@@ -444,35 +409,35 @@
         </div>
       </div>
 
-      <div class="prof-divider"></div>
+      <div class="hid-profile-divider"></div>
 
       <!-- Medical Conditions -->
-      <div class="prof-section" id="sec-conditions">
-        <div class="prof-section-label">Medical conditions</div>
+      <div class="hid-profile-section" id="sec-conditions">
+        <div class="hid-profile-section-label">Medical conditions</div>
         <div id="prof-conditions"></div>
       </div>
 
-      <div class="prof-divider"></div>
+      <div class="hid-profile-divider"></div>
 
       <!-- Allergies -->
-      <div class="prof-section" id="sec-allergies">
-        <div class="prof-section-label">Allergies</div>
+      <div class="hid-profile-section" id="sec-allergies">
+        <div class="hid-profile-section-label">Allergies</div>
         <div id="prof-allergies"></div>
       </div>
 
-      <div class="prof-divider"></div>
+      <div class="hid-profile-divider"></div>
 
       <!-- Medications -->
-      <div class="prof-section" id="sec-medications">
-        <div class="prof-section-label">Medications</div>
+      <div class="hid-profile-section" id="sec-medications">
+        <div class="hid-profile-section-label">Medications</div>
         <div id="prof-medications"></div>
       </div>
 
-      <div class="prof-divider"></div>
+      <div class="hid-profile-divider"></div>
 
       <!-- Emergency Contacts -->
-      <div class="prof-section">
-        <div class="prof-section-label">Emergency contacts</div>
+      <div class="hid-profile-section">
+        <div class="hid-profile-section-label">Emergency contacts</div>
         <div id="prof-contacts"></div>
       </div>
 
@@ -481,23 +446,23 @@
     <!-- Lower detail grid -->
     <div class="lower-grid">
 
-      <div class="info-card">
-        <div class="info-card-title">Vitals</div>
+      <div class="hid-info-card">
+        <div class="hid-info-card-title">Vitals</div>
         <div id="vitals-body"></div>
       </div>
 
-      <div class="info-card">
-        <div class="info-card-title">Medications</div>
+      <div class="hid-info-card">
+        <div class="hid-info-card-title">Medications</div>
         <div id="meds-card-body"></div>
       </div>
 
-      <div class="info-card" id="insurance-card" style="display:none;">
-        <div class="info-card-title">Insurance</div>
+      <div class="hid-info-card" id="insurance-card" style="display:none;">
+        <div class="hid-info-card-title">Insurance</div>
         <div id="ins-body"></div>
       </div>
 
-      <div class="info-card" id="physician-card" style="display:none;">
-        <div class="info-card-title">Physician</div>
+      <div class="hid-info-card" id="physician-card" style="display:none;">
+        <div class="hid-info-card-title">Physician</div>
         <div id="doc-body"></div>
       </div>
 
@@ -664,10 +629,10 @@
       const contactsEl = document.getElementById('prof-contacts');
       if (profile.contacts && profile.contacts.length) {
         contactsEl.innerHTML = profile.contacts.map(c => `
-          <div class="contact-item">
-            <div class="contact-text">
-              <div class="contact-name-line">${esc(c.n || 'Unknown')}</div>
-              <div class="contact-sub">${esc(c.r || '')}${c.r && c.p ? ' · ' : ''}${esc(c.p || '')}</div>
+          <div class="hid-contact-item">
+            <div class="hid-contact-info">
+              <div class="hid-contact-name">${esc(c.n || 'Unknown')}</div>
+              <div class="hid-contact-rel">${esc(c.r || '')}${c.r && c.p ? ' · ' : ''}${esc(c.p || '')}</div>
             </div>
             ${c.p ? '<a href="tel:' + esc(c.p.replace(/\D/g,'')) + '" class="call-btn">Call</a>' : ''}
           </div>
