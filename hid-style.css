@@ -6,21 +6,71 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap');
 
 :root {
+  /* --- Brand colors --- */
   --red: #D0312D;
   --red-dark: #A82320;
   --red-light: #FDECEA;
+  --red-border: #FCA5A5;
+
+  /* --- Neutral palette --- */
   --black: #1A1A1A;
   --gray-dark: #444444;
   --gray-mid: #888888;
   --gray-light: #F4F4F4;
   --white: #FFFFFF;
   --border: #E0E0E0;
+
+  /* --- Semantic / alert colors --- */
+  --color-info: #3730A3;
+  --color-info-bg: #EEF2FF;
+  --color-info-border: #C7D2FE;
+
+  --color-success: #166534;
+  --color-success-bg: #F0FDF4;
+  --color-success-border: #BBF7D0;
+
+  --color-warning: #92400E;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-border: #FDE68A;
+
+  /* --- Spacing scale (4px base) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* --- Typography scale --- */
+  --text-xs: 0.72rem;    /* badges, fine print */
+  --text-sm: 0.82rem;    /* hints, metadata, footer */
+  --text-base: 1rem;     /* body copy, inputs */
+  --text-md: 1.1rem;     /* subheadings, large buttons */
+  --text-lg: 1.25rem;    /* card headings */
+  --text-xl: 1.5rem;     /* page subtitles */
+  --text-2xl: 2rem;      /* page titles (h1) */
+  --text-display: 2.5rem; /* hero / marketing headline */
+
+  /* --- Line heights --- */
+  --leading-tight: 1.1;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  /* --- Effects --- */
   --radius: 10px;
   --radius-lg: 16px;
   --shadow: 0 2px 12px rgba(0,0,0,0.08);
   --shadow-lg: 0 4px 24px rgba(0,0,0,0.12);
+
+  /* --- Type faces --- */
   --font-body: 'DM Sans', sans-serif;
   --font-display: 'DM Serif Display', serif;
+
+  /* --- Layout --- */
   --max-width: 860px;
 }
 
@@ -344,27 +394,27 @@ body {
 }
 
 .hid-alert-info {
-  background: #EEF2FF;
-  color: #3730A3;
-  border: 1px solid #C7D2FE;
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  border: 1px solid var(--color-info-border);
 }
 
 .hid-alert-success {
-  background: #F0FDF4;
-  color: #166534;
-  border: 1px solid #BBF7D0;
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
 }
 
 .hid-alert-warning {
-  background: #FFFBEB;
-  color: #92400E;
-  border: 1px solid #FDE68A;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
 }
 
 .hid-alert-error {
   background: var(--red-light);
   color: var(--red-dark);
-  border: 1px solid #FCA5A5;
+  border: 1px solid var(--red-border);
 }
 
 /* ---- Section headers ---- */
