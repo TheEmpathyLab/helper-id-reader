@@ -16,6 +16,9 @@
   --black: #1A1A1A;
   --gray-dark: #444444;
   --gray-mid: #888888;
+  --gray-muted: #999999;   /* muted chrome / footer text */
+  --gray-faint: #CCCCCC;   /* placeholder text, fine print on dark */
+  --gray-hover: #E8E8E8;   /* secondary interactive hover */
   --gray-light: #F4F4F4;
   --white: #FFFFFF;
   --border: #E0E0E0;
@@ -93,7 +96,7 @@ body {
 .hid-header {
   background: var(--white);
   border-bottom: 2px solid var(--border);
-  padding: 0 24px;
+  padding: 0 var(--space-6);
   height: 64px;
   display: flex;
   align-items: center;
@@ -141,7 +144,7 @@ body {
 .hid-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .hid-nav a {
@@ -168,14 +171,14 @@ body {
 .hid-footer {
   margin-top: auto;
   background: var(--black);
-  color: #999;
-  padding: 28px 24px;
+  color: var(--gray-muted);
+  padding: var(--space-7) var(--space-6);
   text-align: center;
   font-size: var(--text-xs);
 }
 
 .hid-footer a {
-  color: #ccc;
+  color: var(--gray-faint);
   text-decoration: none;
 }
 
@@ -185,8 +188,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .hid-footer-logo .hid-logo-mark {
@@ -207,7 +210,7 @@ body {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: var(--space-10) var(--space-6);
 }
 
 .hid-main.wide {
@@ -216,7 +219,7 @@ body {
 
 /* ---- Page title ---- */
 .hid-page-title {
-  margin-bottom: 32px;
+  margin-bottom: var(--space-8);
 }
 
 .hid-page-title h1 {
@@ -224,7 +227,7 @@ body {
   font-size: var(--text-2xl);
   color: var(--black);
   line-height: 1.2;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .hid-page-title p {
@@ -238,9 +241,9 @@ body {
   background: var(--white);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 28px;
+  padding: var(--space-7);
   box-shadow: var(--shadow);
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .hid-card-title {
@@ -249,12 +252,12 @@ body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--red);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 
 /* ---- Forms ---- */
 .hid-form-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
 .hid-label {
@@ -304,7 +307,7 @@ body {
 .hid-input-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 /* ---- Buttons ---- */
@@ -312,7 +315,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-body);
   font-size: var(--text-base);
   font-weight: 600;
@@ -343,7 +346,7 @@ body {
   color: var(--black);
 }
 
-.hid-btn-secondary:hover { background: #e8e8e8; }
+.hid-btn-secondary:hover { background: var(--gray-hover); }
 
 .hid-btn-outline {
   background: transparent;
@@ -359,7 +362,7 @@ body {
 
 .hid-btn-lg {
   font-size: var(--text-md);
-  padding: 16px 32px;
+  padding: var(--space-4) var(--space-8);
   border-radius: 12px;
 }
 
@@ -382,17 +385,17 @@ body {
 .hid-divider {
   border: none;
   border-top: 1.5px solid var(--border);
-  margin: 24px 0;
+  margin: var(--space-6) 0;
 }
 
 /* ---- Alert / info boxes ---- */
 .hid-alert {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 14px 16px;
   border-radius: var(--radius);
   font-size: var(--text-sm);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
 .hid-alert-info {
@@ -438,13 +441,13 @@ body {
 }
 
 .hid-profile-section {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .hid-contact-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 14px 0;
   border-bottom: 1px solid var(--border);
 }
@@ -486,7 +489,7 @@ body {
 .hid-steps {
   display: flex;
   gap: 0;
-  margin-bottom: 32px;
+  margin-bottom: var(--space-8);
   border-radius: var(--radius);
   overflow: hidden;
   border: 1.5px solid var(--border);
@@ -548,7 +551,7 @@ body {
 .hid-field-error-msg {
   color: var(--red);
   font-size: var(--text-xs);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 /* ---- Credential card (setup / dashboard) ---- */
@@ -556,11 +559,11 @@ body {
   background: var(--white);
   border: 2px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 28px 24px;
-  margin-bottom: 20px;
+  padding: var(--space-7) var(--space-6);
+  margin-bottom: var(--space-5);
   box-shadow: var(--shadow);
 }
-.hid-credential-row { margin-bottom: 20px; }
+.hid-credential-row { margin-bottom: var(--space-5); }
 .hid-credential-row:last-child { margin-bottom: 0; }
 .hid-credential-label {
   font-size: var(--text-xs);
@@ -582,7 +585,7 @@ body {
 .hid-progress-bar {
   display: flex;
   gap: 6px;
-  margin-bottom: 32px;
+  margin-bottom: var(--space-8);
 }
 .hid-progress-step {
   flex: 1;
@@ -599,8 +602,8 @@ body {
   font-family: var(--font-display);
   font-size: var(--text-md);
   color: var(--black);
-  margin: 24px 0 14px;
-  padding-bottom: 8px;
+  margin: var(--space-6) 0 14px;
+  padding-bottom: var(--space-2);
   border-bottom: 2px solid var(--border);
 }
 
@@ -609,7 +612,7 @@ body {
   background: var(--gray-light);
   border-radius: var(--radius);
   padding: 14px;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 .hid-contact-block-label {
   font-size: var(--text-xs);
@@ -633,7 +636,7 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--gray-mid);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 /* ---- Profile section label (compact, muted — reader view) ---- */
@@ -643,30 +646,30 @@ body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--gray-mid);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 /* ---- Profile divider (inset, reader view) ---- */
 .hid-profile-divider {
   height: 1px;
   background: var(--border);
-  margin: 0 16px;
+  margin: 0 var(--space-4);
 }
 
 /* ---- Wallet card ---- */
 .hid-wallet-card {
   border: 2px solid var(--border);
   border-radius: 12px;
-  padding: 20px 22px;
+  padding: var(--space-5) 22px;
   background: var(--white);
   max-width: 320px;
 }
 .hid-wc-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--border);
 }
 .hid-wc-logo-mark {
@@ -681,7 +684,7 @@ body {
 }
 .hid-wc-logo-text { font-size: var(--text-sm); font-weight: 700; color: var(--black); flex: 1; }
 .hid-wc-url { font-size: var(--text-2xs); color: var(--gray-mid); }
-.hid-wc-cred { margin-bottom: 12px; }
+.hid-wc-cred { margin-bottom: var(--space-3); }
 .hid-wc-cred:last-of-type { margin-bottom: 0; }
 .hid-wc-cred-label {
   font-size: var(--text-2xs);
@@ -699,7 +702,7 @@ body {
   color: var(--black);
 }
 .hid-wc-footer {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   padding-top: 10px;
   border-top: 1px solid var(--border);
   font-size: var(--text-2xs);
@@ -708,16 +711,16 @@ body {
 
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
-  .hid-header { padding: 0 16px; }
+  .hid-header { padding: 0 var(--space-4); }
 
   .hid-nav a {
     font-size: var(--text-xs);
     padding: 5px 8px;
   }
 
-  .hid-main { padding: 24px 16px; }
+  .hid-main { padding: var(--space-6) var(--space-4); }
 
-  .hid-card { padding: 20px 16px; }
+  .hid-card { padding: var(--space-5) var(--space-4); }
 
   .hid-input-row { grid-template-columns: 1fr; }
 
