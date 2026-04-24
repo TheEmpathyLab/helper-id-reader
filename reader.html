@@ -746,7 +746,8 @@
         doc:      p.primary_physician || '',
         notes:    p.advance_directives || '',
         ins:      (p.insurance_provider || p.insurance_id)
-                    ? { prov: p.insurance_provider || '', mid: p.insurance_id || '' }
+                    ? { prov: p.insurance_provider || '', mid: p.insurance_id || '',
+                        grp: p.insurance_group || '', ph: p.insurance_phone || '' }
                     : null,
         photo:    p.headshot_url     || null,
       };

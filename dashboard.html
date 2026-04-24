@@ -576,6 +576,30 @@
           </div>
         </div>
 
+        <hr class="hid-divider" style="margin:16px 0;" />
+        <div class="hid-card-title" style="margin-bottom:4px;">Health Insurance <span style="font-weight:400;font-size:var(--text-sm);color:var(--gray-mid);">(optional)</span></div>
+
+        <div class="hid-input-row" style="margin-bottom:12px;">
+          <div>
+            <div class="hid-label">Provider</div>
+            <input class="hid-input" type="text" id="f-ins-prov" placeholder="Medicare / Blue Cross" />
+          </div>
+          <div>
+            <div class="hid-label">Member / Policy ID</div>
+            <input class="hid-input" type="text" id="f-ins-id" placeholder="1EG4-TE5-MK72" />
+          </div>
+        </div>
+        <div class="hid-input-row" style="margin-bottom:12px;">
+          <div>
+            <div class="hid-label">Group Number</div>
+            <input class="hid-input" type="text" id="f-ins-grp" placeholder="Optional" />
+          </div>
+          <div>
+            <div class="hid-label">Insurance Phone</div>
+            <input class="hid-input" type="tel" id="f-ins-ph" placeholder="Optional" />
+          </div>
+        </div>
+
         <div class="err-msg" id="profile-err"></div>
         <div class="success-msg" id="profile-ok" style="display:none;">Profile saved.</div>
         <div class="btn-row">
@@ -902,8 +926,12 @@
       setVal('f-al',    p.allergies          || '');
       setVal('f-med',   p.medications        || '');
       setVal('f-cond',  p.conditions         || '');
-      setVal('f-doc',   p.primary_physician  || '');
-      setVal('f-notes', p.advance_directives || '');
+      setVal('f-doc',     p.primary_physician  || '');
+      setVal('f-notes',   p.advance_directives || '');
+      setVal('f-ins-prov', p.insurance_provider || '');
+      setVal('f-ins-id',   p.insurance_id       || '');
+      setVal('f-ins-grp',  p.insurance_group    || '');
+      setVal('f-ins-ph',   p.insurance_phone    || '');
     }
 
     // ============================================================
@@ -952,6 +980,10 @@
         conditions:         getVal('f-cond'),
         primary_physician:  getVal('f-doc'),
         advance_directives: getVal('f-notes'),
+        insurance_provider: getVal('f-ins-prov'),
+        insurance_id:       getVal('f-ins-id'),
+        insurance_group:    getVal('f-ins-grp'),
+        insurance_phone:    getVal('f-ins-ph'),
       };
 
       try {

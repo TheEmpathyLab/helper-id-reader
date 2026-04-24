@@ -109,6 +109,8 @@ create table profiles (
   -- Insurance
   insurance_provider text,
   insurance_id       text,
+  insurance_group    text,
+  insurance_phone    text,
 
   -- Advance directives
   advance_directives text,

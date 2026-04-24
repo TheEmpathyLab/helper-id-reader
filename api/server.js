@@ -614,7 +614,7 @@ app.post('/lookup', lookupLimiter, async (req, res) => {
   // pin_hash and profile.id are fetched here but never returned to the client.
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, pin_hash, code, first_name, last_name, preferred_name, date_of_birth, headshot_url, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, blood_type, allergies, medications, conditions, primary_physician, insurance_provider, insurance_id, advance_directives, is_minor')
+    .select('id, pin_hash, code, first_name, last_name, preferred_name, date_of_birth, headshot_url, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, blood_type, allergies, medications, conditions, primary_physician, insurance_provider, insurance_id, insurance_group, insurance_phone, advance_directives, is_minor')
     .eq('code', normalizedCode)
     .eq('status', 'active')
     .maybeSingle();
@@ -685,7 +685,7 @@ app.get('/nfc/:token', lookupLimiter, async (req, res) => {
   // Active — fetch profile using same field allowlist as /lookup
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('id, code, first_name, last_name, preferred_name, date_of_birth, headshot_url, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, blood_type, allergies, medications, conditions, primary_physician, insurance_provider, insurance_id, advance_directives, is_minor')
+    .select('id, code, first_name, last_name, preferred_name, date_of_birth, headshot_url, ec1_name, ec1_relationship, ec1_phone, ec2_name, ec2_relationship, ec2_phone, blood_type, allergies, medications, conditions, primary_physician, insurance_provider, insurance_id, insurance_group, insurance_phone, advance_directives, is_minor')
     .eq('id', nfcToken.profile_id)
     .eq('status', 'active')
     .maybeSingle();
@@ -821,7 +821,7 @@ app.post('/save-profile', async (req, res) => {
     'ec1_name', 'ec1_relationship', 'ec1_phone',
     'ec2_name', 'ec2_relationship', 'ec2_phone',
     'allergies', 'medications', 'conditions', 'primary_physician',
-    'insurance_provider', 'insurance_id',
+    'insurance_provider', 'insurance_id', 'insurance_group', 'insurance_phone',
     'advance_directives', 'headshot_url',
   ];
 
@@ -1105,7 +1105,7 @@ app.post('/update-profile', async (req, res) => {
     'ec1_name', 'ec1_relationship', 'ec1_phone',
     'ec2_name', 'ec2_relationship', 'ec2_phone',
     'allergies', 'medications', 'conditions', 'primary_physician',
-    'insurance_provider', 'insurance_id',
+    'insurance_provider', 'insurance_id', 'insurance_group', 'insurance_phone',
     'advance_directives', 'headshot_url',
   ];
 
