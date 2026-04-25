@@ -144,7 +144,7 @@ app.get('/health', (req, res) => {
 //   type: 'pdf'   — Free PDF: sends profile HTML formatted as email
 //   type: 'notify' — CODE+PIN interest: sends internal notification to you
 app.post('/send-email', async (req, res) => {
-  const { type, email, profileUrl, profileHtml, orderId } = req.body;
+  const { type, email, profileUrl, profileHtml, orderId, consent } = req.body;
 
   // Basic validation
   if (!type || !email) {
@@ -311,6 +311,17 @@ app.post('/send-email', async (req, res) => {
     }
 
     await sgMail.send(msg);
+
+    // If PDF sender opted in to follow-ups, upsert a lead record
+    if (type === 'pdf' && consent === true) {
+      const nextSendAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+      await supabase.from('leads').upsert(
+        { email: email.toLowerCase().trim(), consent: true, source: 'pdf',
+          sequence_step: 0, next_send_at: nextSendAt, completed: false },
+        { onConflict: 'email' }
+      );
+    }
+
     res.json({ success: true, type });
 
   } catch (err) {

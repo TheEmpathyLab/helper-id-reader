@@ -126,6 +126,10 @@
         <label class="hid-label" for="pdfEmail">Your Email Address</label>
         <input class="hid-input" type="email" id="pdfEmail" placeholder="you@email.com" />
       </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;margin-top:12px;cursor:pointer;font-size:var(--text-sm);color:var(--gray-dark);line-height:1.5;">
+        <input type="checkbox" id="pdfConsent" style="margin-top:3px;flex-shrink:0;" />
+        Yes, send me a few follow-up tips to make the most of my profile — like where to store it and how to keep it current.
+      </label>
     </div>
 
     <button class="hid-btn hid-btn-primary hid-btn-full hid-btn-lg" onclick="generatePDF()">
@@ -411,12 +415,13 @@
       btn.disabled = true;
 
       const profileHtml = document.getElementById('pdf-preview-content').innerHTML;
+      const consent     = document.getElementById('pdfConsent').checked;
 
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'pdf', email, profileHtml }),
+          body: JSON.stringify({ type: 'pdf', email, profileHtml, consent }),
         });
 
         const data = await res.json();
