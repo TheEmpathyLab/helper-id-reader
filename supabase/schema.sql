@@ -174,6 +174,28 @@ alter table nfc_tokens enable row level security;
 -- All reads and writes go through server.js using the service role key.
 
 
+-- ---- leads ----
+-- Free-PDF visitors who opted in to follow-up drip emails (max 3).
+-- sequence_step: 0 = no drip sent, 1–3 = emails delivered.
+-- next_send_at:  null until consent captured; set to now()+3d on insert.
+-- completed:     true after step 3 — no further emails ever sent.
+
+create table leads (
+  id            uuid        primary key default uuid_generate_v4(),
+  email         text        not null,
+  consent       boolean     not null default false,
+  source        text        not null default 'pdf',
+  sequence_step integer     not null default 0,
+  next_send_at  timestamptz,
+  completed     boolean     not null default false,
+  created_at    timestamptz not null default now()
+);
+
+create unique index leads_email_idx     on leads(email);
+create index        leads_send_queue_idx on leads(next_send_at)
+  where consent = true and completed = false;
+
+
 -- ============================================================
 -- TRIGGERS
 -- ============================================================
@@ -208,6 +230,7 @@ alter table members     enable row level security;
 alter table households  enable row level security;
 alter table profiles    enable row level security;
 alter table access_logs enable row level security;
+alter table leads       enable row level security;
 
 -- access_logs: never directly client-accessible.
 -- No permissive policies = deny all for non-service-role clients.
