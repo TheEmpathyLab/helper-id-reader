@@ -1723,6 +1723,135 @@ app.post('/admin/logs', requireAdmin, async (req, res) => {
 });
 
 // ---- 404 catch-all ----
+// ============================================================
+// ---- Drip email templates (EMAIL-04) ----
+// Returns { subject, html } for each step in the 3-email sequence.
+// Called by /cron/drip (EMAIL-03).
+// ============================================================
+
+function getDripEmail(step) {
+  const header = `
+    <div style="background:#D0312D;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+      <span style="color:rgba(255,255,255,0.8);font-size:0.8rem;">Your Emergency Profile</span>
+    </div>`;
+
+  const footer = `
+    <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+      <p style="color:#999;font-size:0.75rem;margin:0;">
+        Helper-ID &nbsp;·&nbsp;
+        <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a>
+        &nbsp;·&nbsp; Questions? Reply to this email.
+      </p>
+      <p style="color:#666;font-size:0.7rem;margin:8px 0 0;">
+        You're receiving this because you opted in when you created your free PDF.
+      </p>
+    </div>`;
+
+  const wrap = (body) =>
+    `<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">${header}<div style="padding:28px 24px;">${body}</div>${footer}</div>`;
+
+  if (step === 1) {
+    return {
+      subject: 'Did you put your Helper-ID PDF somewhere useful?',
+      html: wrap(`
+        <h2 style="font-size:1.3rem;margin-bottom:8px;color:#1A1A1A;">Quick check-in on your profile.</h2>
+        <p style="color:#444;line-height:1.7;margin-bottom:16px;">
+          You filled out your Helper-ID profile — that's the important part. But if your PDF is still only
+          sitting in your inbox, it can't do much in an actual emergency.
+        </p>
+        <p style="color:#444;line-height:1.7;margin-bottom:16px;">
+          Take two minutes and put it somewhere it can actually help:
+        </p>
+        <ul style="color:#444;font-size:0.95rem;line-height:2;padding-left:20px;margin-bottom:20px;">
+          <li><strong>Print it</strong> and tape it inside a kitchen cabinet or on the fridge</li>
+          <li><strong>Screenshot it</strong> and save it to your phone's camera roll</li>
+          <li><strong>Share it</strong> to a family group chat so others have a copy too</li>
+        </ul>
+        <div style="background:#F4F4F4;border-left:4px solid #D0312D;padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:20px;">
+          <p style="margin:0;font-size:0.9rem;color:#444;line-height:1.6;">
+            First responders look for physical information — in a wallet, on a fridge, in a bag.
+            An inbox is the last place they'd check.
+          </p>
+        </div>
+        <p style="color:#666;font-size:0.9rem;line-height:1.6;">
+          That's the whole tip. One step and your profile is actually working for you.
+        </p>
+      `),
+    };
+  }
+
+  if (step === 2) {
+    return {
+      subject: 'Who else knows your Helper-ID exists?',
+      html: wrap(`
+        <h2 style="font-size:1.3rem;margin-bottom:8px;color:#1A1A1A;">One more step to make it count.</h2>
+        <p style="color:#444;line-height:1.7;margin-bottom:16px;">
+          Here's something most people don't think about: first responders aren't always the first
+          ones on the scene. A family member, a neighbor, a coworker — someone who knows you —
+          might be the first person who needs your information.
+        </p>
+        <p style="color:#444;line-height:1.7;margin-bottom:16px;">
+          Take 30 seconds and share your profile with one person you trust:
+        </p>
+        <ul style="color:#444;font-size:0.95rem;line-height:2;padding-left:20px;margin-bottom:20px;">
+          <li>Text them the link or a photo of your printed copy</li>
+          <li>Tell them where your physical copy lives</li>
+          <li>Let them know your emergency contacts by name</li>
+        </ul>
+        <div style="background:#F4F4F4;border-left:4px solid #D0312D;padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:20px;">
+          <p style="margin:0;font-size:0.9rem;color:#444;line-height:1.6;">
+            Preparedness isn't just about having the information — it's about making sure
+            the right people know where to find it.
+          </p>
+        </div>
+        <p style="color:#666;font-size:0.9rem;line-height:1.6;">
+          The more people who know it exists, the more useful it is.
+        </p>
+      `),
+    };
+  }
+
+  if (step === 3) {
+    return {
+      subject: 'The one thing your Helper-ID PDF can\'t do',
+      html: wrap(`
+        <h2 style="font-size:1.3rem;margin-bottom:8px;color:#1A1A1A;">Your PDF is a snapshot in time.</h2>
+        <p style="color:#444;line-height:1.7;margin-bottom:16px;">
+          It captures exactly what you entered on the day you made it. That's genuinely useful —
+          but it has one real limitation.
+        </p>
+        <p style="color:#444;line-height:1.7;margin-bottom:16px;">
+          What happens when your medications change? Or you get a new doctor? Or your
+          emergency contact moves? Your PDF doesn't update itself. Every change means
+          reprinting and redistributing.
+        </p>
+        <div style="background:#FDECEA;border:1px solid #FCA5A5;border-radius:8px;padding:16px 18px;margin-bottom:20px;">
+          <p style="margin:0 0 6px;font-size:0.85rem;font-weight:700;color:#A82320;text-transform:uppercase;letter-spacing:0.08em;">What a Helper-ID tag does differently</p>
+          <p style="margin:0;font-size:0.9rem;color:#444;line-height:1.7;">
+            A Helper-ID NFC tag links to a <em>live</em> profile. Anyone who taps it with
+            their phone always sees your current information — no printing, no re-sending,
+            no outdated copies floating around.
+          </p>
+        </div>
+        <p style="color:#444;line-height:1.7;margin-bottom:24px;">
+          When you're ready to make the upgrade, your information carries over automatically.
+        </p>
+        <a href="https://helper-id.com"
+           style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+          See Helper-ID Plans →
+        </a>
+        <p style="margin-top:20px;font-size:0.8rem;color:#999;line-height:1.6;">
+          No pressure — your free profile stays yours either way. This is the last email
+          we'll send unless you reach out.
+        </p>
+      `),
+    };
+  }
+
+  return null;
+}
+
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
