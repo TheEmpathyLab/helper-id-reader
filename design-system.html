@@ -187,6 +187,58 @@
       text-align: center;
     }
 
+    /* ── Brand assets ── */
+    .ds-asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-4);
+    }
+    .ds-asset-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--white);
+    }
+    .ds-asset-preview {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ds-asset-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ds-asset-name {
+      font-family: monospace;
+      font-size: var(--text-2xs);
+      color: var(--gray-dark);
+    }
+    .ds-asset-dl {
+      font-size: var(--text-2xs);
+      font-weight: 700;
+      color: var(--red);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+    }
+    .ds-asset-dl:hover { text-decoration: underline; }
+    .ds-asset-soon {
+      font-size: var(--text-2xs);
+      color: var(--gray-muted);
+      font-style: italic;
+    }
+    .ds-color-strip {
+      display: flex;
+      height: 40px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+    .ds-color-strip-swatch { flex: 1; }
+
     /* ── Demo frames ── */
     .ds-demo {
       background: var(--white);
@@ -233,6 +285,11 @@
     <!-- ── Sidebar ── -->
     <nav class="ds-sidebar">
       <div class="ds-sidebar-group">
+        <div class="ds-sidebar-heading">Brand</div>
+        <a href="#brand-assets">Assets</a>
+        <a href="#brand-voice">Voice &amp; Tone</a>
+      </div>
+      <div class="ds-sidebar-group">
         <div class="ds-sidebar-heading">Tokens</div>
         <a href="#colors">Colors</a>
         <a href="#typography">Typography</a>
@@ -254,6 +311,183 @@
 
     <!-- ── Main ── -->
     <main class="ds-main">
+
+      <!-- ════════════════════════════════════════
+           BRAND ASSETS
+      ════════════════════════════════════════ -->
+      <section class="ds-section" id="brand-assets">
+        <div class="ds-section-title">Brand Assets</div>
+        <p class="ds-section-desc">Official Helper-ID logos and marks for marketing, press, and partner use. Use the correct version for each background. Do not recolor, stretch, or add effects.</p>
+
+        <div class="ds-sub">Logo — Light Background</div>
+        <div class="ds-asset-grid">
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#FFFFFF;">
+              <a href="index.html" class="hid-logo" style="text-decoration:none;pointer-events:none;">
+                <div class="hid-logo-mark">HID</div>
+                <span class="hid-logo-text">Helper<span>-ID</span></span>
+              </a>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">Wordmark — White</span>
+              <span class="ds-asset-soon">SVG coming</span>
+            </div>
+          </div>
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#FFFFFF;">
+              <div class="hid-logo-mark" style="font-size:2.5rem;width:60px;height:60px;">HID</div>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">Mark only — White</span>
+              <span class="ds-asset-soon">SVG coming</span>
+            </div>
+          </div>
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#FFFFFF;">
+              <img src="favicon.png" alt="Helper-ID favicon" style="width:48px;height:48px;" />
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">favicon.png · 48×48</span>
+              <a href="favicon.png" download class="ds-asset-dl">↓ PNG</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-sub">Logo — Dark Background</div>
+        <div class="ds-asset-grid">
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#1A1A1A;">
+              <a href="index.html" class="hid-logo" style="text-decoration:none;pointer-events:none;">
+                <div class="hid-logo-mark">HID</div>
+                <span class="hid-logo-text">Helper<span>-ID</span></span>
+              </a>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">Wordmark — Dark</span>
+              <span class="ds-asset-soon">SVG coming</span>
+            </div>
+          </div>
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#1A1A1A;">
+              <div class="hid-logo-mark" style="font-size:2.5rem;width:60px;height:60px;">HID</div>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">Mark only — Dark</span>
+              <span class="ds-asset-soon">SVG coming</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-sub">Logo — Red Background</div>
+        <div class="ds-asset-grid">
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#D0312D;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="hid-logo-mark">HID</div>
+                <span style="font-family:var(--font-body);font-weight:700;font-size:1.1rem;color:white;letter-spacing:-0.3px;">Helper-ID</span>
+              </div>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">Wordmark — Red</span>
+              <span class="ds-asset-soon">SVG coming</span>
+            </div>
+          </div>
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#D0312D;">
+              <div class="hid-logo-mark" style="font-size:2.5rem;width:60px;height:60px;">HID</div>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">Mark only — Red</span>
+              <span class="ds-asset-soon">SVG coming</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-sub">Brand Color Strip</div>
+        <div class="ds-color-strip" style="margin-bottom:var(--space-3);">
+          <div class="ds-color-strip-swatch" style="background:#D0312D;" title="#D0312D — Red"></div>
+          <div class="ds-color-strip-swatch" style="background:#A82320;" title="#A82320 — Red Dark"></div>
+          <div class="ds-color-strip-swatch" style="background:#1A1A1A;" title="#1A1A1A — Black"></div>
+          <div class="ds-color-strip-swatch" style="background:#444444;" title="#444444 — Gray Dark"></div>
+          <div class="ds-color-strip-swatch" style="background:#F4F4F4;" title="#F4F4F4 — Gray Light"></div>
+          <div class="ds-color-strip-swatch" style="background:#FFFFFF;border:1px solid var(--border);" title="#FFFFFF — White"></div>
+        </div>
+        <div class="ds-label">#D0312D · #A82320 · #1A1A1A · #444444 · #F4F4F4 · #FFFFFF</div>
+
+        <div class="ds-sub">Marketing Downloads</div>
+        <div class="ds-asset-grid">
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#F4F4F4;flex-direction:column;gap:6px;">
+              <span style="font-size:2rem;">📄</span>
+              <span style="font-size:var(--text-xs);color:var(--gray-mid);">Emergency Contact PDF</span>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">helper-id_emergency-contact_v2.5</span>
+              <a href="docs/helper-id_emergency-contact_editable_v2.5.pdf" download class="ds-asset-dl">↓ PDF</a>
+            </div>
+          </div>
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#F4F4F4;flex-direction:column;gap:6px;">
+              <span style="font-size:2rem;">🖼️</span>
+              <span style="font-size:var(--text-xs);color:var(--gray-mid);">Logo Package</span>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">helper-id-logos.zip</span>
+              <span class="ds-asset-soon">Coming soon</span>
+            </div>
+          </div>
+          <div class="ds-asset-card">
+            <div class="ds-asset-preview" style="background:#F4F4F4;flex-direction:column;gap:6px;">
+              <span style="font-size:2rem;">🎨</span>
+              <span style="font-size:var(--text-xs);color:var(--gray-mid);">Brand Guide PDF</span>
+            </div>
+            <div class="ds-asset-footer">
+              <span class="ds-asset-name">helper-id-brand-guide.pdf</span>
+              <span class="ds-asset-soon">Coming soon</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════
+           BRAND VOICE
+      ════════════════════════════════════════ -->
+      <section class="ds-section" id="brand-voice">
+        <div class="ds-section-title">Voice &amp; Tone</div>
+        <p class="ds-section-desc">Helper-ID is calm, direct, and trustworthy. It never alarmsits audience — it reassures them. Copy is plain English, short sentences, no jargon.</p>
+
+        <div class="ds-sub">Principles</div>
+        <div class="ds-demo">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);">
+            <div>
+              <div style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-success);margin-bottom:var(--space-3);">✓ We say</div>
+              <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+                <div style="background:var(--color-success-bg);border:1px solid var(--color-success-border);border-radius:var(--radius);padding:10px 14px;font-size:var(--text-sm);color:var(--color-success);">"Write down your CODE and PIN."</div>
+                <div style="background:var(--color-success-bg);border:1px solid var(--color-success-border);border-radius:var(--radius);padding:10px 14px;font-size:var(--text-sm);color:var(--color-success);">"Anyone can tap it — no app needed."</div>
+                <div style="background:var(--color-success-bg);border:1px solid var(--color-success-border);border-radius:var(--radius);padding:10px 14px;font-size:var(--text-sm);color:var(--color-success);">"Your data never leaves this device until you choose to share it."</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);margin-bottom:var(--space-3);">✗ We don't say</div>
+              <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+                <div style="background:var(--red-light);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;font-size:var(--text-sm);color:var(--red-dark);">"In case of emergency!!!"</div>
+                <div style="background:var(--red-light);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;font-size:var(--text-sm);color:var(--red-dark);">"Revolutionary life-saving technology"</div>
+                <div style="background:var(--red-light);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;font-size:var(--text-sm);color:var(--red-dark);">"Sign up NOW before it's too late"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-sub">Product Names</div>
+        <div class="ds-demo">
+          <div style="display:flex;flex-direction:column;gap:var(--space-3);font-size:var(--text-sm);color:var(--gray-dark);line-height:1.7;">
+            <div><strong style="color:var(--black);">Helper-ID</strong> — always hyphenated, capital H, capital ID. Never "HelperID", "Helper ID", or "helper-id" in body copy.</div>
+            <div><strong style="color:var(--black);">CODE</strong> — always all-caps when referring to the access credential. "Your CODE is A3BX7K."</div>
+            <div><strong style="color:var(--black);">PIN</strong> — always all-caps. "Enter your PIN to unlock the profile."</div>
+            <div><strong style="color:var(--black);">Helper-ID tag</strong> — the physical NFC product. Not "chip", not "device", not "sticker" unless referring specifically to a sticker-format tag.</div>
+          </div>
+        </div>
+      </section>
 
       <!-- ════════════════════════════════════════
            COLORS
