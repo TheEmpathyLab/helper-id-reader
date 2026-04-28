@@ -13,7 +13,7 @@ const bcrypt           = require('bcryptjs');
 const crypto           = require('crypto');
 const Stripe           = require('stripe');
 const rateLimit        = require('express-rate-limit');
-const { PDFDocument } = require('pdf-lib');
+const { PDFDocument, StandardFonts } = require('pdf-lib');
 const fs               = require('fs');
 const path             = require('path');
 
@@ -383,6 +383,9 @@ app.post('/email-pdf', async (req, res) => {
       set('Full name_2',   c[1].n); set('Phone number_2',   c[1].p); set('Relationship_2',   c[1].r);
     }
 
+    // Embed Courier so pdf-lib can render appearance streams on flatten
+    const courier = await pdf.embedFont(StandardFonts.Courier);
+    form.updateFieldAppearances(courier);
     form.flatten();
     const pdfBytes = await pdf.save();
 
