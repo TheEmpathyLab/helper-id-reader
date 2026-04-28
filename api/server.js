@@ -13,7 +13,7 @@ const bcrypt           = require('bcryptjs');
 const crypto           = require('crypto');
 const Stripe           = require('stripe');
 const rateLimit        = require('express-rate-limit');
-const { PDFDocument }  = require('pdf-lib');
+const { PDFDocument, PDFName, PDFString } = require('pdf-lib');
 const fs               = require('fs');
 const path             = require('path');
 
@@ -344,8 +344,15 @@ app.post('/email-pdf', async (req, res) => {
     const form = pdf.getForm();
 
     const set = (fieldName, value) => {
-      try { form.getTextField(fieldName).setText(value || ''); }
-      catch (_) { /* field not present in this template version — skip */ }
+      try {
+        const field = form.getTextField(fieldName);
+        field.setText(value || '');
+        // Extract existing font reference from DA, then rewrite with size 9 + blue
+        const existingDA = field.acroField.getDefaultAppearance() || '';
+        const fontMatch  = existingDA.match(/(\/\w+)\s+/);
+        const fontRef    = fontMatch ? fontMatch[1] : '/Helv';
+        field.acroField.setDefaultAppearance(`${fontRef} 9 Tf 0.1 0.3 0.7 rg`);
+      } catch (_) { /* field not present in this template version — skip */ }
     };
 
     // Identity

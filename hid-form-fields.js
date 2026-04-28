@@ -29,7 +29,8 @@ function renderForm(targetId) {
         <div class="hid-form-group">
           <label class="hid-label" for="bloodType">Blood Type <span class="hid-hint">(optional)</span></label>
           <select class="hid-select" id="bloodType">
-            <option value="">Unknown</option>
+            <option value="">— select —</option>
+            <option value="Unknown">Unknown</option>
             <option>A+</option><option>A-</option>
             <option>B+</option><option>B-</option>
             <option>AB+</option><option>AB-</option>

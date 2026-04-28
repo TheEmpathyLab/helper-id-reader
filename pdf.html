@@ -163,15 +163,34 @@
       </div>
 
       <!-- NFC upsell -->
-      <div class="hid-card" style="margin-top:16px; text-align:center;">
-        <div class="hid-card-title">Want this on a physical tag?</div>
-        <p style="font-size:0.9rem;color:var(--gray-dark);margin-bottom:16px;">
-          A Helper-ID NFC tag works without printing — anyone can tap it with their phone to see your info instantly.
+      <div class="hid-card" style="margin-top:16px;">
+        <div class="hid-card-title">Want this on a physical NFC tag?</div>
+        <p style="font-size:var(--text-sm);color:var(--gray-dark);margin-bottom:var(--space-6);line-height:1.6;">
+          Anyone can tap a Helper-ID tag with their phone to see your info instantly — no app, no printing, no inbox to search.
         </p>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <a href="#" data-stripe="digitalDownload" target="_blank" class="hid-btn hid-btn-outline">Digital Download — $9</a>
-          <a href="#" data-stripe="nfcPack" target="_blank" class="hid-btn hid-btn-outline">NFC Pack — $35</a>
-          <a href="#" data-stripe="fullMembership" target="_blank" class="hid-btn hid-btn-primary">Full Membership — $55/yr</a>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);">
+
+          <div style="border:1.5px solid var(--border);border-radius:var(--radius);padding:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3);">
+            <div style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray-mid);">Full DIY — $9</div>
+            <div style="font-size:var(--text-sm);font-weight:700;color:var(--black);">You buy, you build, your data stays local</div>
+            <div style="font-size:var(--text-sm);color:var(--gray-dark);line-height:1.6;flex:1;">Download instructions + your profile URL. You purchase NFC tags separately and program them yourself. No account, no subscription.</div>
+            <a href="#" data-stripe="digitalDownload" target="_blank" class="hid-btn hid-btn-outline" style="text-align:center;">Get Instructions — $9</a>
+          </div>
+
+          <div style="border:1.5px solid var(--border);border-radius:var(--radius);padding:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3);">
+            <div style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray-mid);">Partial DIY — $35</div>
+            <div style="font-size:var(--text-sm);font-weight:700;color:var(--black);">We send the tags, you program them</div>
+            <div style="font-size:var(--text-sm);color:var(--gray-dark);line-height:1.6;flex:1;">We ship pre-selected NFC tags to you. You program them with your profile URL using a free Android app. Your data stays on your device.</div>
+            <a href="#" data-stripe="nfcPack" target="_blank" class="hid-btn hid-btn-outline" style="text-align:center;">Get NFC Pack — $35</a>
+          </div>
+
+          <div style="border:2px solid var(--red);border-radius:var(--radius);padding:var(--space-5);display:flex;flex-direction:column;gap:var(--space-3);background:var(--red-light);">
+            <div style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);">Full Membership — $55/yr</div>
+            <div style="font-size:var(--text-sm);font-weight:700;color:var(--black);">We handle everything — tag, profile, and updates</div>
+            <div style="font-size:var(--text-sm);color:var(--gray-dark);line-height:1.6;flex:1;">We program and ship your NFC tag. Your profile lives securely in our system so it stays current. Access it anytime from your member dashboard.</div>
+            <a href="#" data-stripe="fullMembership" target="_blank" class="hid-btn hid-btn-primary" style="text-align:center;">Get Full Membership — $55/yr</a>
+          </div>
+
         </div>
       </div>
 
