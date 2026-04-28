@@ -13,6 +13,9 @@ const bcrypt           = require('bcryptjs');
 const crypto           = require('crypto');
 const Stripe           = require('stripe');
 const rateLimit        = require('express-rate-limit');
+const { PDFDocument }  = require('pdf-lib');
+const fs               = require('fs');
+const path             = require('path');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -311,9 +314,123 @@ app.post('/send-email', async (req, res) => {
     }
 
     await sgMail.send(msg);
+    res.json({ success: true, type });
 
-    // If PDF sender opted in to follow-ups, upsert a lead record
-    if (type === 'pdf' && consent === true) {
+  } catch (err) {
+    console.error('SendGrid error:', err.response?.body || err.message);
+    res.status(500).json({ error: 'Email sending failed. Please try again.' });
+  }
+});
+
+// ============================================================
+// ---- POST /email-pdf ----
+// Fills the InDesign PDF template with free-form profile data
+// and sends it as an attachment. Replaces the old inline-HTML
+// approach from /send-email type 'pdf'.
+// ============================================================
+app.post('/email-pdf', async (req, res) => {
+  const { email, profile, consent } = req.body;
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Valid email required' });
+  }
+  if (!profile) {
+    return res.status(400).json({ error: 'Profile data required' });
+  }
+
+  try {
+    const templateBytes = fs.readFileSync(path.join(__dirname, 'template.pdf'));
+    const pdf  = await PDFDocument.load(templateBytes);
+    const form = pdf.getForm();
+
+    const set = (fieldName, value) => {
+      try { form.getTextField(fieldName).setText(value || ''); }
+      catch (_) { /* field not present in this template version — skip */ }
+    };
+
+    // Identity
+    set('First Name', profile.fn);
+    set('Last name',  profile.ln);
+
+    // Vitals — blood type only for now; height/weight added in future vitals pass
+    set('Blood type height weight etc', profile.bt);
+
+    // Medical
+    set('Medication animal environmental etc', profile.al);
+    set('Medical conditions',                  profile.cond);
+    set('Medications',                         profile.med);
+
+    // Physician — split on " — " (pdf.html format) or " · " (dashboard format)
+    const docParts = (profile.doc || '').split(/ — | · /);
+    set('Primary physician name',         docParts[0] || '');
+    set('Primary physician phone number', docParts[1] || '');
+
+    // Insurance
+    if (profile.ins) {
+      set('Insurance company name', profile.ins.prov);
+      const groupStr = [profile.ins.mid, profile.ins.grp].filter(Boolean).join(' · ');
+      set('Group policy andor control number', groupStr);
+    }
+
+    // Emergency contacts
+    const c = profile.contacts || [];
+    if (c[0]) {
+      set('Full name',     c[0].n); set('Phone number',     c[0].p); set('Relationship',     c[0].r);
+    }
+    if (c[1]) {
+      set('Full name_2',   c[1].n); set('Phone number_2',   c[1].p); set('Relationship_2',   c[1].r);
+    }
+
+    form.flatten();
+    const pdfBytes = await pdf.save();
+
+    const msg = {
+      to:   email,
+      from: { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID Emergency Profile',
+      html: `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:14px 24px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+          </div>
+          <div style="padding:28px 24px;">
+            <h2 style="font-size:1.3rem;margin-bottom:8px;">Your emergency profile is attached.</h2>
+            <p style="color:#666;margin-bottom:16px;line-height:1.7;">
+              Your Helper-ID emergency profile is attached as a PDF. Print it, keep a copy in your wallet,
+              and share it with family members or caregivers.
+            </p>
+            <div style="background:#FDECEA;border:1px solid #FCA5A5;border-radius:8px;padding:14px 16px;font-size:0.85rem;color:#A82320;margin-bottom:24px;">
+              <strong>Tip:</strong> Store a physical copy somewhere accessible — a wallet, fridge, or go-bag.
+              An inbox is the last place a first responder would look.
+            </div>
+            <p style="font-size:0.85rem;color:#666;line-height:1.7;margin-bottom:16px;">
+              Want your profile on an NFC tag so anyone can tap it with their phone?
+            </p>
+            <a href="https://helper-id.com"
+               style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+              See Helper-ID Plans →
+            </a>
+          </div>
+          <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+            <p style="color:#999;font-size:0.75rem;margin:0;">
+              Helper-ID &nbsp;·&nbsp;
+              <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a>
+            </p>
+          </div>
+        </div>
+      `,
+      attachments: [{
+        content:     Buffer.from(pdfBytes).toString('base64'),
+        filename:    'helper-id-emergency-profile.pdf',
+        type:        'application/pdf',
+        disposition: 'attachment',
+      }],
+    };
+
+    await sgMail.send(msg);
+
+    // Upsert lead if consented
+    if (consent === true) {
       const nextSendAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
       await supabase.from('leads').upsert(
         { email: email.toLowerCase().trim(), consent: true, source: 'pdf',
@@ -322,11 +439,11 @@ app.post('/send-email', async (req, res) => {
       );
     }
 
-    res.json({ success: true, type });
+    return res.json({ success: true });
 
   } catch (err) {
-    console.error('SendGrid error:', err.response?.body || err.message);
-    res.status(500).json({ error: 'Email sending failed. Please try again.' });
+    console.error('/email-pdf error:', err.message);
+    return res.status(500).json({ error: 'Failed to generate or send PDF.' });
   }
 });
 
