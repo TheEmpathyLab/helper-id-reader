@@ -29,6 +29,7 @@ const SUPABASE_URL              = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SETUP_LINK_SECRET         = process.env.SETUP_LINK_SECRET;
 const SITE_URL                  = process.env.SITE_URL || 'https://helper-id.com';
+const CRON_SECRET               = process.env.CRON_SECRET;
 
 const REQUIRED_ENV_VARS = [
   'SENDGRID_API_KEY',
@@ -1846,7 +1847,6 @@ app.post('/admin/logs', requireAdmin, async (req, res) => {
   return res.json({ logs: enriched });
 });
 
-// ---- 404 catch-all ----
 // ============================================================
 // ---- Drip email templates (EMAIL-04) ----
 // Returns { subject, html } for each step in the 3-email sequence.
@@ -1976,6 +1976,77 @@ function getDripEmail(step) {
   return null;
 }
 
+// ============================================================
+// ---- POST /cron/drip ----
+// Called on a schedule (Render cron job) to fire drip emails.
+// Protected by x-cron-secret header matching CRON_SECRET env var.
+//
+// Schedule: step 0→1 after 3 days (set at /email-pdf upsert)
+//           step 1→2 after 7 more days
+//           step 2→3 after 11 more days
+//           step 3  → mark completed, no further emails
+// ============================================================
+app.post('/cron/drip', async (req, res) => {
+  if (!CRON_SECRET || req.headers['x-cron-secret'] !== CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const now = new Date().toISOString();
+    const { data: leads, error } = await supabase
+      .from('leads')
+      .select('id, email, sequence_step')
+      .eq('consent', true)
+      .eq('completed', false)
+      .lt('sequence_step', 3)
+      .lte('next_send_at', now);
+
+    if (error) throw error;
+    if (!leads || leads.length === 0) {
+      return res.json({ processed: 0, leads: [] });
+    }
+
+    const results = [];
+    for (const lead of leads) {
+      const nextStep = lead.sequence_step + 1;
+      const template = getDripEmail(nextStep);
+      if (!template) continue;
+
+      try {
+        await sgMail.send({
+          to:      lead.email,
+          from:    { email: FROM_EMAIL, name: 'Helper-ID' },
+          subject: template.subject,
+          html:    template.html,
+        });
+
+        const isLast    = nextStep >= 3;
+        const daysUntilNext = nextStep === 1 ? 7 : 11;
+        const nextSendAt = isLast
+          ? null
+          : new Date(Date.now() + daysUntilNext * 24 * 60 * 60 * 1000).toISOString();
+
+        await supabase
+          .from('leads')
+          .update({ sequence_step: nextStep, next_send_at: nextSendAt, completed: isLast })
+          .eq('id', lead.id);
+
+        results.push({ email: lead.email, step: nextStep, ok: true });
+      } catch (sendErr) {
+        console.error('drip send error:', lead.email, sendErr.message);
+        results.push({ email: lead.email, step: nextStep, ok: false, error: sendErr.message });
+      }
+    }
+
+    return res.json({ processed: results.length, leads: results });
+
+  } catch (err) {
+    console.error('/cron/drip error:', err.message);
+    return res.status(500).json({ error: 'Drip job failed.' });
+  }
+});
+
+// ---- 404 catch-all ----
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });

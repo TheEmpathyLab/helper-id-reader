@@ -15,8 +15,6 @@
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="favicon.png" />
   <link rel="stylesheet" href="hid-style.css" />
-  <!-- jsPDF for PDF generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     .section-title { font-family:var(--font-display); font-size:1.2rem; color:var(--black); margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid var(--red-light); }
     .contact-block { background:var(--gray-light); border-radius:var(--radius); padding:16px; margin-bottom:12px; border:1.5px solid var(--border); }
@@ -29,69 +27,8 @@
     .char-count.danger { color:var(--red); }
     .insurance-toggle { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:4px 0; }
     .toggle-icon { font-size:0.85rem; font-weight:700; color:var(--red); white-space:nowrap; }
-    #output-section { display:none; margin-top:24px; }
-    .pdf-preview {
-      background: white;
-      border: 2px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      font-family: Georgia, serif;
-      line-height: 1.6;
-    }
-    .pdf-preview .pdf-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 3px solid #D0312D;
-      padding-bottom: 14px;
-      margin-bottom: 20px;
-    }
-    .pdf-preview .pdf-logo {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #D0312D;
-      letter-spacing: -0.5px;
-    }
-    .pdf-preview .pdf-emergency {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #D0312D;
-    }
-    .pdf-preview h1 { font-size: 1.6rem; margin-bottom: 4px; color: #1A1A1A; }
-    .pdf-preview .pdf-meta { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
-    .pdf-preview .pdf-section { margin-bottom: 18px; }
-    .pdf-preview .pdf-section-title {
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em;
-      text-transform: uppercase; color: #D0312D;
-      margin-bottom: 8px; padding-bottom: 4px;
-      border-bottom: 1px solid #FDECEA;
-      font-family: sans-serif;
-    }
-    .pdf-preview .pdf-contact { margin-bottom: 8px; font-size: 0.9rem; }
-    .pdf-preview .pdf-contact strong { display: block; }
-    .pdf-preview .pill {
-      display: inline-block;
-      background: #F4F4F4;
-      border: 1px solid #E0E0E0;
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 0.82rem;
-      margin: 2px;
-    }
-    .pdf-preview .pill.alert-pill { background: #FDECEA; border-color: #FCA5A5; color: #A82320; font-weight: 600; }
-    .pdf-preview .pdf-footer {
-      border-top: 1px solid #E0E0E0;
-      padding-top: 10px;
-      margin-top: 20px;
-      font-size: 0.75rem;
-      color: #999;
-      text-align: center;
-      font-family: sans-serif;
-    }
-    .action-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
-    #send-success { display:none; }
+    #output-section { display:none; margin-top:var(--space-6); }
+    #send-error { display:none; }
   </style>
 </head>
 <body>
@@ -114,12 +51,12 @@
 
     <div class="hid-page-title">
       <h1>Free Emergency Information PDF</h1>
-      <p>Fill in your details below. We'll generate a printable PDF you can carry in your wallet — and email it to you for safekeeping.</p>
+      <p>Fill in your details below and we'll email you a completed emergency profile PDF — ready to print and carry.</p>
     </div>
 
     <div id="form-fields"></div>
 
-    <!-- Email field before submit -->
+    <!-- Email + consent + submit -->
     <div class="hid-card">
       <div class="hid-card-title">Where should we send it?</div>
       <div class="hid-form-group">
@@ -132,38 +69,21 @@
       </label>
     </div>
 
-    <button class="hid-btn hid-btn-primary hid-btn-full hid-btn-lg" onclick="generatePDF()">
-      Generate My PDF →
+    <div class="hid-alert hid-alert-error" id="send-error"></div>
+
+    <button class="hid-btn hid-btn-primary hid-btn-full hid-btn-lg" id="send-btn" onclick="sendProfile()">
+      Email Me My Profile →
     </button>
 
-    <!-- OUTPUT -->
+    <!-- Revealed after successful send -->
     <div id="output-section">
 
-      <div class="hid-card" style="border-color:var(--red);border-width:2px;margin-top:0;">
-        <div class="hid-card-title">✅ Your Emergency PDF</div>
-        <div class="hid-alert hid-alert-success" style="margin-bottom:16px;">
-          Your PDF is shown below. Download it, print it, and carry it with you.
-        </div>
-
-        <!-- PDF PREVIEW -->
-        <div class="pdf-preview" id="pdf-preview-content">
-          <!-- rendered by JS -->
-        </div>
-
-        <div class="action-row">
-          <button class="hid-btn hid-btn-primary" onclick="downloadPDF()">⬇️ Download PDF</button>
-          <button class="hid-btn hid-btn-secondary" onclick="window.print()">🖨️ Print</button>
-          <button class="hid-btn hid-btn-outline" onclick="emailPDF()">📧 Email to Me</button>
-          <button class="hid-btn hid-btn-outline" onclick="resetForm()">Start Over</button>
-        </div>
-
-        <div id="send-success" class="hid-alert hid-alert-success" style="margin-top:14px;margin-bottom:0;">
-          ✅ Sent! Check your inbox for your emergency information PDF.
-        </div>
+      <div class="hid-alert hid-alert-success" style="margin-bottom:var(--space-6);">
+        ✅ On its way! Check your inbox — your emergency profile PDF is attached.
       </div>
 
       <!-- NFC upsell -->
-      <div class="hid-card" style="margin-top:16px;">
+      <div class="hid-card">
         <div class="hid-card-title">Want this on a physical NFC tag?</div>
         <p style="font-size:var(--text-sm);color:var(--gray-dark);margin-bottom:var(--space-6);line-height:1.6;">
           Anyone can tap a Helper-ID tag with their phone to see your info instantly — no app, no printing, no inbox to search.
@@ -216,259 +136,60 @@
     });
   </script>
   <script>
-    const API_URL = '/api/send-email';
-
-    let currentProfile = null;
-
     renderForm('form-fields');
 
-    // ---- Generate PDF preview ----
-    function generatePDF() {
+    async function sendProfile() {
+      const errEl = document.getElementById('send-error');
+      errEl.style.display = 'none';
+
       const profile = buildProfile();
       if (!profile.fn && !profile.ln) {
-        alert('Please enter at least a first or last name.');
+        errEl.textContent = 'Please enter at least a first or last name.';
+        errEl.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-      currentProfile = profile;
 
-      const age = calcAge(profile.dob);
-      const fullName = [profile.fn, profile.ln].filter(Boolean).join(' ');
-
-      const metaParts = [];
-      if (age)       metaParts.push(`Age: ${age}`);
-      if (profile.bt) metaParts.push(`Blood Type: ${profile.bt}`);
-
-      // Contacts
-      let contactsHTML = '';
-      if (profile.contacts && profile.contacts.length) {
-        contactsHTML = profile.contacts.map(c => `
-          <div class="pdf-contact">
-            <strong>${esc(c.n || '')}${c.r ? ` <span style="font-weight:400;color:#666;">— ${esc(c.r)}</span>` : ''}</strong>
-            ${c.p ? `<span>${esc(c.p)}</span>` : ''}
-          </div>`).join('');
-      } else {
-        contactsHTML = '<span style="color:#999;font-size:0.85rem;">None listed</span>';
-      }
-
-      // Pills
-      const pills = (str, alert) => str
-        ? str.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
-             .map(s => `<span class="pill${alert?' alert-pill':''}">${esc(s)}</span>`).join('')
-        : '<span style="color:#999;font-size:0.85rem;">None listed</span>';
-
-      // Insurance
-      let insHTML = '';
-      if (profile.ins) {
-        const i = profile.ins;
-        insHTML = `
-          <div class="pdf-section">
-            <div class="pdf-section-title">Health Insurance</div>
-            ${i.prov ? `<div><strong>Provider:</strong> ${esc(i.prov)}</div>` : ''}
-            ${i.mid  ? `<div><strong>Member ID:</strong> ${esc(i.mid)}</div>` : ''}
-            ${i.grp  ? `<div><strong>Group:</strong> ${esc(i.grp)}</div>` : ''}
-            ${i.ph   ? `<div><strong>Phone:</strong> ${esc(i.ph)}</div>` : ''}
-          </div>`;
-      }
-
-      document.getElementById('pdf-preview-content').innerHTML = `
-        <div class="pdf-header">
-          <div class="pdf-logo">Helper-ID</div>
-          <div class="pdf-emergency">⚡ Emergency Information</div>
-        </div>
-
-        <h1>${esc(fullName)}</h1>
-        ${metaParts.length ? `<div class="pdf-meta">${metaParts.join('&nbsp;&nbsp;·&nbsp;&nbsp;')}</div>` : ''}
-
-        <div class="pdf-section">
-          <div class="pdf-section-title">Emergency Contacts</div>
-          ${contactsHTML}
-        </div>
-
-        <div class="pdf-section">
-          <div class="pdf-section-title">⚠️ Allergies</div>
-          ${pills(profile.al, true)}
-        </div>
-
-        <div class="pdf-section">
-          <div class="pdf-section-title">💊 Medications</div>
-          ${pills(profile.med, false)}
-        </div>
-
-        <div class="pdf-section">
-          <div class="pdf-section-title">🏥 Medical Conditions</div>
-          ${pills(profile.cond, false)}
-        </div>
-
-        ${profile.doc ? `
-        <div class="pdf-section">
-          <div class="pdf-section-title">Primary Physician</div>
-          <div>🩺 ${esc(profile.doc)}</div>
-        </div>` : ''}
-
-        ${insHTML}
-
-        ${profile.notes ? `
-        <div class="pdf-section">
-          <div class="pdf-section-title">Notes</div>
-          <div style="font-size:0.88rem;">${esc(profile.notes)}</div>
-        </div>` : ''}
-
-        <div class="pdf-footer">
-          Generated by Helper-ID &nbsp;·&nbsp; helper-id.com &nbsp;·&nbsp; ${new Date().toLocaleDateString()}
-        </div>
-      `;
-
-      const out = document.getElementById('output-section');
-      out.style.display = 'block';
-      out.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window._formDirty = false;
-    }
-
-    // ---- Download PDF using jsPDF ----
-    function downloadPDF() {
-      if (!currentProfile) return;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-      const profile = currentProfile;
-      const fullName = [profile.fn, profile.ln].filter(Boolean).join(' ');
-      const age = calcAge(profile.dob);
-
-      let y = 20;
-      const lm = 20; // left margin
-      const pw = 170; // page width
-
-      // Header
-      doc.setFillColor(208, 49, 45);
-      doc.rect(0, 0, 210, 14, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text('HELPER-ID  —  EMERGENCY INFORMATION', lm, 9);
-
-      y = 24;
-      doc.setTextColor(26, 26, 26);
-      doc.setFontSize(22);
-      doc.setFont('helvetica', 'bold');
-      doc.text(fullName || 'Emergency Profile', lm, y);
-      y += 7;
-
-      if (age || profile.bt) {
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(100, 100, 100);
-        const meta = [age ? `Age: ${age}` : null, profile.bt ? `Blood Type: ${profile.bt}` : null].filter(Boolean).join('   ·   ');
-        doc.text(meta, lm, y);
-        y += 8;
-      }
-
-      // Section helper
-      function section(title, lines) {
-        if (!lines || lines.length === 0) return;
-        if (y > 260) { doc.addPage(); y = 20; }
-        y += 4;
-        doc.setFillColor(253, 236, 234);
-        doc.rect(lm, y - 4, pw, 7, 'F');
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(168, 35, 32);
-        doc.text(title.toUpperCase(), lm + 2, y);
-        y += 6;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        doc.setTextColor(26, 26, 26);
-        lines.forEach(line => {
-          if (y > 270) { doc.addPage(); y = 20; }
-          const wrapped = doc.splitTextToSize(line, pw);
-          doc.text(wrapped, lm, y);
-          y += wrapped.length * 6;
-        });
-      }
-
-      // Contacts
-      const contactLines = (profile.contacts || []).map(c =>
-        `${c.n || ''}${c.r ? ` (${c.r})` : ''}${c.p ? '  —  ' + c.p : ''}`
-      );
-      section('Emergency Contacts', contactLines.length ? contactLines : ['None listed']);
-
-      const listOrNone = str => str
-        ? str.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
-        : ['None listed'];
-
-      section('Allergies', listOrNone(profile.al));
-      section('Medications', listOrNone(profile.med));
-      section('Medical Conditions', listOrNone(profile.cond));
-      if (profile.doc) section('Primary Physician', [profile.doc]);
-
-      if (profile.ins) {
-        const i = profile.ins;
-        const insLines = [
-          i.prov ? `Provider: ${i.prov}` : null,
-          i.mid  ? `Member ID: ${i.mid}` : null,
-          i.grp  ? `Group: ${i.grp}` : null,
-          i.ph   ? `Phone: ${i.ph}` : null,
-        ].filter(Boolean);
-        section('Health Insurance', insLines);
-      }
-
-      if (profile.notes) section('Additional Notes', [profile.notes]);
-
-      // Footer
-      doc.setFontSize(8);
-      doc.setTextColor(180, 180, 180);
-      doc.text(`Generated by Helper-ID  ·  helper-id.com  ·  ${new Date().toLocaleDateString()}`, lm, 285);
-
-      doc.save(`helper-id-${(profile.fn || 'profile').toLowerCase()}.pdf`);
-    }
-
-    // ---- Email PDF via API ----
-    async function emailPDF() {
       const email = document.getElementById('pdfEmail').value.trim();
       if (!email || !email.includes('@')) {
-        alert('Please enter your email address in the form above first.');
+        errEl.textContent = 'Please enter a valid email address.';
+        errEl.style.display = 'block';
         document.getElementById('pdfEmail').focus();
         return;
       }
 
-      const btn = event.target;
+      const btn     = document.getElementById('send-btn');
+      const consent = document.getElementById('pdfConsent').checked;
+
       btn.textContent = 'Sending…';
       btn.disabled = true;
 
-      const consent = document.getElementById('pdfConsent').checked;
-      const profile = buildProfile();
-
       try {
-        const res = await fetch('/api/email-pdf', {
-          method: 'POST',
+        const res  = await fetch('/api/email-pdf', {
+          method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, profile, consent }),
+          body:    JSON.stringify({ email, profile, consent }),
         });
-
         const data = await res.json();
 
         if (res.ok && data.success) {
-          document.getElementById('send-success').style.display = 'flex';
+          btn.textContent = '✅ Sent!';
+          window._formDirty = false;
+          const out = document.getElementById('output-section');
+          out.style.display = 'block';
+          out.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
-          alert(data.error || 'Email failed. Please download the PDF using the button above.');
-          btn.textContent = '📧 Email to Me';
+          errEl.textContent = data.error || 'Something went wrong. Please try again.';
+          errEl.style.display = 'block';
+          btn.textContent = 'Email Me My Profile →';
           btn.disabled = false;
         }
       } catch (e) {
-        alert('Network error. Please download the PDF using the button above.');
-        btn.textContent = '📧 Email to Me';
+        errEl.textContent = 'Network error. Please check your connection and try again.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Email Me My Profile →';
         btn.disabled = false;
       }
-    }
-
-    // ---- Reset ----
-    function resetForm() {
-      document.querySelectorAll('input, textarea, select').forEach(el => {
-        if (el.tagName === 'SELECT') el.selectedIndex = 0;
-        else el.value = '';
-      });
-      document.getElementById('output-section').style.display = 'none';
-      document.getElementById('send-success').style.display = 'none';
-      window._formDirty = false;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
 </body>
