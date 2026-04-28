@@ -340,7 +340,7 @@ app.post('/email-pdf', async (req, res) => {
   }
 
   try {
-    const templateBytes = fs.readFileSync(path.join(__dirname, '..', 'docs', 'helper-id_emergency_information_form.pdf'));
+    const templateBytes = fs.readFileSync(path.join(__dirname, 'template.pdf'));
     const pdf  = await PDFDocument.load(templateBytes);
     const form = pdf.getForm();
 
