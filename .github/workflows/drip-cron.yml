@@ -1,0 +1,17 @@
+name: Drip Email Cron
+
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 9am ET (UTC-4 summer) daily
+  workflow_dispatch:        # manual trigger for testing
+
+jobs:
+  send-drip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger drip endpoint
+        run: |
+          curl -s -X POST https://helper-id.com/api/cron/drip \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --fail-with-body
