@@ -436,6 +436,35 @@
         </div>
       </div>
 
+      <!-- My Devices -->
+      <div class="hid-card" style="margin-bottom:20px;">
+        <div class="hid-card-title">My Devices</div>
+        <p style="font-size:0.88rem;color:var(--gray-dark);margin-bottom:16px;">
+          NFC tags linked to your profile. Tap a tag, then scan it with any phone to confirm it works.
+        </p>
+        <div id="devices-list">
+          <div style="font-size:0.85rem;color:var(--gray-mid);">Loading…</div>
+        </div>
+        <hr class="hid-divider" style="margin:16px 0;" />
+        <div style="font-size:0.88rem;font-weight:700;color:var(--black);margin-bottom:10px;">Link a New Tag</div>
+        <p style="font-size:0.85rem;color:var(--gray-dark);margin-bottom:12px;">
+          Enter the tag ID printed on your Helper-ID tag (e.g. <span style="font-family:monospace;">HID-X7K2M9</span>).
+        </p>
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+          <div style="flex:1;">
+            <div class="hid-label" style="margin-bottom:4px;">Tag ID</div>
+            <input class="hid-input" type="text" id="new-tag-input"
+              placeholder="HID-XXXXXX"
+              maxlength="10"
+              autocomplete="off"
+              autocapitalize="characters"
+              style="font-family:monospace;text-transform:uppercase;" />
+          </div>
+          <button class="hid-btn hid-btn-secondary" onclick="goToActivate()">Activate →</button>
+        </div>
+        <div class="err-msg" id="new-tag-err" style="min-height:0;margin-top:6px;"></div>
+      </div>
+
       <!-- Household members — shown only for household admins -->
       <div id="household-section" style="display:none;">
         <div class="hid-card">
@@ -762,6 +791,9 @@
 
       // Access log
       renderLog(logs);
+
+      // NFC devices
+      loadMyDevices();
     }
 
     // ============================================================
@@ -1204,6 +1236,106 @@
       img.src = url;
       img.style.display = 'block';
       fallback.style.display = 'none';
+    }
+
+    // ============================================================
+    // Utilities
+    // ============================================================
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function timeAgo(iso) {
+      const diff = Date.now() - new Date(iso).getTime();
+      const m    = Math.floor(diff / 60000);
+      if (m < 1)   return 'just now';
+      if (m < 60)  return `${m}m ago`;
+      const h = Math.floor(m / 60);
+      if (h < 24)  return `${h}h ago`;
+      const d = Math.floor(h / 24);
+      return `${d}d ago`;
+    }
+
+    // ============================================================
+    // My Devices
+    // ============================================================
+    async function loadMyDevices() {
+      const wrap = document.getElementById('devices-list');
+      try {
+        const res  = await fetch(`${API}/tag/mine`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        renderDevices(data.tags || []);
+      } catch {
+        wrap.innerHTML = '<div style="font-size:0.85rem;color:var(--gray-mid);">Could not load devices.</div>';
+      }
+    }
+
+    function renderDevices(tags) {
+      const wrap = document.getElementById('devices-list');
+      if (!tags.length) {
+        wrap.innerHTML = '<div style="font-size:0.85rem;color:var(--gray-mid);">No tags linked yet.</div>';
+        return;
+      }
+      wrap.innerHTML = tags.map(t => {
+        const isActive  = t.status === 'active';
+        const dateLabel = t.activated_at ? `Activated ${timeAgo(t.activated_at)}` : '';
+        return `
+          <div id="device-row-${escHtml(t.tag_id)}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0F0F0;">
+            <div>
+              <div style="font-family:monospace;font-weight:700;font-size:0.95rem;">${escHtml(t.tag_id)}</div>
+              <div style="font-size:0.78rem;color:var(--gray-mid);margin-top:2px;">${dateLabel}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:100px;text-transform:uppercase;background:${isActive ? '#D1FAE5' : '#FEE2E2'};color:${isActive ? '#065F46' : '#991B1B'};">
+                ${escHtml(t.status)}
+              </span>
+              ${isActive ? `<button class="hid-btn hid-btn-secondary" style="padding:5px 12px;font-size:0.8rem;" onclick="deactivateDevice('${escHtml(t.tag_id)}', this)">Deactivate</button>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function deactivateDevice(tagId, btn) {
+      if (!confirm(`Deactivate tag ${tagId}? It will no longer open your profile when tapped.`)) return;
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const res  = await fetch(`${API}/tag/deactivate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, tagId }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        loadMyDevices();
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Deactivate';
+        alert(err.message || 'Deactivation failed. Please try again.');
+      }
+    }
+
+    function goToActivate() {
+      const input = document.getElementById('new-tag-input');
+      const errEl = document.getElementById('new-tag-err');
+      const tagId = input.value.trim().toUpperCase();
+      errEl.textContent = '';
+      if (!tagId) { errEl.textContent = 'Enter a tag ID.'; return; }
+      if (!/^HID-[A-Z0-9]{6}$/.test(tagId)) {
+        errEl.textContent = 'Tag ID format: HID-XXXXXX (e.g. HID-X7K2M9).';
+        return;
+      }
+      window.location.href = `/activate.html?tag=${encodeURIComponent(tagId)}`;
     }
 
     // ============================================================

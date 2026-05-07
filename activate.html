@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Activate Tag</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-588PV5KMPT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-588PV5KMPT');
+  </script>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    .activate-wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .activate-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .activate-header h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      margin-bottom: 8px;
+    }
+    .activate-header p {
+      color: var(--gray-dark);
+      font-size: var(--text-sm);
+      line-height: 1.6;
+    }
+
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gray-light);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--black);
+      margin-bottom: 28px;
+    }
+    .tag-badge-label {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray-mid);
+    }
+
+    .success-icon { font-size: 3rem; text-align: center; margin-bottom: 16px; }
+    .success-title {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .success-body {
+      font-size: var(--text-sm);
+      color: var(--gray-dark);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .no-tag-wrap {
+      text-align: center;
+      padding: 64px 24px;
+    }
+    .no-tag-wrap h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      margin-bottom: 10px;
+    }
+    .no-tag-wrap p { font-size: var(--text-sm); color: var(--gray-dark); line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+  <div class="hid-nav">
+    <a href="/" class="hid-nav-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper-ID</span>
+    </a>
+  </div>
+
+  <div class="activate-wrap">
+
+    <!-- Screen: no tag param -->
+    <div id="screen-no-tag" class="screen">
+      <div class="no-tag-wrap">
+        <h2>No Tag Found</h2>
+        <p>This page requires a tag ID in the URL. Tap your Helper-ID NFC tag again to start over.</p>
+      </div>
+    </div>
+
+    <!-- Screen: activation form -->
+    <div id="screen-form" class="screen">
+      <div class="activate-header">
+        <h1>Link This Tag</h1>
+        <p>Enter your Helper-ID CODE and PIN to link this tag to your profile. After activation, anyone who taps this tag will see your emergency information.</p>
+      </div>
+
+      <div style="text-align:center;">
+        <div class="tag-badge">
+          <span class="tag-badge-label">Tag</span>
+          <span id="tag-id-display">—</span>
+        </div>
+      </div>
+
+      <div class="hid-card">
+        <div style="margin-bottom:16px;">
+          <div class="hid-label">Your CODE</div>
+          <input class="hid-input" type="text" id="code-input"
+            placeholder="e.g. ABCDEF"
+            maxlength="8"
+            autocomplete="off"
+            autocapitalize="characters"
+            style="font-family:monospace;font-size:1.1rem;letter-spacing:0.1em;text-transform:uppercase;" />
+        </div>
+        <div style="margin-bottom:20px;">
+          <div class="hid-label">Your PIN</div>
+          <input class="hid-input" type="text" id="pin-input"
+            placeholder="e.g. 482-931"
+            maxlength="10"
+            autocomplete="off"
+            inputmode="numeric" />
+        </div>
+        <div class="err-msg" id="form-err"></div>
+        <button class="hid-btn hid-btn-primary hid-btn-full" id="activate-btn" onclick="activateTag()">
+          Activate Tag →
+        </button>
+      </div>
+
+      <p style="text-align:center;font-size:var(--text-xs);color:var(--gray-mid);margin-top:16px;">
+        Your CODE and PIN are in your welcome email. The tag will link to your current profile.
+      </p>
+    </div>
+
+    <!-- Screen: success -->
+    <div id="screen-success" class="screen">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Tag Activated</div>
+      <p class="success-body">
+        This tag is now linked to your Helper-ID profile. Tap it with any phone to confirm it works.
+      </p>
+      <a href="/dashboard.html" class="hid-btn hid-btn-primary hid-btn-full" style="display:block;text-align:center;text-decoration:none;">
+        Go to My Dashboard →
+      </a>
+      <p style="text-align:center;margin-top:16px;font-size:var(--text-xs);color:var(--gray-mid);">
+        You'll need to log in with your email to access the dashboard.
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    const API    = '/api';
+    let   _tagId = null;
+
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    (function init() {
+      const params = new URLSearchParams(window.location.search);
+      _tagId = params.get('tag');
+      if (!_tagId) { show('screen-no-tag'); return; }
+      document.getElementById('tag-id-display').textContent = _tagId;
+      show('screen-form');
+    })();
+
+    document.getElementById('code-input').addEventListener('input', function() {
+      this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+
+    document.getElementById('pin-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') activateTag();
+    });
+
+    async function activateTag() {
+      const code   = document.getElementById('code-input').value.trim().toUpperCase();
+      const pin    = document.getElementById('pin-input').value.trim();
+      const errEl  = document.getElementById('form-err');
+      const btn    = document.getElementById('activate-btn');
+
+      errEl.textContent = '';
+
+      if (!code) { errEl.textContent = 'Enter your CODE.'; return; }
+      if (!pin)  { errEl.textContent = 'Enter your PIN.'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Activating…';
+
+      try {
+        const res  = await fetch(`${API}/tag/activate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ tagId: _tagId, code, pin }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          errEl.textContent = data.error || 'Activation failed. Please try again.';
+          btn.disabled = false;
+          btn.textContent = 'Activate Tag →';
+          return;
+        }
+
+        show('screen-success');
+      } catch {
+        errEl.textContent = 'Connection error. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Activate Tag →';
+      }
+    }
+  </script>
+
+</body>
+</html>

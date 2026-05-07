@@ -2044,6 +2044,288 @@ app.post('/cron/drip', async (req, res) => {
   }
 });
 
+// ============================================================
+// ---- NFC Tag System (NFC-10) ----
+// ============================================================
+
+// Format: HID-[6 alphanumeric uppercase], no I/O/0/1
+function generateTagId() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let id = 'HID-';
+  for (let i = 0; i < 6; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return id;
+}
+
+// Shared token provisioning for a profile — creates one nfc_token if none exists.
+// Returns the token string or null on failure.
+async function ensureNfcToken(profileId) {
+  const { data: existing } = await supabase
+    .from('nfc_tokens')
+    .select('token')
+    .eq('profile_id', profileId)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (existing) return existing.token;
+
+  let token;
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const raw = crypto.randomBytes(9).toString('base64url').slice(0, 12).toUpperCase();
+    const { data: taken } = await supabase
+      .from('nfc_tokens').select('id').eq('token', raw).maybeSingle();
+    if (!taken) { token = raw; break; }
+  }
+  if (!token) return null;
+
+  const { error } = await supabase
+    .from('nfc_tokens')
+    .insert({ profile_id: profileId, token, status: 'active', label: 'pre-programmed tag' });
+
+  return error ? null : token;
+}
+
+// ---- POST /tag-resolve ----
+// Called by t.html to resolve a tag_id to its current state.
+// Returns JSON — t.html handles client-side navigation.
+app.post('/tag-resolve', lookupLimiter, async (req, res) => {
+  const { tagId } = req.body;
+  if (!tagId) return res.status(400).json({ error: 'Missing tagId' });
+
+  const norm = tagId.toUpperCase().trim();
+
+  const { data: tag } = await supabase
+    .from('nfc_tags')
+    .select('id, tag_id, member_id, status')
+    .eq('tag_id', norm)
+    .maybeSingle();
+
+  if (!tag) return res.json({ status: 'not_found' });
+  if (tag.status === 'pending') return res.json({ status: 'pending', tagId: norm });
+  if (tag.status === 'revoked') return res.json({ status: 'revoked' });
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('member_id', tag.member_id)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (!profile) return res.json({ status: 'profile_inactive' });
+
+  const token = await ensureNfcToken(profile.id);
+  if (!token) return res.status(500).json({ error: 'Could not resolve tag' });
+
+  supabase.from('access_logs').insert({
+    profile_id:    profile.id,
+    access_method: 'nfc',
+    ip_address:    req.headers['x-forwarded-for'] || req.ip || null,
+    failed_attempt: false,
+  }).then(() => {}).catch(err => console.error('tag access_log failed:', err.message));
+
+  return res.json({ status: 'active', token });
+});
+
+// ---- POST /tag/activate ----
+// Validate CODE+PIN, link a pending tag to the member's account.
+app.post('/tag/activate', lookupLimiter, async (req, res) => {
+  const { tagId, code, pin } = req.body;
+  if (!tagId || !code || !pin) return res.status(400).json({ error: 'Missing tagId, code, or pin' });
+
+  const tagNorm  = tagId.toUpperCase().trim();
+  const codeNorm = code.trim().toUpperCase();
+
+  const { data: tag } = await supabase
+    .from('nfc_tags')
+    .select('id, member_id, status')
+    .eq('tag_id', tagNorm)
+    .maybeSingle();
+
+  if (!tag) return res.status(404).json({ error: 'Tag not found' });
+  if (tag.status === 'revoked') return res.status(400).json({ error: 'This tag has been deactivated' });
+
+  if (isCodeLocked(codeNorm)) {
+    return res.status(429).json({ error: 'Too many failed attempts. Please try again in 15 minutes.' });
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, pin_hash, member_id')
+    .eq('code', codeNorm)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (!profile) {
+    recordCodeFailure(codeNorm);
+    return res.status(401).json({ error: 'Invalid code or PIN' });
+  }
+
+  const pinValid = await bcrypt.compare(pin.trim(), profile.pin_hash);
+  if (!pinValid) {
+    recordCodeFailure(codeNorm);
+    await supabase.from('access_logs').insert({
+      profile_id:    profile.id,
+      access_method: 'cp',
+      ip_address:    req.headers['x-forwarded-for'] || req.ip || null,
+      failed_attempt: true,
+    });
+    return res.status(401).json({ error: 'Invalid code or PIN' });
+  }
+
+  clearCodeFailures(codeNorm);
+
+  if (tag.status === 'active' && tag.member_id === profile.member_id) {
+    return res.json({ success: true, tagId: tagNorm });
+  }
+
+  const { error: updateErr } = await supabase
+    .from('nfc_tags')
+    .update({ member_id: profile.member_id, status: 'active', activated_at: new Date().toISOString() })
+    .eq('id', tag.id);
+
+  if (updateErr) {
+    console.error('/tag/activate update failed:', updateErr.message);
+    return res.status(500).json({ error: 'Activation failed' });
+  }
+
+  await ensureNfcToken(profile.id);
+
+  console.log(`/tag/activate: ${tagNorm} linked to member ${profile.member_id}`);
+  return res.json({ success: true, tagId: tagNorm });
+});
+
+// ---- POST /tag/mine ----
+// Returns nfc_tags linked to the authenticated member.
+app.post('/tag/mine', async (req, res) => {
+  const { session } = req.body;
+  if (!session) return res.status(401).json({ error: 'Missing session' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const { data: tags } = await supabase
+    .from('nfc_tags')
+    .select('id, tag_id, status, activated_at, revoked_at')
+    .eq('member_id', payload.memberId)
+    .order('activated_at', { ascending: false });
+
+  return res.json({ tags: tags || [] });
+});
+
+// ---- POST /tag/deactivate ----
+// Member revokes one of their own tags.
+app.post('/tag/deactivate', async (req, res) => {
+  const { session, tagId } = req.body;
+  if (!session || !tagId) return res.status(400).json({ error: 'Missing session or tagId' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const { data: tag } = await supabase
+    .from('nfc_tags')
+    .select('id, member_id, status')
+    .eq('tag_id', tagId.toUpperCase().trim())
+    .maybeSingle();
+
+  if (!tag) return res.status(404).json({ error: 'Tag not found' });
+  if (tag.member_id !== payload.memberId) return res.status(403).json({ error: 'Access denied' });
+  if (tag.status === 'revoked') return res.json({ success: true });
+
+  const { error } = await supabase
+    .from('nfc_tags')
+    .update({ status: 'revoked', revoked_at: new Date().toISOString() })
+    .eq('id', tag.id);
+
+  if (error) return res.status(500).json({ error: 'Deactivation failed' });
+  return res.json({ success: true });
+});
+
+// ---- POST /admin/tags ----
+// Admin: all nfc_tags with member info.
+app.post('/admin/tags', requireAdmin, async (req, res) => {
+  const { data: tags } = await supabase
+    .from('nfc_tags')
+    .select('id, tag_id, member_id, status, created_at, activated_at, revoked_at')
+    .order('created_at', { ascending: false });
+
+  const memberIds = [...new Set((tags || []).filter(t => t.member_id).map(t => t.member_id))];
+  const memberMap  = {};
+  const profileMap = {};
+
+  if (memberIds.length) {
+    const { data: members } = await supabase
+      .from('members').select('id, email').in('id', memberIds);
+    (members || []).forEach(m => { memberMap[m.id] = m; });
+
+    const { data: profiles } = await supabase
+      .from('profiles').select('member_id, first_name, last_name').in('member_id', memberIds);
+    (profiles || []).forEach(p => { profileMap[p.member_id] = p; });
+  }
+
+  const enriched = (tags || []).map(t => ({
+    ...t,
+    member_email: t.member_id ? (memberMap[t.member_id]?.email || null) : null,
+    member_name:  t.member_id
+      ? (profileMap[t.member_id]
+          ? `${profileMap[t.member_id].first_name} ${profileMap[t.member_id].last_name}`.trim()
+          : null)
+      : null,
+  }));
+
+  return res.json({ tags: enriched });
+});
+
+// ---- POST /admin/tags/generate ----
+// Admin: generate a batch of pending tag IDs.
+app.post('/admin/tags/generate', requireAdmin, async (req, res) => {
+  const count = Math.min(Math.max(parseInt(req.body.count) || 1, 1), 100);
+  const generated = [];
+
+  for (let i = 0; i < count; i++) {
+    let tagId;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const candidate = generateTagId();
+      const { data: exists } = await supabase
+        .from('nfc_tags').select('id').eq('tag_id', candidate).maybeSingle();
+      if (!exists) { tagId = candidate; break; }
+    }
+    if (!tagId) break;
+
+    const { error } = await supabase.from('nfc_tags').insert({ tag_id: tagId, status: 'pending' });
+    if (!error) generated.push(tagId);
+  }
+
+  const urls = generated.map(id => ({ tag_id: id, url: `${SITE_URL}/t.html?id=${id}` }));
+  return res.json({ generated: urls, count: generated.length });
+});
+
+// ---- POST /admin/tags/revoke ----
+// Admin: force-revoke any tag regardless of owner.
+app.post('/admin/tags/revoke', requireAdmin, async (req, res) => {
+  const { tagId } = req.body;
+  if (!tagId) return res.status(400).json({ error: 'Missing tagId' });
+
+  const { data: tag } = await supabase
+    .from('nfc_tags')
+    .select('id, status')
+    .eq('tag_id', tagId.toUpperCase().trim())
+    .maybeSingle();
+
+  if (!tag) return res.status(404).json({ error: 'Tag not found' });
+  if (tag.status === 'revoked') return res.json({ success: true });
+
+  const { error } = await supabase
+    .from('nfc_tags')
+    .update({ status: 'revoked', revoked_at: new Date().toISOString() })
+    .eq('id', tag.id);
+
+  if (error) return res.status(500).json({ error: 'Revoke failed' });
+  return res.json({ success: true });
+});
+
 // ---- 404 catch-all ----
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });

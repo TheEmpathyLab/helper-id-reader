@@ -398,6 +398,51 @@
         </div>
       </div>
 
+      <!-- NFC Tags -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">NFC Tags</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="admin-card-count" id="tags-count"></span>
+            <button class="refresh-btn" onclick="loadTags()">Refresh</button>
+          </div>
+        </div>
+
+        <!-- Generate batch -->
+        <div style="padding:14px 20px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <label style="font-size:0.82rem;font-weight:600;color:var(--gray-dark);">Generate</label>
+          <input type="number" id="gen-count" value="10" min="1" max="100"
+            style="width:70px;padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:0.88rem;font-family:var(--font-body);" />
+          <label style="font-size:0.82rem;font-weight:600;color:var(--gray-dark);">tags</label>
+          <button class="save-btn" onclick="generateTags()">Generate →</button>
+          <span id="gen-msg" class="inline-msg"></span>
+        </div>
+
+        <!-- Generated results (shown after generate) -->
+        <div id="gen-results" style="display:none;padding:14px 20px;border-bottom:1.5px solid var(--border);">
+          <div style="font-size:0.82rem;font-weight:600;color:var(--gray-dark);margin-bottom:8px;">Generated Tags — copy and write these URLs to tags:</div>
+          <pre id="gen-list" style="font-size:0.78rem;font-family:monospace;white-space:pre-wrap;color:#444;background:var(--gray-light);border-radius:var(--radius);padding:12px;max-height:200px;overflow-y:auto;"></pre>
+          <button class="cancel-btn" style="margin-top:8px;" onclick="document.getElementById('gen-results').style.display='none'">Dismiss</button>
+        </div>
+
+        <div class="members-table-wrap">
+          <table id="tags-table">
+            <thead>
+              <tr>
+                <th>Tag ID</th>
+                <th>Status</th>
+                <th>Member</th>
+                <th>Activated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tags-tbody">
+              <tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Access Logs -->
       <div class="admin-card">
         <div class="admin-card-header">
@@ -479,6 +524,7 @@
         renderLogs(logs.logs || []);
 
         show('screen-admin');
+        loadTags();
 
       } catch (err) {
         console.error('Admin load error:', err);
@@ -664,6 +710,106 @@
       if (h < 24)  return `${h}h ago`;
       const d = Math.floor(h / 24);
       return `${d}d ago`;
+    }
+
+    // ============================================================
+    // NFC Tags
+    // ============================================================
+    async function loadTags() {
+      try {
+        const res  = await fetch(`${API}/admin/tags`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        renderTags(data.tags || []);
+      } catch {
+        document.getElementById('tags-tbody').innerHTML =
+          '<tr><td colspan="5"><div class="empty-state">Failed to load tags.</div></td></tr>';
+      }
+    }
+
+    function renderTags(tags) {
+      document.getElementById('tags-count').textContent = `${tags.length} total`;
+
+      if (!tags.length) {
+        document.getElementById('tags-tbody').innerHTML =
+          '<tr><td colspan="5"><div class="empty-state">No tags yet. Generate a batch to get started.</div></td></tr>';
+        return;
+      }
+
+      document.getElementById('tags-tbody').innerHTML = tags.map(t => {
+        const pillClass = t.status === 'active' ? 'pill-active' : t.status === 'pending' ? 'pill-pending' : 'pill-none';
+        const activated = t.activated_at ? timeAgo(t.activated_at) : '—';
+        const memberInfo = t.member_name ? escHtml(t.member_name) : (t.member_email ? escHtml(t.member_email) : '<span style="color:#ccc;">—</span>');
+        const actions = t.status !== 'revoked'
+          ? `<button class="action-btn" onclick="revokeTag('${escHtml(t.tag_id)}', this)">Revoke</button>`
+          : '<span style="color:#ccc;font-size:0.78rem;">revoked</span>';
+
+        return `<tr>
+          <td style="font-family:monospace;font-weight:700;">${escHtml(t.tag_id)}</td>
+          <td><span class="status-pill ${pillClass}">${escHtml(t.status)}</span></td>
+          <td>${memberInfo}</td>
+          <td style="color:var(--gray-mid);font-size:0.82rem;">${activated}</td>
+          <td>${actions}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function generateTags() {
+      const count  = parseInt(document.getElementById('gen-count').value) || 10;
+      const msgEl  = document.getElementById('gen-msg');
+      const btn    = document.querySelector('#gen-msg').previousElementSibling;
+      msgEl.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+
+      try {
+        const res  = await fetch(`${API}/admin/tags/generate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, count }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        msgEl.textContent = `Generated ${data.count} tag${data.count !== 1 ? 's' : ''}.`;
+        msgEl.className = 'inline-msg ok';
+
+        document.getElementById('gen-list').textContent =
+          data.generated.map(t => `${t.tag_id}  →  ${t.url}`).join('\n');
+        document.getElementById('gen-results').style.display = 'block';
+
+        loadTags();
+      } catch (err) {
+        msgEl.textContent = err.message || 'Generation failed.';
+        msgEl.className = 'inline-msg err';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate →';
+      }
+    }
+
+    async function revokeTag(tagId, btn) {
+      if (!confirm(`Revoke tag ${tagId}? This cannot be undone.`)) return;
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const res  = await fetch(`${API}/admin/tags/revoke`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session, tagId }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        loadTags();
+      } catch (err) {
+        btn.textContent = 'Error';
+        btn.style.color = 'var(--gray-mid)';
+        alert(err.message || 'Revoke failed.');
+      }
     }
   </script>
 </body>

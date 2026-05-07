@@ -345,6 +345,29 @@ alter table leads       enable row level security;
 --   select cron.unschedule('purge-old-access-logs');
 --
 -- ============================================================
+-- nfc_tags table — added 2026-05-07 via Supabase SQL Editor
+-- (NFC-10 Pre-Program NFC Architecture)
+-- ============================================================
+-- Run this block in Supabase SQL Editor:
+--
+--   create table nfc_tags (
+--     id           uuid primary key default gen_random_uuid(),
+--     tag_id       text unique not null,
+--     member_id    uuid references members(id) on delete set null,
+--     status       text not null default 'pending'
+--                    check (status in ('pending', 'active', 'revoked')),
+--     created_at   timestamptz default now(),
+--     activated_at timestamptz,
+--     revoked_at   timestamptz
+--   );
+--
+--   create index idx_nfc_tags_tag_id    on nfc_tags(tag_id);
+--   create index idx_nfc_tags_member_id on nfc_tags(member_id);
+--
+--   alter table nfc_tags enable row level security;
+--   -- No permissive policies — all access via service role (server.js).
+--
+-- ============================================================
 -- NEXT STEPS (manual — Supabase dashboard)
 -- ============================================================
 -- 1. Storage → New bucket → name: "headshots" → toggle Private

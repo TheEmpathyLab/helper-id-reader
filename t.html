@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, serif;
+      background: #F6F6F6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: #D0312D;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 12px;
+    }
+    .logo-text { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.3px; color: #1A1A1A; }
+    .icon { font-size: 2.5rem; margin-bottom: 16px; }
+    h1 { font-size: 1.25rem; margin-bottom: 10px; color: #1A1A1A; }
+    p { font-size: 0.9rem; color: #666; line-height: 1.6; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #E0E0E0;
+      border-top-color: #D0312D;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .footer {
+      margin-top: 40px;
+      font-size: 0.75rem;
+      color: #999;
+    }
+    a { color: #D0312D; }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="card">
+    <div class="logo">
+      <div class="logo-mark">HID</div>
+      <span class="logo-text">Helper-ID</span>
+    </div>
+    <div class="spinner" id="spinner"></div>
+    <p id="msg" style="color:#999;">Resolving tag…</p>
+  </div>
+
+  <div class="footer">
+    <a href="https://helper-id.com">helper-id.com</a>
+  </div>
+
+  <script>
+    const API = '/api';
+
+    function showError(title, message) {
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('card').innerHTML = `
+        <div class="logo">
+          <div class="logo-mark">HID</div>
+          <span class="logo-text">Helper-ID</span>
+        </div>
+        <div class="icon">⚠️</div>
+        <h1>${title}</h1>
+        <p>${message}</p>
+      `;
+    }
+
+    (async function resolve() {
+      const params = new URLSearchParams(window.location.search);
+      const tagId  = params.get('id');
+
+      if (!tagId) {
+        showError('No Tag ID', 'This link is missing a tag identifier. Check the URL and try again.');
+        return;
+      }
+
+      let data;
+      try {
+        const res = await fetch(`${API}/tag-resolve`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ tagId }),
+        });
+        data = await res.json();
+      } catch {
+        showError('Connection Error', 'Could not reach the Helper-ID server. Please check your connection and try again.');
+        return;
+      }
+
+      switch (data.status) {
+        case 'active':
+          window.location.replace(`/reader.html?token=${encodeURIComponent(data.token)}`);
+          break;
+
+        case 'pending':
+          window.location.replace(`/activate.html?tag=${encodeURIComponent(data.tagId)}`);
+          break;
+
+        case 'revoked':
+          showError(
+            'Tag Deactivated',
+            'This Helper-ID tag has been deactivated. If you need emergency information, ask for their Helper-ID CODE instead.'
+          );
+          break;
+
+        case 'not_found':
+          showError(
+            'Tag Not Recognized',
+            'This tag is not registered in the Helper-ID system. Contact <a href="mailto:hello@helper-id.com">hello@helper-id.com</a> if you believe this is an error.'
+          );
+          break;
+
+        case 'profile_inactive':
+          showError(
+            'Profile Not Available',
+            'The profile linked to this tag is not currently active. Please try again later.'
+          );
+          break;
+
+        default:
+          showError('Error', data.error || 'Something went wrong. Please try again.');
+      }
+    })();
+  </script>
+
+</body>
+</html>
