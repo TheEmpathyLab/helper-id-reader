@@ -11,8 +11,8 @@ const HID_CONFIG = {
     digitalDownload:      'https://buy.stripe.com/cNi6oHbIB7c37R67XccIE02',
     nfcPack:              'https://buy.stripe.com/14AcN5cMF0NF4EUdhwcIE01',
     fullMembership:       'https://buy.stripe.com/5kQeVdeUN67Z4EUelAcIE00',
-    individualMembership: '#',
-    familyMembership:     'https://buy.stripe.com/5kQeVdeUN67Z4EUelAcIE00',
+    individualMembership: 'https://buy.stripe.com/5kQeVdeUN67Z4EUelAcIE00',
+    familyMembership:     '#',
   },
 
   // ---- API Endpoint ----
@@ -30,8 +30,8 @@ const HID_CONFIG = {
     digitalDownload:      '$9',
     nfcPack:              '$35',
     fullMembership:       '$55/yr',
-    individualMembership: '$35/yr',
-    familyMembership:     '$55/yr',
+    individualMembership: '$55/yr',
+    familyMembership:     '$99/yr',
   },
 
 };
