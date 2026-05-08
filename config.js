@@ -12,7 +12,7 @@ const HID_CONFIG = {
     nfcPack:              'https://buy.stripe.com/14AcN5cMF0NF4EUdhwcIE01',
     fullMembership:       'https://buy.stripe.com/5kQeVdeUN67Z4EUelAcIE00',
     individualMembership: 'https://buy.stripe.com/5kQeVdeUN67Z4EUelAcIE00',
-    familyMembership:     '#',
+    familyMembership:     'https://buy.stripe.com/aFa3cvh2Vcwnc7mdhwcIE03',
   },
 
   // ---- API Endpoint ----
