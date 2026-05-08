@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Membership</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-588PV5KMPT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-588PV5KMPT');
+  </script>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    /* ---- Hero ---- */
+    .member-hero {
+      text-align: center;
+      padding: 64px 24px 52px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .member-hero h1 { font-family: var(--font-display); font-size: 2.4rem; line-height: 1.15; margin-bottom: 16px; }
+    .member-hero h1 em { font-style: normal; color: var(--red); }
+    .member-hero p { font-size: 1.05rem; color: var(--gray-dark); line-height: 1.7; margin-bottom: 28px; }
+
+    /* ---- What's included ---- */
+    .included-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
+    .included-inner { max-width: var(--max-width); margin: 0 auto; }
+    .included-inner h2 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 8px; }
+    .included-inner > p { font-size: 0.95rem; color: var(--gray-dark); margin-bottom: 32px; line-height: 1.65; }
+    .included-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+    .included-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+      font-size: 0.92rem; color: var(--gray-dark); line-height: 1.4;
+    }
+    .included-check { color: var(--red); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .included-text strong { display: block; font-weight: 600; color: var(--black); margin-bottom: 2px; font-size: 0.92rem; }
+
+    /* ---- Pricing (tier comparison) ---- */
+    .pricing-section { background: #FAFAFA; border-top: 1.5px solid var(--border); padding: 56px 24px; }
+    .pricing-inner { max-width: 760px; margin: 0 auto; }
+    .pricing-header { text-align: center; margin-bottom: 40px; }
+    .pricing-header h2 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 8px; }
+    .pricing-header p { font-size: 0.95rem; color: var(--gray-dark); }
+    .product-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
+    .product-card {
+      border: 2px solid var(--border); border-radius: var(--radius-lg);
+      padding: 28px 24px; display: flex; flex-direction: column;
+      text-align: center; position: relative; transition: box-shadow 0.15s;
+      background: var(--white);
+    }
+    .product-card:hover { box-shadow: var(--shadow-lg); }
+    .product-card.featured { border-color: var(--red); border-width: 2.5px; }
+    .product-card.featured::before {
+      content: '★ Most Popular';
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: var(--red); color: white;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 14px; border-radius: 999px; white-space: nowrap;
+    }
+    .product-tier {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 16px; padding: 4px 10px; border-radius: 999px; display: inline-block;
+    }
+    .tier-individual { background: var(--gray-light); color: var(--gray-dark); }
+    .tier-family { background: var(--red-light); color: var(--red-dark); }
+    .product-icon { font-size: 2.4rem; margin-bottom: 12px; }
+    .product-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+    .product-tagline { font-size: 0.85rem; color: var(--gray-dark); margin-bottom: 14px; line-height: 1.5; }
+    .product-price { font-family: var(--font-display); font-size: 2.2rem; color: var(--red); line-height: 1.1; margin-bottom: 20px; }
+    .product-price .sub { font-family: var(--font-body); font-size: 0.78rem; color: var(--gray-mid); font-weight: 400; }
+    .product-features { list-style: none; text-align: left; margin-bottom: 24px; flex: 1; }
+    .product-features li { font-size: 0.85rem; color: var(--gray-dark); padding: 5px 0; display: flex; gap: 8px; line-height: 1.4; }
+    .product-features li::before { content: '✓'; color: var(--red); font-weight: 700; flex-shrink: 0; }
+    .product-features li.highlight { font-weight: 600; color: var(--black); }
+
+    /* ---- How it works ---- */
+    .steps-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
+    .steps-inner { max-width: var(--max-width); margin: 0 auto; }
+    .steps-inner h2 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 8px; }
+    .steps-inner > p { font-size: 0.95rem; color: var(--gray-dark); margin-bottom: 36px; line-height: 1.65; }
+    .step-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .step-item { text-align: center; }
+    .step-num { width: 48px; height: 48px; background: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: white; margin: 0 auto 16px; }
+    .step-item h4 { font-size: 0.95rem; font-weight: 700; color: var(--black); margin-bottom: 6px; }
+    .step-item p { font-size: 0.85rem; color: var(--gray-dark); line-height: 1.6; }
+
+    /* ---- FAQ teaser ---- */
+    .faq-teaser { border-top: 1.5px solid var(--border); padding: 48px 24px; text-align: center; background: var(--gray-light); }
+    .faq-teaser-inner { max-width: 560px; margin: 0 auto; }
+    .faq-teaser h3 { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 10px; }
+    .faq-teaser p { font-size: 0.92rem; color: var(--gray-dark); line-height: 1.7; margin-bottom: 20px; }
+
+    /* ---- CTA ---- */
+    .member-cta { background: var(--black); padding: 64px 24px; text-align: center; color: white; }
+    .member-cta h2 { font-family: var(--font-display); font-size: 1.9rem; color: white; margin-bottom: 12px; }
+    .member-cta > p { font-size: 0.95rem; color: #aaa; margin-bottom: 36px; }
+    .cta-tier-row { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; align-items: flex-start; }
+    .cta-tier { text-align: center; }
+    .cta-tier-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+    .cta-tier-price { font-family: var(--font-display); font-size: 1.6rem; color: white; margin-bottom: 14px; }
+    .cta-tier-price .sub { font-family: var(--font-body); font-size: 0.75rem; color: #888; font-weight: 400; }
+
+    @media (max-width: 620px) {
+      .member-hero h1 { font-size: 1.9rem; }
+      .included-grid { grid-template-columns: 1fr; }
+      .product-grid { grid-template-columns: 1fr; }
+      .step-list { grid-template-columns: 1fr; gap: 20px; }
+      .cta-tier-row { flex-direction: column; align-items: center; gap: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="products.html">Products</a>
+      <a href="membership.html" class="active">Membership</a>
+      <a href="reader.html">Read a Tag</a>
+      <a href="pdf.html">Free PDF</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="dashboard.html" class="hid-btn hid-btn-outline" style="font-size:0.85rem;padding:8px 16px;">Member Login</a>
+  </header>
+
+  <!-- Hero -->
+  <div class="member-hero">
+    <span class="hid-badge hid-badge-red" style="margin-bottom:16px;display:inline-block;">Full Membership</span>
+    <h1>You're the kind of person who <em>looks out for others.</em></h1>
+    <p>Helper-ID membership means the people who look out for you will have what they need — the moment they need it. Emergency contacts, medical information, and care instructions, ready instantly.</p>
+    <a href="#pricing" class="hid-btn hid-btn-primary hid-btn-lg">See Membership Plans →</a>
+  </div>
+
+  <!-- What's included -->
+  <section class="included-section">
+    <div class="included-inner">
+      <span class="hid-section-label">What You Get</span>
+      <h2>Everything you need to be ready.</h2>
+      <p>A Helper-ID membership is a complete emergency information system — not just a card, not just an app. It's a live, hosted profile that anyone can access the moment you need help.</p>
+      <div class="included-grid">
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Live emergency profile</strong>
+            Hosted and available 24/7 — anyone can access it instantly, anywhere.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>NFC tap access</strong>
+            Tap your card or key tag to any smartphone. No app needed.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>CODE + PIN backup access</strong>
+            A unique 6-character CODE and PIN — for anyone without NFC.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Emergency contacts</strong>
+            Name, relationship, and phone number for the people you trust most.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Medical information</strong>
+            Allergies, medications, conditions, blood type, and primary physician.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Care instructions</strong>
+            Advance directives and anything else a helper needs to know.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Photo on your profile</strong>
+            Helps helpers identify you quickly — especially in stressful situations.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Access log</strong>
+            See every time your profile is viewed, from your member dashboard.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Member dashboard</strong>
+            Update your information anytime — changes are live immediately.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>NFC hardware shipped to you</strong>
+            An NFC card and two NFC key tags, ready to carry.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tier comparison -->
+  <section class="pricing-section" id="pricing">
+    <div class="pricing-inner">
+      <div class="pricing-header">
+        <span class="hid-section-label">Plans</span>
+        <h2>Choose your membership.</h2>
+        <p>One profile or the whole household — both plans include everything above.</p>
+      </div>
+      <div class="product-grid">
+
+        <!-- Individual -->
+        <div class="product-card">
+          <span class="product-tier tier-individual">Individual</span>
+          <div class="product-icon">🪪</div>
+          <div class="product-name">Individual Membership</div>
+          <div class="product-tagline">One profile, fully hosted and ready — for yourself.</div>
+          <div class="product-price">$35 <span class="sub">per year</span></div>
+          <ul class="product-features">
+            <li class="highlight">One hosted emergency profile</li>
+            <li>NFC card + two NFC key tags shipped to you</li>
+            <li>CODE + PIN and NFC access</li>
+            <li>Emergency contacts, medical info, care instructions</li>
+            <li class="highlight">Photo on your profile</li>
+            <li>Access log and member dashboard</li>
+          </ul>
+          <a href="#" data-stripe="individualMembership" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Join — Individual →</a>
+        </div>
+
+        <!-- Family -->
+        <div class="product-card featured">
+          <span class="product-tier tier-family">Family / Household</span>
+          <div class="product-icon">🤝</div>
+          <div class="product-name">Family Membership</div>
+          <div class="product-tagline">Multiple profiles for the people you live with and care for most.</div>
+          <div class="product-price">$55 <span class="sub">per year</span></div>
+          <ul class="product-features">
+            <li class="highlight">Everything in Individual</li>
+            <li class="highlight">Up to 4 profiles — one for each household member</li>
+            <li>NFC hardware for every profile</li>
+            <li>One account, one annual renewal</li>
+            <li>Ideal for families, caregivers, and anyone with complex medical needs</li>
+          </ul>
+          <a href="#" data-stripe="familyMembership" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Join — Family →</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="steps-section">
+    <div class="steps-inner">
+      <span class="hid-section-label">Getting Started</span>
+      <h2>Three steps to covered.</h2>
+      <p>Most members finish setup in a day. Your profile goes live the moment you save it — the hardware catches up a few days later.</p>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <h4>Get your kit</h4>
+          <p>Complete checkout and your NFC card and key tags ship to your door within a few days.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <h4>Set up your profile</h4>
+          <p>Log in to your member dashboard and add emergency contacts, medical information, and care instructions.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <h4>You're covered</h4>
+          <p>Your profile is live 24/7. Anyone can tap your tag or enter your CODE + PIN to get your information instantly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ teaser -->
+  <section class="faq-teaser">
+    <div class="faq-teaser-inner">
+      <h3>Questions? We've got answers.</h3>
+      <p>From how NFC tags work to what happens to your data — our FAQ covers everything about how Helper-ID works, what's on your profile, and how your information is protected.</p>
+      <a href="faq.html" class="hid-btn hid-btn-outline">Read the FAQ →</a>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="member-cta">
+    <h2>Join Helper-ID</h2>
+    <p>Your profile is live the moment you finish setup. 30-day money-back guarantee.</p>
+    <div class="cta-tier-row">
+      <div class="cta-tier">
+        <div class="cta-tier-label">Individual</div>
+        <div class="cta-tier-price">$35 <span class="sub">/ year</span></div>
+        <a href="#" data-stripe="individualMembership" target="_blank" class="hid-btn hid-btn-primary">Join — Individual →</a>
+      </div>
+      <div class="cta-tier">
+        <div class="cta-tier-label">Family / Household</div>
+        <div class="cta-tier-price">$55 <span class="sub">/ year</span></div>
+        <a href="#" data-stripe="familyMembership" target="_blank" class="hid-btn hid-btn-outline" style="color:white;border-color:white;">Join — Family →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID</span>
+    </div>
+    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="trust.html">Privacy &amp; Terms</a> &nbsp;·&nbsp; <a href="faq.html">FAQ</a></p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-stripe="individualMembership"]').forEach(el => el.href = HID_CONFIG.stripe.individualMembership);
+      document.querySelectorAll('[data-stripe="familyMembership"]').forEach(el => el.href = HID_CONFIG.stripe.familyMembership);
+    });
+  </script>
+</body>
+</html>
