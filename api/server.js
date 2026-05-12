@@ -1776,17 +1776,77 @@ app.post('/admin/members', requireAdmin, async (req, res) => {
 
 // ---- POST /admin/update-email ----
 // Update a member's email address.
+// Sends a confirmation + magic login link to individual members and household guardians.
+// Skips email for household dependents (they have no independent login).
 app.post('/admin/update-email', requireAdmin, async (req, res) => {
   const { memberId, newEmail } = req.body;
   if (!memberId || !newEmail) return res.status(400).json({ error: 'Missing memberId or newEmail' });
 
+  const cleanEmail = newEmail.toLowerCase().trim();
+
   const { error } = await supabase
     .from('members')
-    .update({ email: newEmail.toLowerCase().trim() })
+    .update({ email: cleanEmail })
     .eq('id', memberId);
 
   if (error) return res.status(500).json({ error: 'Update failed' });
-  return res.json({ success: true });
+
+  // Determine if this member has an active login (individual or household guardian).
+  // Dependents are linked to a household but are NOT the admin_member_id — skip email for them.
+  const { data: guardianHousehold } = await supabase
+    .from('households')
+    .select('id')
+    .eq('admin_member_id', memberId)
+    .maybeSingle();
+
+  let isDependent = false;
+  if (!guardianHousehold) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('household_id')
+      .eq('member_id', memberId)
+      .maybeSingle();
+    isDependent = !!(profile?.household_id);
+  }
+
+  if (!isDependent) {
+    const token    = generateSessionToken(memberId, cleanEmail);
+    const loginUrl = `${SITE_URL}/dashboard.html?session=${token}`;
+    await sgMail.send({
+      to:      cleanEmail,
+      from:    { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID account email has been updated',
+      html: `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:14px 24px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+          </div>
+          <div style="padding:28px 24px;">
+            <h2 style="font-size:1.3rem;margin-bottom:8px;">Your email address has been updated.</h2>
+            <p style="color:#666;margin-bottom:24px;">
+              Your Helper-ID account is now associated with this email address.
+              Use the link below to access your dashboard.
+            </p>
+            <a href="${loginUrl}"
+               style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+              Open My Dashboard →
+            </a>
+            <p style="margin-top:24px;font-size:0.8rem;color:#999;">
+              Didn't expect this change? Reply to this email and we'll help.
+            </p>
+          </div>
+          <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+            <p style="color:#999;font-size:0.75rem;margin:0;">
+              Helper-ID &nbsp;·&nbsp;
+              <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a>
+            </p>
+          </div>
+        </div>`,
+    });
+    return res.json({ success: true, emailSent: true });
+  }
+
+  return res.json({ success: true, emailSent: false });
 });
 
 // ---- POST /admin/resend-setup ----

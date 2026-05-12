@@ -625,7 +625,7 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Update failed');
-        msgEl.textContent = 'Saved.';
+        msgEl.textContent = data.emailSent ? 'Saved. Confirmation email sent.' : 'Saved.';
         msgEl.classList.add('ok');
         // Update the displayed email in the main row
         const rowCell = document.querySelector(`#row-${memberId} td:first-child`);
