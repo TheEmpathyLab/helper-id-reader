@@ -1207,7 +1207,19 @@ app.post('/member-data', async (req, res) => {
     .order('accessed_at', { ascending: false })
     .limit(10);
 
-  const sanitized = profiles.map(({ pin_hash, ...p }) => p);
+  const { data: tokens } = await supabase
+    .from('nfc_tokens')
+    .select('profile_id, token')
+    .in('profile_id', profiles.map(p => p.id))
+    .eq('status', 'active');
+
+  const tokenByProfile = {};
+  (tokens || []).forEach(t => { tokenByProfile[t.profile_id] = t.token; });
+
+  const sanitized = profiles.map(({ pin_hash, ...p }) => ({
+    ...p,
+    nfc_token: tokenByProfile[p.id] || null,
+  }));
 
   return res.json({
     member,

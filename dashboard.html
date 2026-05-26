@@ -811,7 +811,9 @@
         const avatarInner = p.headshot_url
           ? `<img src="${p.headshot_url}" alt="${name}" />`
           : '👤';
-        const readerUrl = `reader.html?code=${encodeURIComponent(p.code)}`;
+        const readerUrl = p.nfc_token
+          ? `reader.html?token=${encodeURIComponent(p.nfc_token)}`
+          : `reader.html?code=${encodeURIComponent(p.code)}`;
         return `
           <div class="dep-card" id="dep-card-${p.id}">
             <div class="dep-avatar">${avatarInner}</div>
@@ -854,7 +856,9 @@
       document.getElementById('dep-cred-pin').style.color  = 'var(--gray-mid)';
       document.getElementById('dep-cred-pin').style.fontSize = '0.85rem';
       document.getElementById('dep-view-link').style.display = 'none';
-      document.getElementById('dep-view-link').href = `reader.html?code=${encodeURIComponent(profile.code)}`;
+      document.getElementById('dep-view-link').href = profile.nfc_token
+        ? `reader.html?token=${encodeURIComponent(profile.nfc_token)}`
+        : `reader.html?code=${encodeURIComponent(profile.code)}`;
 
       // PIN context label
       document.getElementById('pin-context-label').textContent =
