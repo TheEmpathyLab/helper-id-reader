@@ -493,6 +493,109 @@ app.post('/card-pdf/email', async (req, res) => {
 });
 
 // ============================================================
+// ---- POST /profile-pdf/email ----
+// ============================================================
+// Session-authenticated. Fills the full emergency profile PDF
+// template and emails it to the member. Mirrors /email-pdf but
+// pulls data from the DB instead of accepting it from the client.
+// ============================================================
+app.post('/profile-pdf/email', async (req, res) => {
+  const { session, profileId } = req.body;
+  if (!session || !profileId) return res.status(400).json({ error: 'Missing required fields' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const canAccess = await guardianCanAccess(payload.memberId, profileId);
+  if (!canAccess) return res.status(403).json({ error: 'Access denied' });
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('email')
+    .eq('id', payload.memberId)
+    .maybeSingle();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, blood_type, allergies, conditions, medications, primary_physician, insurance_provider, insurance_id, insurance_group, ec1_name, ec1_phone, ec1_relationship, ec2_name, ec2_phone, ec2_relationship')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (!profile || !member) return res.status(404).json({ error: 'Not found' });
+
+  try {
+    const templateBytes = fs.readFileSync(path.join(__dirname, 'template.pdf'));
+    const pdf  = await PDFDocument.load(templateBytes);
+    const form = pdf.getForm();
+
+    const set = (fieldName, value) => {
+      try { form.getTextField(fieldName).setText(value || ''); } catch (_) {}
+    };
+
+    set('First Name', profile.first_name);
+    set('Last name',  profile.last_name);
+    set('Blood type height weight etc', profile.blood_type);
+    set('Medication animal environmental etc', profile.allergies);
+    set('Medical conditions', profile.conditions);
+    set('Medications',        profile.medications);
+
+    const docParts = (profile.primary_physician || '').split(/ — | · /);
+    set('Primary physician name',         docParts[0] || '');
+    set('Primary physician phone number', docParts[1] || '');
+
+    set('Insurance company name', profile.insurance_provider);
+    const groupStr = [profile.insurance_id, profile.insurance_group].filter(Boolean).join(' · ');
+    set('Group policy andor control number', groupStr);
+
+    set('Full name',     profile.ec1_name);  set('Phone number',     profile.ec1_phone);  set('Relationship',     profile.ec1_relationship);
+    set('Full name_2',   profile.ec2_name);  set('Phone number_2',   profile.ec2_phone);  set('Relationship_2',   profile.ec2_relationship);
+
+    const courier = await pdf.embedFont(StandardFonts.Courier);
+    form.updateFieldAppearances(courier);
+    form.flatten();
+    const pdfBytes = await pdf.save();
+
+    await sgMail.send({
+      to:   member.email,
+      from: { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID Emergency Profile',
+      html: `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:14px 24px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+          </div>
+          <div style="padding:28px 24px;">
+            <h2 style="font-size:1.3rem;margin-bottom:8px;">Your emergency profile is attached.</h2>
+            <p style="color:#666;margin-bottom:16px;line-height:1.7;">
+              Your Helper-ID emergency profile is attached as a PDF. Print it, keep a copy in your wallet,
+              and share it with family members or caregivers.
+            </p>
+            <div style="background:#FDECEA;border:1px solid #FCA5A5;border-radius:8px;padding:14px 16px;font-size:0.85rem;color:#A82320;margin-bottom:24px;">
+              <strong>Tip:</strong> Store a physical copy somewhere accessible — a wallet, fridge, or go-bag.
+              An inbox is the last place a first responder would look.
+            </div>
+          </div>
+          <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+            <p style="color:#999;font-size:0.75rem;margin:0;">Helper-ID &nbsp;·&nbsp; <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a></p>
+          </div>
+        </div>`,
+      attachments: [{
+        content:     Buffer.from(pdfBytes).toString('base64'),
+        filename:    'helper-id-emergency-profile.pdf',
+        type:        'application/pdf',
+        disposition: 'attachment',
+      }],
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('/profile-pdf/email:', err.message);
+    return res.status(500).json({ error: 'Failed to send profile' });
+  }
+});
+
+// ============================================================
 // Fills the InDesign PDF template with free-form profile data
 // and sends it as an attachment. Replaces the old inline-HTML
 // approach from /send-email type 'pdf'.

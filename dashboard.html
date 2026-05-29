@@ -415,6 +415,17 @@
         <div id="card-success" style="display:none;font-size:0.85rem;color:var(--green,#2a7a2a);margin-top:8px;"></div>
       </div>
 
+      <!-- Full Profile PDF -->
+      <div class="hid-card" style="margin-bottom:20px;">
+        <div class="hid-card-title">Full Profile PDF</div>
+        <p style="font-size:0.88rem;color:var(--gray-dark);margin-bottom:16px;">
+          Email yourself a filled copy of your complete emergency profile — all medical info, contacts, and insurance on one page. Print it for your fridge, go-bag, or to share with a caregiver.
+        </p>
+        <button class="hid-btn hid-btn-primary hid-btn-full" onclick="emailProfilePdf()">Email Full Profile →</button>
+        <div class="err-msg" id="profile-pdf-err" style="min-height:0;margin-top:8px;"></div>
+        <div id="profile-pdf-success" style="display:none;font-size:0.85rem;color:var(--green,#2a7a2a);margin-top:8px;"></div>
+      </div>
+
       <!-- My Devices -->
       <div class="hid-card" style="margin-bottom:20px;">
         <div class="hid-card-title">My Devices</div>
@@ -1120,6 +1131,28 @@
       a.download = 'helper-id-card.pdf';
       a.click();
       URL.revokeObjectURL(url);
+    }
+
+    async function emailProfilePdf() {
+      const errEl  = document.getElementById('profile-pdf-err');
+      const succEl = document.getElementById('profile-pdf-success');
+      errEl.textContent  = '';
+      succEl.style.display = 'none';
+
+      const res = await fetch('/api/profile-pdf/email', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ session: _session, profileId: _activeProfileId }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Could not send profile.';
+        return;
+      }
+
+      succEl.textContent   = 'Profile sent to your email.';
+      succEl.style.display = 'block';
     }
 
     async function emailCard() {
