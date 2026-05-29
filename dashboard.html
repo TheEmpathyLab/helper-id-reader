@@ -318,11 +318,7 @@
       border-radius: 999px;
     }
 
-    @media print {
-      body > * { display: none !important; }
-      #wallet-print-area { display: block !important; padding: 48px; }
-      #wallet-print-area .hid-wallet-card { border: 2px solid #ccc; max-width: 340px; }
-    }
+    @media print { body > * { display: none !important; } }
 
     @media (max-width: 480px) {
       .hid-input-row { grid-template-columns: 1fr; }
@@ -399,41 +395,24 @@
         </div>
       </div>
 
-      <!-- Print My Card -->
+      <!-- My Card -->
       <div class="hid-card" style="margin-bottom:20px;">
-        <div class="hid-card-title">Print My Card</div>
+        <div class="hid-card-title">My Card</div>
         <p style="font-size:0.88rem;color:var(--gray-dark);margin-bottom:16px;">
-          Enter your PIN to generate a printable wallet card. Your PIN is never sent to our servers. Use the PIN from your welcome email, or regenerate it below if you've lost it.
+          Download your filled emergency card — print it, cut it out, fold it, and keep it with you. Enter your PIN to include it on the card.
         </p>
-        <div id="print-pin-form">
-          <div style="display:flex;gap:10px;align-items:flex-end;">
-            <div style="flex:1;">
-              <div class="hid-label" style="margin-bottom:4px;">Your PIN</div>
-              <input class="hid-input" type="text" id="print-pin-input" placeholder="e.g. 482-931" maxlength="10" />
-            </div>
-            <button class="hid-btn hid-btn-primary" onclick="generateWalletCard()">Generate Card</button>
+        <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:8px;">
+          <div style="flex:1;">
+            <div class="hid-label" style="margin-bottom:4px;">Your PIN</div>
+            <input class="hid-input" type="text" id="card-pin-input" placeholder="e.g. A4B-29X" maxlength="10" autocomplete="off" />
           </div>
-          <div class="err-msg" id="print-pin-err" style="min-height:0;margin-top:6px;"></div>
         </div>
-        <div id="print-card-preview" style="display:none;margin-top:16px;">
-          <div class="hid-wallet-card" style="margin-bottom:14px;">
-            <div class="hid-wc-brand">
-              <div class="hid-wc-logo-mark">HID</div>
-              <span class="hid-wc-logo-text">Helper-ID</span>
-              <span class="hid-wc-url">helper-id.com</span>
-            </div>
-            <div class="hid-wc-cred">
-              <div class="hid-wc-cred-label">CODE</div>
-              <div class="hid-wc-cred-value" id="preview-code">—</div>
-            </div>
-            <div class="hid-wc-cred">
-              <div class="hid-wc-cred-label">PIN</div>
-              <div class="hid-wc-cred-value" id="preview-pin">—</div>
-            </div>
-            <div class="hid-wc-footer">Emergency identification · helper-id.com</div>
-          </div>
-          <button class="hid-btn hid-btn-primary hid-btn-full" onclick="printDashCard()">Print This Card →</button>
+        <div class="err-msg" id="card-err" style="min-height:0;margin-bottom:8px;"></div>
+        <div style="display:flex;gap:10px;">
+          <button class="hid-btn hid-btn-primary" style="flex:1;" onclick="downloadCard()">Download PDF</button>
+          <button class="hid-btn" style="flex:1;" onclick="emailCard()">Email to Me</button>
         </div>
+        <div id="card-success" style="display:none;font-size:0.85rem;color:var(--green,#2a7a2a);margin-top:8px;"></div>
       </div>
 
       <!-- My Devices -->
@@ -663,25 +642,6 @@
     </div>
   </div>
 
-  <!-- Wallet card — printed by @media print (body-level so print CSS can isolate it) -->
-  <div id="wallet-print-area" style="display:none;">
-    <div class="hid-wallet-card">
-      <div class="hid-wc-brand">
-        <div class="hid-wc-logo-mark">HID</div>
-        <span class="hid-wc-logo-text">Helper-ID</span>
-        <span class="hid-wc-url">helper-id.com</span>
-      </div>
-      <div class="hid-wc-cred">
-        <div class="hid-wc-cred-label">CODE</div>
-        <div class="hid-wc-cred-value" id="wc-code">—</div>
-      </div>
-      <div class="hid-wc-cred">
-        <div class="hid-wc-cred-label">PIN</div>
-        <div class="hid-wc-cred-value" id="wc-pin">—</div>
-      </div>
-      <div class="hid-wc-footer">Emergency identification · helper-id.com</div>
-    </div>
-  </div>
 
   <script>
     // ============================================================
@@ -870,7 +830,9 @@
       document.getElementById('pin-new-wrap').style.display = 'none';
 
       populateForm(profile);
-      resetPrintCard();
+      document.getElementById('card-pin-input').value = '';
+      document.getElementById('card-err').textContent = '';
+      document.getElementById('card-success').style.display = 'none';
       document.getElementById('editing-banner').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -893,7 +855,9 @@
 
       const ownProfile = _allProfiles.find(p => p.id === _ownProfileId);
       if (ownProfile) populateForm(ownProfile);
-      resetPrintCard();
+      document.getElementById('card-pin-input').value = '';
+      document.getElementById('card-err').textContent = '';
+      document.getElementById('card-success').style.display = 'none';
     }
 
     // ============================================================
@@ -1128,37 +1092,57 @@
     }
 
     // ============================================================
-    // Print wallet card
+    // My Card — download and email
     // ============================================================
-    function generateWalletCard() {
-      const pin   = document.getElementById('print-pin-input').value.trim();
-      const errEl = document.getElementById('print-pin-err');
-      errEl.textContent = '';
+    async function downloadCard() {
+      const pin    = document.getElementById('card-pin-input').value.trim();
+      const errEl  = document.getElementById('card-err');
+      const succEl = document.getElementById('card-success');
+      errEl.textContent  = '';
+      succEl.style.display = 'none';
 
-      if (!pin) {
-        errEl.textContent = 'Enter your PIN to generate your card.';
+      const res = await fetch('/api/card-pdf', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ session: _session, profileId: _activeProfileId, pin }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        errEl.textContent = data.error || 'Could not generate card.';
         return;
       }
 
-      const profile = _allProfiles.find(p => p.id === _activeProfileId);
-      const code = profile?.code || '—';
-
-      document.getElementById('preview-code').textContent = code;
-      document.getElementById('preview-pin').textContent  = pin;
-      document.getElementById('print-card-preview').style.display = 'block';
-
-      document.getElementById('wc-code').textContent = code;
-      document.getElementById('wc-pin').textContent  = pin;
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'helper-id-card.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
-    function printDashCard() {
-      window.print();
-    }
+    async function emailCard() {
+      const pin    = document.getElementById('card-pin-input').value.trim();
+      const errEl  = document.getElementById('card-err');
+      const succEl = document.getElementById('card-success');
+      errEl.textContent  = '';
+      succEl.style.display = 'none';
 
-    function resetPrintCard() {
-      document.getElementById('print-pin-input').value = '';
-      document.getElementById('print-pin-err').textContent = '';
-      document.getElementById('print-card-preview').style.display = 'none';
+      const res = await fetch('/api/card-pdf/email', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ session: _session, profileId: _activeProfileId, pin }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Could not send card.';
+        return;
+      }
+
+      succEl.textContent   = 'Card sent to your email.';
+      succEl.style.display = 'block';
     }
 
     // ============================================================

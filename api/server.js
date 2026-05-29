@@ -326,6 +326,173 @@ app.post('/send-email', async (req, res) => {
 
 // ============================================================
 // ---- POST /email-pdf ----
+// ============================================================
+// ---- POST /card-pdf ----
+// ============================================================
+// Session-authenticated. Fills the folded wallet card template
+// with member profile data and returns it as a PDF download.
+// PIN is passed from the client and never logged or stored.
+// ============================================================
+app.post('/card-pdf', async (req, res) => {
+  const { session, profileId, pin } = req.body;
+  if (!session || !profileId) return res.status(400).json({ error: 'Missing required fields' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const canAccess = await guardianCanAccess(payload.memberId, profileId);
+  if (!canAccess) return res.status(403).json({ error: 'Access denied' });
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, code, conditions, medications, ec1_name, ec1_phone, ec2_name, ec2_phone, date_of_birth, insurance_provider, insurance_id')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+  try {
+    const templateBytes = fs.readFileSync(path.join(__dirname, 'card-template.pdf'));
+    const pdf  = await PDFDocument.load(templateBytes);
+    const form = pdf.getForm();
+
+    const set = (fieldName, value) => {
+      try { form.getTextField(fieldName).setText(value || ''); } catch (_) {}
+    };
+
+    let age = '';
+    if (profile.date_of_birth) {
+      const dob   = new Date(profile.date_of_birth);
+      const today = new Date();
+      let a = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+      age = String(a);
+    }
+
+    set('first_name',         profile.first_name);
+    set('last_name',          profile.last_name);
+    set('code',               profile.code);
+    set('pin',                pin || '');
+    set('medical_conditions', profile.conditions);
+    set('medications',        profile.medications);
+    set('age',                age);
+    set('contact1_name',      profile.ec1_name);
+    set('contact1_phone',     profile.ec1_phone);
+    set('contact2_name',      profile.ec2_name);
+    set('contact2_phone',     profile.ec2_phone);
+    set('insurance_carrier',  profile.insurance_provider);
+    set('insurance_number',   profile.insurance_id);
+
+    const courier = await pdf.embedFont(StandardFonts.Courier);
+    form.updateFieldAppearances(courier);
+    form.flatten();
+    const pdfBytes = await pdf.save();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="helper-id-card.pdf"');
+    return res.send(Buffer.from(pdfBytes));
+  } catch (err) {
+    console.error('/card-pdf:', err.message);
+    return res.status(500).json({ error: 'PDF generation failed' });
+  }
+});
+
+// ============================================================
+// ---- POST /card-pdf/email ----
+// ============================================================
+// Same as /card-pdf but emails the filled card to the member.
+// ============================================================
+app.post('/card-pdf/email', async (req, res) => {
+  const { session, profileId, pin } = req.body;
+  if (!session || !profileId) return res.status(400).json({ error: 'Missing required fields' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const canAccess = await guardianCanAccess(payload.memberId, profileId);
+  if (!canAccess) return res.status(403).json({ error: 'Access denied' });
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('email')
+    .eq('id', payload.memberId)
+    .maybeSingle();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, code, conditions, medications, ec1_name, ec1_phone, ec2_name, ec2_phone, date_of_birth, insurance_provider, insurance_id')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (!profile || !member) return res.status(404).json({ error: 'Not found' });
+
+  try {
+    const templateBytes = fs.readFileSync(path.join(__dirname, 'card-template.pdf'));
+    const pdf  = await PDFDocument.load(templateBytes);
+    const form = pdf.getForm();
+
+    const set = (fieldName, value) => {
+      try { form.getTextField(fieldName).setText(value || ''); } catch (_) {}
+    };
+
+    let age = '';
+    if (profile.date_of_birth) {
+      const dob   = new Date(profile.date_of_birth);
+      const today = new Date();
+      let a = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+      age = String(a);
+    }
+
+    set('first_name',         profile.first_name);
+    set('last_name',          profile.last_name);
+    set('code',               profile.code);
+    set('pin',                pin || '');
+    set('medical_conditions', profile.conditions);
+    set('medications',        profile.medications);
+    set('age',                age);
+    set('contact1_name',      profile.ec1_name);
+    set('contact1_phone',     profile.ec1_phone);
+    set('contact2_name',      profile.ec2_name);
+    set('contact2_phone',     profile.ec2_phone);
+    set('insurance_carrier',  profile.insurance_provider);
+    set('insurance_number',   profile.insurance_id);
+
+    const courier = await pdf.embedFont(StandardFonts.Courier);
+    form.updateFieldAppearances(courier);
+    form.flatten();
+    const pdfBytes = await pdf.save();
+
+    const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    await sgMail.send({
+      to:   member.email,
+      from: { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID Emergency Card',
+      html: `<div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+        <p>Hi${name ? ' ' + profile.first_name : ''},</p>
+        <p>Your Helper-ID emergency card is attached. Print it, cut it out, fold it, and keep it with you.</p>
+        <p>Stay safe,<br/>The Helper-ID Team</p>
+      </div>`,
+      attachments: [{
+        content:     Buffer.from(pdfBytes).toString('base64'),
+        filename:    'helper-id-card.pdf',
+        type:        'application/pdf',
+        disposition: 'attachment',
+      }],
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('/card-pdf/email:', err.message);
+    return res.status(500).json({ error: 'Failed to send card' });
+  }
+});
+
+// ============================================================
 // Fills the InDesign PDF template with free-form profile data
 // and sends it as an attachment. Replaces the old inline-HTML
 // approach from /send-email type 'pdf'.
