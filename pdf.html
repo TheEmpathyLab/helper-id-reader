@@ -76,6 +76,30 @@
       Email Me My Profile →
     </button>
 
+    <!-- Quick blank PDF send -->
+    <div style="margin-top:var(--space-6);text-align:center;">
+      <p style="font-size:var(--text-sm);color:var(--gray-mid);margin-bottom:var(--space-4);">— or —</p>
+      <div class="hid-card" style="text-align:left;">
+        <div class="hid-card-title">Just want the blank form?</div>
+        <p style="font-size:var(--text-sm);color:var(--gray-dark);margin-bottom:var(--space-4);line-height:1.6;">
+          We'll email you an editable PDF you can fill in yourself — digitally or by hand.
+        </p>
+        <div style="display:flex;gap:var(--space-3);align-items:flex-end;flex-wrap:wrap;">
+          <div class="hid-form-group" style="flex:1;min-width:200px;margin-bottom:0;">
+            <label class="hid-label" for="blankEmail">Your Email Address</label>
+            <input class="hid-input" type="email" id="blankEmail" placeholder="you@email.com" />
+          </div>
+          <button class="hid-btn hid-btn-outline" id="blank-btn" onclick="sendBlank()" style="white-space:nowrap;">
+            Send Blank PDF →
+          </button>
+        </div>
+        <div class="hid-alert hid-alert-error" id="blank-error" style="display:none;margin-top:var(--space-3);"></div>
+        <div class="hid-alert hid-alert-success" id="blank-success" style="display:none;margin-top:var(--space-3);">
+          ✅ On its way! Check your inbox.
+        </div>
+      </div>
+    </div>
+
     <!-- Revealed after successful send -->
     <div id="output-section">
 
@@ -189,6 +213,47 @@
         errEl.textContent = 'Network error. Please check your connection and try again.';
         errEl.style.display = 'block';
         btn.textContent = 'Email Me My Profile →';
+        btn.disabled = false;
+      }
+    }
+    async function sendBlank() {
+      const errEl = document.getElementById('blank-error');
+      const okEl  = document.getElementById('blank-success');
+      errEl.style.display = 'none';
+      okEl.style.display  = 'none';
+
+      const email = document.getElementById('blankEmail').value.trim();
+      if (!email || !email.includes('@')) {
+        errEl.textContent = 'Please enter a valid email address.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('blank-btn');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+
+      try {
+        const res  = await fetch('/api/send-blank-pdf', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          btn.textContent = '✅ Sent!';
+          okEl.style.display = 'block';
+        } else {
+          errEl.textContent = data.error || 'Something went wrong. Please try again.';
+          errEl.style.display = 'block';
+          btn.textContent = 'Send Blank PDF →';
+          btn.disabled = false;
+        }
+      } catch (e) {
+        errEl.textContent = 'Network error. Please check your connection and try again.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Send Blank PDF →';
         btn.disabled = false;
       }
     }

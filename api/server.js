@@ -724,6 +724,69 @@ app.post('/email-pdf', async (req, res) => {
 });
 
 // ============================================================
+// ---- POST /send-blank-pdf ----
+// ============================================================
+app.post('/send-blank-pdf', async (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Valid email required' });
+  }
+
+  try {
+    const pdfBytes = fs.readFileSync(path.join(__dirname, 'blank-card.pdf'));
+
+    const msg = {
+      to:   email,
+      from: { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID Blank Emergency Card',
+      html: `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:14px 24px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+          </div>
+          <div style="padding:28px 24px;">
+            <h2 style="font-size:1.3rem;margin-bottom:8px;">Your blank emergency card is attached.</h2>
+            <p style="color:#666;margin-bottom:16px;line-height:1.7;">
+              Open the PDF in Acrobat, Preview, or any PDF reader to fill it in digitally — or print it and write it out by hand.
+            </p>
+            <div style="background:#FDECEA;border:1px solid #FCA5A5;border-radius:8px;padding:14px 16px;font-size:0.85rem;color:#A82320;margin-bottom:24px;">
+              <strong>Tip:</strong> Store a physical copy somewhere accessible — a wallet, fridge, or go-bag.
+              An inbox is the last place a first responder would look.
+            </div>
+            <p style="font-size:0.85rem;color:#666;line-height:1.7;margin-bottom:16px;">
+              Want a pre-filled card or a tap-to-view NFC tag instead?
+            </p>
+            <a href="https://helper-id.com/pdf.html"
+               style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+              Fill It In Online →
+            </a>
+          </div>
+          <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+            <p style="color:#999;font-size:0.75rem;margin:0;">
+              Helper-ID &nbsp;·&nbsp;
+              <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a>
+            </p>
+          </div>
+        </div>
+      `,
+      attachments: [{
+        content:     Buffer.from(pdfBytes).toString('base64'),
+        filename:    'helper-id-blank-emergency-card.pdf',
+        type:        'application/pdf',
+        disposition: 'attachment',
+      }],
+    };
+
+    await sgMail.send(msg);
+    return res.json({ success: true });
+
+  } catch (err) {
+    console.error('/send-blank-pdf error:', err.message);
+    return res.status(500).json({ error: 'Failed to send PDF.' });
+  }
+});
+
+// ============================================================
 // ---- POST /stripe-webhook ----
 // ============================================================
 // Provisioning flow:
