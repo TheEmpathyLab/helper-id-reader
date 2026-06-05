@@ -367,6 +367,11 @@
           <div class="stat-label">Failed Attempts (7d)</div>
           <div class="stat-value red" id="stat-failed">—</div>
         </div>
+        <div class="stat-tile">
+          <div class="stat-label">PDFs Sent (7d)</div>
+          <div class="stat-value" id="stat-pdf7">—</div>
+          <div class="stat-sub" id="stat-pdf30-sub">— last 30 days</div>
+        </div>
       </div>
 
       <!-- Members -->
@@ -454,6 +459,28 @@
         </div>
       </div>
 
+      <!-- PDF Sends -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">PDF Sends</div>
+          <span class="admin-card-count" id="pdf-sends-count"></span>
+        </div>
+        <div class="members-table-wrap">
+          <table id="pdf-sends-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Type</th>
+                <th>Sent</th>
+              </tr>
+            </thead>
+            <tbody id="pdf-sends-tbody">
+              <tr><td colspan="3"><div class="empty-state">Loading…</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -525,6 +552,7 @@
 
         show('screen-admin');
         loadTags();
+        loadPdfSends();
 
       } catch (err) {
         console.error('Admin load error:', err);
@@ -542,6 +570,8 @@
       document.getElementById('stat-lookups7').textContent    = s.lookups.last7d ?? '—';
       document.getElementById('stat-lookups30-sub').textContent = `${s.lookups.last30d ?? 0} last 30 days`;
       document.getElementById('stat-failed').textContent      = s.security.failedAttempts7d ?? '—';
+      document.getElementById('stat-pdf7').textContent        = s.pdfSends?.last7d ?? '—';
+      document.getElementById('stat-pdf30-sub').textContent   = `${s.pdfSends?.last30d ?? 0} last 30 days`;
     }
 
     // ============================================================
@@ -756,6 +786,33 @@
           <td>${actions}</td>
         </tr>`;
       }).join('');
+    }
+
+    async function loadPdfSends() {
+      try {
+        const res  = await fetch(`${API}/admin/pdf-sends`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        const sends = data.sends || [];
+        document.getElementById('pdf-sends-count').textContent = `${sends.length} most recent`;
+        if (!sends.length) {
+          document.getElementById('pdf-sends-tbody').innerHTML =
+            '<tr><td colspan="3"><div class="empty-state">No PDF sends yet.</div></td></tr>';
+          return;
+        }
+        document.getElementById('pdf-sends-tbody').innerHTML = sends.map(s => `<tr>
+          <td>${escHtml(s.email)}</td>
+          <td><span class="status-pill ${s.type === 'filled' ? 'pill-active' : 'pill-pending'}">${escHtml(s.type)}</span></td>
+          <td style="color:var(--gray-mid);font-size:0.82rem;">${timeAgo(s.sent_at)}</td>
+        </tr>`).join('');
+      } catch {
+        document.getElementById('pdf-sends-tbody').innerHTML =
+          '<tr><td colspan="3"><div class="empty-state">Failed to load.</div></td></tr>';
+      }
     }
 
     async function generateTags() {

@@ -368,6 +368,25 @@ alter table leads       enable row level security;
 --   -- No permissive policies — all access via service role (server.js).
 --
 -- ============================================================
+-- pdf_sends table — added 2026-06-05 via Supabase SQL Editor
+-- Tracks every PDF email sent from /email-pdf (filled) and
+-- /send-blank-pdf (blank). Powers admin dashboard PDF Sends card.
+-- ============================================================
+-- Run this block in Supabase SQL Editor:
+--
+--   create table pdf_sends (
+--     id      uuid primary key default gen_random_uuid(),
+--     email   text not null,
+--     type    text not null check (type in ('filled', 'blank')),
+--     sent_at timestamptz default now()
+--   );
+--
+--   create index idx_pdf_sends_sent_at on pdf_sends(sent_at desc);
+--
+--   alter table pdf_sends enable row level security;
+--   -- No permissive policies — all access via service role (server.js).
+--
+-- ============================================================
 -- NEXT STEPS (manual — Supabase dashboard)
 -- ============================================================
 -- 1. Storage → New bucket → name: "headshots" → toggle Private

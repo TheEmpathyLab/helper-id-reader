@@ -705,6 +705,8 @@ app.post('/email-pdf', async (req, res) => {
 
     await sgMail.send(msg);
 
+    await supabase.from('pdf_sends').insert({ email: email.toLowerCase().trim(), type: 'filled' });
+
     // Upsert lead if consented
     if (consent === true) {
       const nextSendAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
@@ -778,6 +780,7 @@ app.post('/send-blank-pdf', async (req, res) => {
     };
 
     await sgMail.send(msg);
+    await supabase.from('pdf_sends').insert({ email: email.toLowerCase().trim(), type: 'blank' });
     return res.json({ success: true });
 
   } catch (err) {
@@ -2069,6 +2072,8 @@ app.post('/admin/stats', requireAdmin, async (req, res) => {
     { count: lookups7d },
     { count: lookups30d },
     { count: failedAttempts7d },
+    { count: pdfSends7d },
+    { count: pdfSends30d },
   ] = await Promise.all([
     supabase.from('members').select('*', { count: 'exact', head: true }),
     supabase.from('members').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -2083,6 +2088,10 @@ app.post('/admin/stats', requireAdmin, async (req, res) => {
     supabase.from('access_logs').select('*', { count: 'exact', head: true })
       .eq('failed_attempt', true)
       .gte('accessed_at', new Date(Date.now() - 7  * 86400000).toISOString()),
+    supabase.from('pdf_sends').select('*', { count: 'exact', head: true })
+      .gte('sent_at', new Date(Date.now() - 7  * 86400000).toISOString()),
+    supabase.from('pdf_sends').select('*', { count: 'exact', head: true })
+      .gte('sent_at', new Date(Date.now() - 30 * 86400000).toISOString()),
   ]);
 
   return res.json({
@@ -2090,7 +2099,18 @@ app.post('/admin/stats', requireAdmin, async (req, res) => {
     profiles: { active: activeProfiles },
     lookups:  { last7d: lookups7d, last30d: lookups30d },
     security: { failedAttempts7d },
+    pdfSends: { last7d: pdfSends7d, last30d: pdfSends30d },
   });
+});
+
+// ---- POST /admin/pdf-sends ----
+app.post('/admin/pdf-sends', requireAdmin, async (req, res) => {
+  const { data } = await supabase
+    .from('pdf_sends')
+    .select('id, email, type, sent_at')
+    .order('sent_at', { ascending: false })
+    .limit(100);
+  return res.json({ sends: data || [] });
 });
 
 // ---- POST /admin/members ----
