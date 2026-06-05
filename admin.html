@@ -493,7 +493,7 @@
     // ============================================================
     (async () => {
       const params  = new URLSearchParams(window.location.search);
-      const session = params.get('session');
+      const session = params.get('session') || localStorage.getItem('hid_admin_session');
 
       if (!session) {
         show('screen-no-session');
@@ -501,6 +501,7 @@
       }
 
       _session = session;
+      localStorage.setItem('hid_admin_session', session);
       history.replaceState({}, '', window.location.pathname);
 
       await loadAll();
@@ -519,6 +520,7 @@
     // ============================================================
     function logout() {
       _session = null;
+      localStorage.removeItem('hid_admin_session');
       show('screen-no-session');
     }
 
@@ -534,10 +536,12 @@
         ]);
 
         if (statsRes.status === 403 || membersRes.status === 403) {
+          localStorage.removeItem('hid_admin_session');
           show('screen-denied');
           return;
         }
         if (statsRes.status === 401 || membersRes.status === 401) {
+          localStorage.removeItem('hid_admin_session');
           show('screen-no-session');
           return;
         }
