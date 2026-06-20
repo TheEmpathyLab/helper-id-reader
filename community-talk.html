@@ -42,6 +42,29 @@
     }
     @media(max-width:600px) { .talk-hero h1 { font-size: 2rem; } }
 
+    /* ---- Proof ---- */
+    .proof-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .proof-item { margin: 0; }
+    .proof-item img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+      display: block;
+    }
+    .proof-item figcaption {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: var(--gray-dark);
+      text-align: center;
+      line-height: 1.5;
+    }
+    @media(max-width:680px) { .proof-grid { grid-template-columns: 1fr; } }
+
     /* ---- Sections ---- */
     .talk-section { padding: 56px 24px; border-top: 1.5px solid var(--border); }
     .talk-section-inner { max-width: var(--max-width); margin: 0 auto; }
@@ -223,6 +246,22 @@
       Request This Talk →
     </a>
   </div>
+
+  <!-- Proof -->
+  <section class="talk-section">
+    <div class="talk-section-inner">
+      <div class="proof-grid">
+        <figure class="proof-item">
+          <img src="images/helper-id-stickers.jpg" alt="Helper-ID stickers" />
+          <figcaption>Real Helper-ID stickers — handed out at every talk, not a mockup.</figcaption>
+        </figure>
+        <figure class="proof-item">
+          <img src="images/helper-id-community-kit.jpg" alt="Helper-ID community kit" />
+          <figcaption>The community kit attendees take home — this is a real, working program.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
 
   <!-- About the talk -->
   <section class="talk-section">
