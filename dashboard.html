@@ -211,7 +211,7 @@
       color: var(--gray-mid);
       margin-top: 2px;
     }
-    .dep-edit-btn {
+    .dep-edit-btn, .dep-pdf-btn, .dep-card-btn {
       background: transparent;
       color: var(--red);
       font-family: var(--font-body);
@@ -225,8 +225,9 @@
       flex-shrink: 0;
       transition: background 0.2s, color 0.2s;
     }
-    .dep-edit-btn:hover { background: var(--red); color: white; }
+    .dep-edit-btn:hover, .dep-pdf-btn:hover, .dep-card-btn:hover { background: var(--red); color: white; }
     .dep-edit-btn.active { background: var(--red); color: white; }
+    .dep-pdf-btn:disabled, .dep-card-btn:disabled { opacity: 0.6; cursor: default; }
 
     /* ── Profile edit form ── */
     .editing-banner {
@@ -324,7 +325,7 @@
       .hid-input-row { grid-template-columns: 1fr; }
       .hid-credential-value { font-size: 1.4rem; }
       .dep-card { flex-wrap: wrap; }
-      .dep-edit-btn { width: 100%; text-align: center; }
+      .dep-edit-btn, .dep-pdf-btn, .dep-card-btn { width: 100%; text-align: center; }
     }
   </style>
 </head>
@@ -403,7 +404,7 @@
         </p>
         <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:8px;">
           <div style="flex:1;">
-            <div class="hid-label" style="margin-bottom:4px;">Your PIN</div>
+            <div class="hid-label" style="margin-bottom:4px;">Your PIN <span style="font-weight:400;color:var(--gray-mid);">(optional)</span></div>
             <input class="hid-input" type="text" id="card-pin-input" placeholder="e.g. A4B-29X" maxlength="10" autocomplete="off" />
           </div>
         </div>
@@ -851,10 +852,73 @@
             </div>
             <div style="display:flex;gap:8px;flex-shrink:0;">
               <a href="${readerUrl}" target="_blank" class="view-profile-link">View ↗</a>
+              <button class="dep-card-btn" id="dep-card-${p.id}" onclick="downloadDependentCard('${p.id}', this)">Download Card</button>
+              <button class="dep-pdf-btn" id="dep-pdf-${p.id}" onclick="emailDependentPdf('${p.id}', this)">Email PDF</button>
               <button class="dep-edit-btn" id="dep-btn-${p.id}" onclick="editDependent('${p.id}')">Edit</button>
             </div>
           </div>`;
       }).join('');
+    }
+
+    // ============================================================
+    // Download a dependent's wallet card (PIN left blank — guardians
+    // don't know a dependent's raw PIN; hand-write it in if known)
+    // ============================================================
+    async function downloadDependentCard(profileId, btn) {
+      const original = btn.textContent;
+      btn.disabled    = true;
+      btn.textContent = 'Preparing…';
+
+      const res = await fetch(`${API}/card-pdf`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ session: _session, profileId, pin: '' }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Could not generate card.');
+        btn.disabled    = false;
+        btn.textContent = original;
+        return;
+      }
+
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'helper-id-card.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      btn.disabled    = false;
+      btn.textContent = original;
+    }
+
+    // ============================================================
+    // Email a dependent's full profile PDF (no PIN required)
+    // ============================================================
+    async function emailDependentPdf(profileId, btn) {
+      const original = btn.textContent;
+      btn.disabled    = true;
+      btn.textContent = 'Sending…';
+
+      const res  = await fetch(`${API}/profile-pdf/email`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ session: _session, profileId }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.error || 'Could not send profile.');
+        btn.disabled    = false;
+        btn.textContent = original;
+        return;
+      }
+
+      btn.textContent = 'Sent ✓';
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2500);
     }
 
     // ============================================================
