@@ -31,6 +31,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SETUP_LINK_SECRET         = process.env.SETUP_LINK_SECRET;
 const SITE_URL                  = process.env.SITE_URL || 'https://helper-id.com';
 const CRON_SECRET               = process.env.CRON_SECRET;
+const HOUSEHOLD_SEAT_CAP        = 4;
 
 const REQUIRED_ENV_VARS = [
   'SENDGRID_API_KEY',
@@ -929,6 +930,24 @@ async function handleCheckoutCompleted(session) {
     return;
   }
 
+  // An existing member checking out again under a new Stripe customer ID —
+  // this is a plan upgrade (individual → household), not a new signup.
+  // members.email is unique, so a plain insert below would fail silently.
+  const { data: existingByEmail } = await supabase
+    .from('members')
+    .select('id, plan, stripe_subscription_id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existingByEmail) {
+    if (plan === 'household' && existingByEmail.plan !== 'household') {
+      await upgradeToHousehold(existingByEmail, email, customerId, session.subscription);
+    } else {
+      console.log('Webhook: duplicate signup attempt for existing email', email);
+    }
+    return;
+  }
+
   // Generate CODE and PIN
   const code    = await generateCode();
   const rawPin  = generatePin();
@@ -1051,6 +1070,75 @@ async function sendWelcomeEmail({ email, code, pin, setupUrl, plan }) {
     await sgMail.send(msg);
   } catch (err) {
     console.error('Welcome email failed:', err.response?.body || err.message);
+  }
+}
+
+// ============================================================
+// ---- upgradeToHousehold(member, email, customerId, subscriptionId) ----
+// ============================================================
+// Called when an existing individual-plan member checks out for the
+// household plan. Cancels their old subscription (avoids double-billing),
+// flips their plan, and points stripe_customer_id/stripe_subscription_id
+// at the new household subscription. Does not create a households row —
+// that happens lazily on first dependent add (see POST /add-dependent).
+async function upgradeToHousehold(member, email, customerId, subscriptionId) {
+  if (member.stripe_subscription_id && member.stripe_subscription_id !== subscriptionId) {
+    try {
+      await stripe.subscriptions.cancel(member.stripe_subscription_id);
+    } catch (err) {
+      console.error('Webhook: failed to cancel prior subscription:', err.message);
+    }
+  }
+
+  const { error } = await supabase
+    .from('members')
+    .update({
+      plan: 'household',
+      stripe_customer_id:     customerId,
+      stripe_subscription_id: subscriptionId,
+    })
+    .eq('id', member.id);
+
+  if (error) {
+    console.error('Webhook: failed to upgrade member to household:', error.message);
+    return;
+  }
+
+  console.log(`Webhook: upgraded member ${member.id} to household plan`);
+  await sendUpgradeEmail(email);
+}
+
+async function sendUpgradeEmail(email) {
+  const msg = {
+    to:   email,
+    from: { email: FROM_EMAIL, name: 'Helper-ID' },
+    subject: 'You\'re on the Helper-ID Family plan',
+    html: `
+      <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+        <div style="background:#D0312D;padding:14px 24px;">
+          <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+        </div>
+        <div style="padding:28px 24px;">
+          <h2 style="font-size:1.3rem;margin-bottom:8px;">You're on the Family plan.</h2>
+          <p style="color:#666;margin-bottom:16px;line-height:1.7;">
+            Your account has been upgraded — your CODE, PIN, and profile are unchanged.
+            Log in to your dashboard to add up to 4 household members.
+          </p>
+          <a href="${SITE_URL}/dashboard.html"
+             style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+            Go to My Dashboard →
+          </a>
+        </div>
+        <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+          <p style="color:#999;font-size:0.75rem;margin:0;">Helper-ID &nbsp;·&nbsp; <a href="https://helper-id.com" style="color:#ccc;">helper-id.com</a></p>
+        </div>
+      </div>`,
+  };
+
+  try {
+    await sgMail.send(msg);
+  } catch (err) {
+    console.error('Upgrade email failed:', err.response?.body || err.message);
   }
 }
 
@@ -1626,6 +1714,93 @@ app.post('/regenerate-pin', async (req, res) => {
   if (error) return res.status(500).json({ error: 'PIN regeneration failed' });
 
   return res.json({ pin: rawPin });
+});
+
+// ============================================================
+// ---- POST /add-dependent ----
+// ============================================================
+// Session-authenticated. Creates a dependent profile under the
+// requesting member's household, creating the household row on
+// first use. Household-plan members only — see issue #77.
+
+app.post('/add-dependent', async (req, res) => {
+  const { session, firstName, lastName, isMinor } = req.body;
+  if (!session || !firstName || !lastName) return res.status(400).json({ error: 'Missing required fields' });
+
+  let payload;
+  try { payload = validateSessionToken(session); }
+  catch (err) { return res.status(401).json({ error: err.message }); }
+
+  const { data: member } = await supabase
+    .from('members')
+    .select('id, plan')
+    .eq('id', payload.memberId)
+    .maybeSingle();
+
+  if (!member) return res.status(404).json({ error: 'Member not found' });
+  if (member.plan !== 'household') return res.status(403).json({ error: 'Household plan required' });
+
+  let { data: household } = await supabase
+    .from('households')
+    .select('id, name')
+    .eq('admin_member_id', member.id)
+    .maybeSingle();
+
+  if (!household) {
+    const { data: ownProfile } = await supabase
+      .from('profiles')
+      .select('last_name')
+      .eq('member_id', member.id)
+      .maybeSingle();
+
+    const { data: newHousehold, error: householdErr } = await supabase
+      .from('households')
+      .insert({ admin_member_id: member.id, name: `${ownProfile?.last_name || 'My'} Household` })
+      .select('id, name')
+      .single();
+
+    if (householdErr) {
+      console.error('/add-dependent: failed to create household:', householdErr.message);
+      return res.status(500).json({ error: 'Failed to create household' });
+    }
+    household = newHousehold;
+  }
+
+  const { count: seatCount } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .or(`member_id.eq.${member.id},household_id.eq.${household.id}`);
+
+  if (seatCount >= HOUSEHOLD_SEAT_CAP) {
+    return res.status(409).json({ error: 'Household is full' });
+  }
+
+  const code    = await generateCode();
+  const rawPin  = generatePin();
+  const pinHash = await bcrypt.hash(rawPin, 10);
+
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .insert({
+      member_id:    null,
+      household_id: household.id,
+      code,
+      pin_hash:     pinHash,
+      first_name:   firstName,
+      last_name:    lastName,
+      is_minor:     !!isMinor,
+      access_tier:  'cp_only',
+      status:       'active',
+    })
+    .select('id, first_name, last_name, code, is_minor, member_id, household_id')
+    .single();
+
+  if (profileErr) {
+    console.error('/add-dependent: failed to create profile:', profileErr.message);
+    return res.status(500).json({ error: 'Failed to create dependent profile' });
+  }
+
+  return res.json({ profile, household });
 });
 
 // ============================================================

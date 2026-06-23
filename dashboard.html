@@ -455,12 +455,51 @@
         <div class="err-msg" id="new-tag-err" style="min-height:0;margin-top:6px;"></div>
       </div>
 
-      <!-- Household members — shown only for household admins -->
-      <div id="household-section" style="display:none;">
-        <div class="hid-card">
+      <!-- Household — plan view (add/manage members) or upgrade pitch -->
+      <div id="household-section" style="margin-bottom:20px;">
+
+        <div id="household-plan-view" class="hid-card" style="display:none;">
           <div class="hid-card-title" id="household-title">Household</div>
           <div id="household-members"></div>
+          <div id="household-empty" style="display:none;font-size:0.85rem;color:var(--gray-mid);margin-bottom:12px;">No additional members yet.</div>
+
+          <div id="add-dependent-form" style="display:none;margin-top:16px;">
+            <div class="hid-input-row">
+              <div>
+                <div class="hid-label">First Name</div>
+                <input class="hid-input" type="text" id="dep-add-fn" />
+              </div>
+              <div>
+                <div class="hid-label">Last Name</div>
+                <input class="hid-input" type="text" id="dep-add-ln" />
+              </div>
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--gray-dark);margin:10px 0;">
+              <input type="checkbox" id="dep-add-minor" /> This is a minor
+            </label>
+            <div class="err-msg" id="dep-add-err" style="min-height:0;margin-bottom:8px;"></div>
+            <div style="display:flex;gap:10px;">
+              <button class="hid-btn hid-btn-primary" style="flex:1;" onclick="submitAddDependent()">Add</button>
+              <button class="hid-btn" style="flex:1;" onclick="cancelAddDependent()">Cancel</button>
+            </div>
+          </div>
+
+          <button class="hid-btn hid-btn-secondary" id="add-dependent-btn" onclick="showAddDependentForm()" style="margin-top:12px;">+ Add a Household Member</button>
         </div>
+
+        <div id="household-upgrade-view" class="hid-card" style="display:none;">
+          <div class="hid-card-title">Add Family Members</div>
+          <p style="font-size:0.88rem;color:var(--gray-dark);margin-bottom:16px;">
+            Upgrade to the Family plan to manage emergency profiles for everyone in your household.
+          </p>
+          <ul style="font-size:0.85rem;color:var(--gray-dark);line-height:1.8;margin:0 0 16px 18px;padding:0;">
+            <li>Up to 4 profiles — one for each household member</li>
+            <li>NFC hardware for every profile</li>
+            <li>One account, one annual renewal</li>
+          </ul>
+          <a id="upgrade-family-link" href="#" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Join — Family → ($99/yr)</a>
+        </div>
+
       </div>
 
       <hr class="hid-divider" />
@@ -653,7 +692,7 @@
     </div>
   </div>
 
-
+  <script src="config.js"></script>
   <script>
     // ============================================================
     // State
@@ -662,6 +701,7 @@
     let _session        = null;
     let _member         = null;
     let _allProfiles    = [];
+    let _household       = null;
     let _ownProfileId   = null;
     let _activeProfileId = null; // currently loaded in edit form (own or dependent)
 
@@ -758,7 +798,8 @@
       if (ownProfile) populateForm(ownProfile);
 
       // Household
-      if (household) renderHousehold(household, _allProfiles, member.id);
+      _household = household;
+      renderHouseholdSection();
 
       // Access log
       renderLog(logs);
@@ -770,13 +811,29 @@
     // ============================================================
     // Household section
     // ============================================================
-    function renderHousehold(household, profiles, myMemberId) {
-      const dependents = profiles.filter(p => p.member_id !== myMemberId);
-      if (!dependents.length) return;
+    function renderHouseholdSection() {
+      const planView    = document.getElementById('household-plan-view');
+      const upgradeView = document.getElementById('household-upgrade-view');
 
-      document.getElementById('household-section').style.display = 'block';
-      document.getElementById('household-title').textContent = household.name;
+      if (_member.plan !== 'household') {
+        planView.style.display    = 'none';
+        upgradeView.style.display = 'block';
+        if (window.HID_CONFIG) {
+          document.getElementById('upgrade-family-link').href = HID_CONFIG.stripe.familyMembership;
+        }
+        return;
+      }
 
+      upgradeView.style.display = 'none';
+      planView.style.display    = 'block';
+      document.getElementById('household-title').textContent = _household?.name || 'Household';
+      renderHouseholdMembers();
+    }
+
+    function renderHouseholdMembers() {
+      const dependents = _allProfiles.filter(p => p.member_id !== _member.id);
+
+      document.getElementById('household-empty').style.display = dependents.length ? 'none' : 'block';
       document.getElementById('household-members').innerHTML = dependents.map(p => {
         const name    = [p.first_name, p.last_name].filter(Boolean).join(' ') || 'Unnamed';
         const avatarInner = p.headshot_url
@@ -798,6 +855,54 @@
             </div>
           </div>`;
       }).join('');
+    }
+
+    // ============================================================
+    // Add a household member
+    // ============================================================
+    function showAddDependentForm() {
+      document.getElementById('add-dependent-form').style.display = 'block';
+      document.getElementById('add-dependent-btn').style.display  = 'none';
+    }
+
+    function cancelAddDependent() {
+      document.getElementById('add-dependent-form').style.display = 'none';
+      document.getElementById('add-dependent-btn').style.display  = 'block';
+      document.getElementById('dep-add-fn').value    = '';
+      document.getElementById('dep-add-ln').value    = '';
+      document.getElementById('dep-add-minor').checked = false;
+      document.getElementById('dep-add-err').textContent = '';
+    }
+
+    async function submitAddDependent() {
+      const firstName = getVal('dep-add-fn');
+      const lastName  = getVal('dep-add-ln');
+      const isMinor   = document.getElementById('dep-add-minor').checked;
+      const errEl     = document.getElementById('dep-add-err');
+      errEl.textContent = '';
+
+      if (!firstName || !lastName) {
+        errEl.textContent = 'First and last name are required.';
+        return;
+      }
+
+      const res  = await fetch(`${API}/add-dependent`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ session: _session, firstName, lastName, isMinor }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Could not add household member.';
+        return;
+      }
+
+      _household = data.household;
+      _allProfiles.push(data.profile);
+      cancelAddDependent();
+      renderHouseholdSection();
+      editDependent(data.profile.id);
     }
 
     // ============================================================
