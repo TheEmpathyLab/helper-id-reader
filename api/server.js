@@ -33,6 +33,12 @@ const SITE_URL                  = process.env.SITE_URL || 'https://helper-id.com
 const CRON_SECRET               = process.env.CRON_SECRET;
 const HOUSEHOLD_SEAT_CAP        = 4;
 
+// card-template.pdf ships with every field's font size set to 0 (Acrobat
+// auto-fit), which renders a different size per field depending on box
+// dimensions and text length. Forcing one fixed size keeps the card visually
+// consistent. Color matches template.pdf's existing blue field tint.
+const CARD_FIELD_APPEARANCE     = '/Helv 7 Tf 0.000 0.001 0.998 rg';
+
 const REQUIRED_ENV_VARS = [
   'SENDGRID_API_KEY',
   'STRIPE_SECRET_KEY',
@@ -386,6 +392,8 @@ app.post('/card-pdf', async (req, res) => {
     set('insurance_carrier',  profile.insurance_provider);
     set('insurance_number',   profile.insurance_id);
 
+    form.getFields().forEach(f => f.acroField.setDefaultAppearance(CARD_FIELD_APPEARANCE));
+
     const courier = await pdf.embedFont(StandardFonts.Courier);
     form.updateFieldAppearances(courier);
     form.flatten();
@@ -462,6 +470,8 @@ app.post('/card-pdf/email', async (req, res) => {
     set('contact2_phone',     profile.ec2_phone);
     set('insurance_carrier',  profile.insurance_provider);
     set('insurance_number',   profile.insurance_id);
+
+    form.getFields().forEach(f => f.acroField.setDefaultAppearance(CARD_FIELD_APPEARANCE));
 
     const courier = await pdf.embedFont(StandardFonts.Courier);
     form.updateFieldAppearances(courier);
