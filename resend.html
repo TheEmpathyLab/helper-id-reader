@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Resend My Form Link</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-588PV5KMPT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-588PV5KMPT');
+  </script>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    .resend-wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 72px 24px;
+    }
+    .resend-wrap h1 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .resend-wrap p {
+      color: var(--gray-dark);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    #resend-err {
+      color: var(--red);
+      font-size: 0.9rem;
+      margin-top: 10px;
+      display: none;
+    }
+    #resend-success {
+      background: #F0FDF4;
+      border: 1px solid #86EFAC;
+      border-radius: var(--radius);
+      padding: 20px;
+      display: none;
+    }
+    #resend-success h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: #166534;
+    }
+    #resend-success p {
+      color: #166534;
+      font-size: 0.88rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="resend-wrap">
+    <h1>Need more time?</h1>
+    <p>Enter the email address you used when you purchased your kit. We'll send a fresh 7-day link.</p>
+
+    <div class="hid-form-group">
+      <label class="hid-label" for="email-input">Email Address</label>
+      <input class="hid-input" type="email" id="email-input" placeholder="you@example.com" autocomplete="email" />
+    </div>
+
+    <div id="resend-err"></div>
+
+    <div style="margin-top:16px;">
+      <button class="hid-btn hid-btn-primary" id="resend-btn" onclick="resendLink()">Send My Link →</button>
+    </div>
+
+    <div id="resend-success" style="margin-top:24px;">
+      <h3>Check your inbox.</h3>
+      <p>If that email is on file, your new form link is on its way. Check your spam folder if you don't see it within a few minutes.</p>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+
+    async function resendLink() {
+      const email  = document.getElementById('email-input').value.trim();
+      const errEl  = document.getElementById('resend-err');
+      const succEl = document.getElementById('resend-success');
+      const btn    = document.getElementById('resend-btn');
+
+      errEl.style.display  = 'none';
+      succEl.style.display = 'none';
+
+      if (!email || !email.includes('@')) {
+        errEl.textContent   = 'Please enter a valid email address.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Sending…';
+
+      const res = await fetch(`${API}/resend-token`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email }),
+      });
+
+      // Always show success — prevents email enumeration
+      succEl.style.display = 'block';
+      btn.style.display    = 'none';
+    }
+  </script>
+
+</body>
+</html>

@@ -8,6 +8,7 @@ const HID_CONFIG = {
   // ---- Stripe Payment Links ----
   // Get these from: https://dashboard.stripe.com/payment-links
   stripe: {
+    kitPdf:               'REPLACE_WITH_STRIPE_PAYMENT_LINK',  // $5 — set metadata: { plan: 'kit' }, success_url: https://helper-id.com/kit-confirm.html
     digitalDownload:      'https://buy.stripe.com/cNi6oHbIB7c37R67XccIE02',
     nfcPack:              'https://buy.stripe.com/14AcN5cMF0NF4EUdhwcIE01',
     fullMembership:       'https://buy.stripe.com/5kQeVdeUN67Z4EUelAcIE00',

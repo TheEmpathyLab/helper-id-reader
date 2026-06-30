@@ -387,6 +387,28 @@ alter table leads       enable row level security;
 --   -- No permissive policies — all access via service role (server.js).
 --
 -- ============================================================
+-- one_time_orders table — added 2026-06-30
+-- Tracks paid PDF kit purchases (issue #82). One row per Stripe
+-- checkout session. Token is emailed to buyer; used to gate /one-time-submit.
+-- ============================================================
+-- Run this block in Supabase SQL Editor:
+--
+--   create table one_time_orders (
+--     id                uuid primary key default gen_random_uuid(),
+--     email             text not null,
+--     token             text not null unique,
+--     stripe_session_id text unique,
+--     used              boolean not null default false,
+--     expires_at        timestamptz not null,
+--     created_at        timestamptz default now()
+--   );
+--
+--   create index idx_one_time_orders_token on one_time_orders(token);
+--   create index idx_one_time_orders_email on one_time_orders(email);
+--   alter table one_time_orders enable row level security;
+--   -- No permissive policies — all access via service role (server.js).
+--
+-- ============================================================
 -- NEXT STEPS (manual — Supabase dashboard)
 -- ============================================================
 -- 1. Storage → New bucket → name: "headshots" → toggle Private

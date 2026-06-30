@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helper-ID — Payment Confirmed</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-588PV5KMPT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-588PV5KMPT');
+  </script>
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    .confirm-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 72px 24px;
+      text-align: center;
+    }
+    .confirm-wrap h1 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    .confirm-wrap p {
+      color: var(--gray-dark);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .confirm-box {
+      background: var(--gray-light);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      text-align: left;
+      margin: 28px 0;
+    }
+    .confirm-box ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--black);
+      font-size: 0.95rem;
+      line-height: 2;
+    }
+    .confirm-note {
+      font-size: 0.82rem;
+      color: var(--gray-mid);
+      margin-top: 24px;
+    }
+    .confirm-note a {
+      color: var(--red);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="confirm-wrap">
+    <h1>Payment confirmed.</h1>
+    <p>Check your email — your form link is on its way. It may take a minute to arrive.</p>
+
+    <div class="confirm-box">
+      <ol>
+        <li>Open the email from Helper-ID</li>
+        <li>Click the link to fill out your information</li>
+        <li>Submit — your PDFs arrive immediately</li>
+        <li>Print and keep a copy somewhere accessible</li>
+      </ol>
+    </div>
+
+    <p class="confirm-note">
+      Need more time to gather your information? The link is valid for 7 days.<br />
+      If it expires, visit <a href="/resend.html">helper-id.com/resend.html</a> to get a new one.
+    </p>
+  </div>
+
+</body>
+</html>

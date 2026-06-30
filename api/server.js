@@ -913,6 +913,11 @@ app.post('/stripe-webhook', async (req, res) => {
 async function handleCheckoutCompleted(session) {
   const plan = session.metadata?.plan;
 
+  if (plan === 'kit') {
+    await handleKitCheckout(session);
+    return;
+  }
+
   // Only provision members for the $55 hosted plan.
   // $9 and $35 purchases are handled by /send-email and store no member data.
   if (plan !== 'individual' && plan !== 'household') {
@@ -1149,6 +1154,84 @@ async function sendUpgradeEmail(email) {
     await sgMail.send(msg);
   } catch (err) {
     console.error('Upgrade email failed:', err.response?.body || err.message);
+  }
+}
+
+// ============================================================
+// ---- handleKitCheckout ----
+// ============================================================
+// Called from handleCheckoutCompleted when plan === 'kit'.
+// Creates a one-time token, stores it in one_time_orders, and
+// emails the buyer a link to fill.html.
+// ============================================================
+async function handleKitCheckout(session) {
+  const email = session.customer_details?.email || session.customer_email;
+  if (!email) {
+    console.error('Kit webhook: no email on session', session.id);
+    return;
+  }
+
+  // Idempotency — bail if we already processed this Stripe session
+  const { data: existing } = await supabase
+    .from('one_time_orders')
+    .select('id')
+    .eq('stripe_session_id', session.id)
+    .maybeSingle();
+
+  if (existing) {
+    console.log('Kit webhook: duplicate event for session', session.id);
+    return;
+  }
+
+  const token     = crypto.randomBytes(24).toString('hex');
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { error } = await supabase
+    .from('one_time_orders')
+    .insert({ email: email.toLowerCase().trim(), token, stripe_session_id: session.id, expires_at: expiresAt });
+
+  if (error) {
+    console.error('Kit webhook: failed to insert order:', error.message);
+    return;
+  }
+
+  const formUrl = `${SITE_URL}/fill.html?token=${token}`;
+  try {
+    await sgMail.send({
+      to:   email,
+      from: { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID Emergency Kit — fill out your form',
+      html: `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:14px 24px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+          </div>
+          <div style="padding:28px 24px;">
+            <h2 style="font-size:1.3rem;margin-bottom:8px;">Your payment is confirmed — you're almost done.</h2>
+            <p style="color:#666;margin-bottom:24px;line-height:1.7;">
+              Click the button below to fill out your emergency information. Once you submit, we'll email
+              you a print-ready wallet card and full emergency profile PDF.
+            </p>
+            <a href="${formUrl}"
+               style="display:inline-block;background:#D0312D;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:1rem;">
+              Fill Out My Form →
+            </a>
+            <p style="color:#999;font-size:0.82rem;margin-top:24px;line-height:1.6;">
+              This link expires in 7 days. If you need more time, visit
+              <a href="${SITE_URL}/resend.html" style="color:#D0312D;">${SITE_URL}/resend.html</a>
+              to request a new link.
+            </p>
+          </div>
+          <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+            <p style="color:#999;font-size:0.75rem;margin:0;">
+              Helper-ID &nbsp;·&nbsp;
+              <a href="${SITE_URL}" style="color:#ccc;">helper-id.com</a>
+            </p>
+          </div>
+        </div>`,
+    });
+  } catch (err) {
+    console.error('Kit webhook: failed to send form link email:', err.message);
   }
 }
 
@@ -2652,6 +2735,229 @@ app.post('/cron/drip', async (req, res) => {
     console.error('/cron/drip error:', err.message);
     return res.status(500).json({ error: 'Drip job failed.' });
   }
+});
+
+// ============================================================
+// ---- Kit PDF Product (issue #82) ----
+// ============================================================
+
+// GET /kit-token-status — called by fill.html on load to validate token
+app.get('/kit-token-status', async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: 'Missing token' });
+
+  const { data } = await supabase
+    .from('one_time_orders')
+    .select('used, expires_at')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (!data)     return res.json({ valid: false, reason: 'not_found' });
+  if (data.used) return res.json({ valid: false, reason: 'used' });
+  if (new Date(data.expires_at) < new Date()) return res.json({ valid: false, reason: 'expired' });
+  return res.json({ valid: true });
+});
+
+// POST /one-time-submit — validate token, generate both PDFs, email bundle, mark used
+app.post('/one-time-submit', async (req, res) => {
+  const { token, profile } = req.body;
+  if (!token || !profile) return res.status(400).json({ error: 'Missing required fields' });
+
+  const { data: order } = await supabase
+    .from('one_time_orders')
+    .select('id, email, used, expires_at')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (!order)    return res.status(404).json({ error: 'Invalid link. Please check your email for the correct link.' });
+  if (order.used) return res.status(409).json({ error: 'This form has already been submitted. Check your email for your PDFs.' });
+  if (new Date(order.expires_at) < new Date()) return res.status(410).json({ error: 'This link has expired. Visit /resend.html to get a new one.' });
+
+  try {
+    // Wallet card PDF
+    const cardTemplateBytes = fs.readFileSync(path.join(__dirname, 'card-template.pdf'));
+    const cardPdf  = await PDFDocument.load(cardTemplateBytes);
+    const cardForm = cardPdf.getForm();
+    const setCard  = (n, v) => { try { cardForm.getTextField(n).setText(v || ''); } catch (_) {} };
+
+    let age = '';
+    if (profile.dob) {
+      const dob   = new Date(profile.dob);
+      const today = new Date();
+      let a = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+      age = String(a);
+    }
+
+    setCard('first_name',         profile.fn);
+    setCard('last_name',          profile.ln);
+    setCard('medical_conditions', profile.cond);
+    setCard('medications',        profile.med);
+    setCard('age',                age);
+    setCard('contact1_name',      profile.contacts?.[0]?.n);
+    setCard('contact1_phone',     profile.contacts?.[0]?.p);
+    setCard('contact2_name',      profile.contacts?.[1]?.n);
+    setCard('contact2_phone',     profile.contacts?.[1]?.p);
+    setCard('insurance_carrier',  profile.ins?.prov);
+    setCard('insurance_number',   profile.ins?.mid);
+
+    cardForm.getFields().forEach(f => f.acroField.setDefaultAppearance(CARD_FIELD_APPEARANCE));
+    const cardCourier = await cardPdf.embedFont(StandardFonts.Courier);
+    cardForm.updateFieldAppearances(cardCourier);
+    cardForm.flatten();
+    const cardBytes = await cardPdf.save();
+
+    // Full profile PDF
+    const profileTemplateBytes = fs.readFileSync(path.join(__dirname, 'template.pdf'));
+    const profilePdf  = await PDFDocument.load(profileTemplateBytes);
+    const profileForm = profilePdf.getForm();
+    const setProf     = (n, v) => { try { profileForm.getTextField(n).setText(v || ''); } catch (_) {} };
+
+    setProf('First Name', profile.fn);
+    setProf('Last name',  profile.ln);
+    setProf('Blood type height weight etc', profile.bt);
+    setProf('Medication animal environmental etc', profile.al);
+    setProf('Medical conditions', profile.cond);
+    setProf('Medications',        profile.med);
+
+    const docParts = (profile.doc || '').split(/ — | · /);
+    setProf('Primary physician name',         docParts[0] || '');
+    setProf('Primary physician phone number', docParts[1] || '');
+
+    if (profile.ins) {
+      setProf('Insurance company name', profile.ins.prov);
+      const groupStr = [profile.ins.mid, profile.ins.grp].filter(Boolean).join(' · ');
+      setProf('Group policy andor control number', groupStr);
+    }
+
+    const c = profile.contacts || [];
+    if (c[0]) { setProf('Full name', c[0].n); setProf('Phone number', c[0].p); setProf('Relationship', c[0].r); }
+    if (c[1]) { setProf('Full name_2', c[1].n); setProf('Phone number_2', c[1].p); setProf('Relationship_2', c[1].r); }
+
+    const profCourier = await profilePdf.embedFont(StandardFonts.Courier);
+    profileForm.updateFieldAppearances(profCourier);
+    profileForm.flatten();
+    const profBytes = await profilePdf.save();
+
+    // Mark token used before sending — prevents double-send on retry
+    await supabase.from('one_time_orders').update({ used: true }).eq('id', order.id);
+
+    await sgMail.send({
+      to:   order.email,
+      from: { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID Emergency Kit',
+      html: `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:14px 24px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+          </div>
+          <div style="padding:28px 24px;">
+            <h2 style="font-size:1.3rem;margin-bottom:8px;">Your emergency kit is attached.</h2>
+            <p style="color:#666;margin-bottom:16px;line-height:1.7;">
+              Two files are attached: your folded wallet card and your full emergency profile sheet.
+              Print both, cut out the wallet card, and keep copies somewhere accessible.
+            </p>
+            <div style="background:#FDECEA;border:1px solid #FCA5A5;border-radius:8px;padding:14px 16px;font-size:0.85rem;color:#A82320;margin-bottom:24px;">
+              <strong>Tip:</strong> Store a physical copy somewhere accessible — a wallet, fridge, or go-bag.
+              An inbox is the last place a first responder would look.
+            </div>
+            <p style="font-size:0.85rem;color:#666;line-height:1.7;">
+              Want your profile on an NFC tag so anyone can tap it with their phone?
+            </p>
+            <a href="${SITE_URL}"
+               style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
+              See Helper-ID Plans →
+            </a>
+          </div>
+          <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+            <p style="color:#999;font-size:0.75rem;margin:0;">
+              Helper-ID &nbsp;·&nbsp;
+              <a href="${SITE_URL}" style="color:#ccc;">helper-id.com</a>
+            </p>
+          </div>
+        </div>`,
+      attachments: [
+        {
+          content:     Buffer.from(cardBytes).toString('base64'),
+          filename:    'helper-id-wallet-card.pdf',
+          type:        'application/pdf',
+          disposition: 'attachment',
+        },
+        {
+          content:     Buffer.from(profBytes).toString('base64'),
+          filename:    'helper-id-emergency-profile.pdf',
+          type:        'application/pdf',
+          disposition: 'attachment',
+        },
+      ],
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('/one-time-submit:', err.message);
+    return res.status(500).json({ error: 'Failed to generate PDFs. Please try again.' });
+  }
+});
+
+// POST /resend-token — buyer requests a new form link by email
+app.post('/resend-token', async (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
+
+  const { data: order } = await supabase
+    .from('one_time_orders')
+    .select('id, token, used, expires_at, created_at')
+    .eq('email', email.toLowerCase().trim())
+    .eq('used', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Always return success — prevents email enumeration
+  if (!order) return res.json({ ok: true });
+
+  // Don't resend for orders older than 30 days
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  if (new Date(order.created_at) < thirtyDaysAgo) return res.json({ ok: true });
+
+  const newExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  await supabase.from('one_time_orders').update({ expires_at: newExpiry }).eq('id', order.id);
+
+  const formUrl = `${SITE_URL}/fill.html?token=${order.token}`;
+  try {
+    await sgMail.send({
+      to:   email,
+      from: { email: FROM_EMAIL, name: 'Helper-ID' },
+      subject: 'Your Helper-ID form link',
+      html: `
+        <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#1A1A1A;">
+          <div style="background:#D0312D;padding:14px 24px;">
+            <span style="color:white;font-weight:700;font-size:1.1rem;letter-spacing:-0.3px;">Helper-ID</span>
+          </div>
+          <div style="padding:28px 24px;">
+            <h2 style="font-size:1.3rem;margin-bottom:8px;">Here's your form link.</h2>
+            <p style="color:#666;margin-bottom:24px;line-height:1.7;">
+              Your link has been extended 7 days from today.
+            </p>
+            <a href="${formUrl}"
+               style="display:inline-block;background:#D0312D;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:1rem;">
+              Fill Out My Form →
+            </a>
+          </div>
+          <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
+            <p style="color:#999;font-size:0.75rem;margin:0;">
+              Helper-ID &nbsp;·&nbsp;
+              <a href="${SITE_URL}" style="color:#ccc;">helper-id.com</a>
+            </p>
+          </div>
+        </div>`,
+    });
+  } catch (err) {
+    console.error('/resend-token email failed:', err.message);
+  }
+
+  return res.json({ ok: true });
 });
 
 // ============================================================
