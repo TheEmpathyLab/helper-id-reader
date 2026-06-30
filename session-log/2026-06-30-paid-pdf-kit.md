@@ -57,6 +57,7 @@
 | Question | Context | Priority |
 |---|---|---|
 | Anniversary re-purchase email | One year after kit purchase, send discount code to update PDFs. `created_at` on `one_time_orders` makes targeting straightforward. | Post-launch |
+| Product-update re-generation emails | When a meaningful kit improvement ships (new output, image support, etc.), email all prior buyers with `used = true` and offer a free regeneration. `one_time_orders` has email + created_at for cohort targeting. At small scale this is a manual blast; automate when buyer count justifies it. Defer until 50+ buyers and a meaningful product update exist. | Post-launch |
 | Copy and design pass on `fill.html` | Shelton will update the placeholder copy once he has a feel for how buyers respond. | Post-launch |
 | Print-and-mail add-on | $2 fee insufficient to cover costs; fulfillment partner needed. Revisit when email kit has proven demand. | Post-launch |
 | Update flow for existing buyers | Currently re-purchase only. If buyers ask for it, add a `/resend-token`-style flow that permits re-submission. | Post-launch |
