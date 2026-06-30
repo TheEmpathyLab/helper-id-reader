@@ -13,7 +13,7 @@ const bcrypt           = require('bcryptjs');
 const crypto           = require('crypto');
 const Stripe           = require('stripe');
 const rateLimit        = require('express-rate-limit');
-const { PDFDocument, StandardFonts } = require('pdf-lib');
+const { PDFDocument, StandardFonts, rgb, PageSizes } = require('pdf-lib');
 const fs               = require('fs');
 const path             = require('path');
 
@@ -2738,6 +2738,145 @@ app.post('/cron/drip', async (req, res) => {
 });
 
 // ============================================================
+// ---- generateSharePdf(profile) ----
+// ============================================================
+// Produces a portrait Letter PDF with all profile fields laid out
+// for phone viewing and sharing. No AcroForm template — drawn
+// programmatically with pdf-lib so layout is fully controlled.
+// ============================================================
+async function generateSharePdf(profile) {
+  const RED       = rgb(0.816, 0.192, 0.176);
+  const BLACK     = rgb(0.102, 0.102, 0.102);
+  const GRAY      = rgb(0.4,   0.4,   0.4);
+  const LIGHT     = rgb(0.96,  0.96,  0.96);
+  const WHITE     = rgb(1,     1,     1);
+  const PAGE_W    = PageSizes.Letter[0];  // 612
+  const PAGE_H    = PageSizes.Letter[1];  // 792
+  const MARGIN    = 48;
+  const COL_W     = PAGE_W - MARGIN * 2;  // 516
+
+  const pdfDoc = await PDFDocument.create();
+  const page   = pdfDoc.addPage([PAGE_W, PAGE_H]);
+
+  const bold  = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const reg   = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  // Word-wrap helper
+  function wrap(text, font, size, maxW) {
+    const words = (text || '').split(' ');
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const test = cur ? `${cur} ${w}` : w;
+      if (font.widthOfTextAtSize(test, size) <= maxW) { cur = test; }
+      else { if (cur) lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [''];
+  }
+
+  let y = PAGE_H;
+
+  // ── Red header bar ──
+  page.drawRectangle({ x: 0, y: PAGE_H - 44, width: PAGE_W, height: 44, color: RED });
+  page.drawText('HELPER-ID', { x: MARGIN, y: PAGE_H - 28, font: bold, size: 11, color: WHITE });
+  page.drawText('EMERGENCY INFORMATION', { x: MARGIN + 84, y: PAGE_H - 28, font: reg, size: 9, color: rgb(1, 0.78, 0.78) });
+  y = PAGE_H - 44;
+
+  // ── Name block ──
+  y -= 28;
+  const fullName = [profile.fn, profile.ln].filter(Boolean).join(' ') || 'No name provided';
+  page.drawText(fullName, { x: MARGIN, y, font: bold, size: 22, color: BLACK });
+  y -= 18;
+
+  const vitals = [];
+  if (profile.dob) {
+    const dob   = new Date(profile.dob);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    if (age > 0) vitals.push(`Age ${age}`);
+  }
+  if (profile.bt) vitals.push(`Blood Type: ${profile.bt}`);
+  if (vitals.length) {
+    page.drawText(vitals.join('   ·   '), { x: MARGIN, y, font: reg, size: 10, color: GRAY });
+    y -= 14;
+  }
+
+  y -= 10;
+  page.drawLine({ start: { x: MARGIN, y }, end: { x: PAGE_W - MARGIN, y }, thickness: 1, color: rgb(0.88, 0.88, 0.88) });
+
+  // ── Section helper ──
+  function drawSection(label, lines) {
+    if (!lines.length) return;
+    y -= 18;
+    // Label pill background
+    const lw = bold.widthOfTextAtSize(label, 7.5) + 12;
+    page.drawRectangle({ x: MARGIN, y: y - 3, width: lw, height: 14, color: RED, borderRadius: 3 });
+    page.drawText(label, { x: MARGIN + 6, y, font: bold, size: 7.5, color: WHITE });
+    y -= 16;
+    for (const line of lines) {
+      if (y < 80) break;
+      page.drawText(line.value || '', { x: MARGIN + (line.indent || 0), y, font: line.bold ? bold : reg, size: line.size || 10, color: line.color || BLACK });
+      y -= (line.gap || 14);
+    }
+    y -= 4;
+    page.drawLine({ start: { x: MARGIN, y }, end: { x: PAGE_W - MARGIN, y }, thickness: 0.5, color: rgb(0.91, 0.91, 0.91) });
+  }
+
+  // ── Emergency Contacts ──
+  const contacts = profile.contacts || [];
+  if (contacts.length) {
+    const contactLines = [];
+    contacts.forEach((c, i) => {
+      if (!c.n && !c.p) return;
+      const label = c.r ? `${c.n} (${c.r})` : c.n;
+      contactLines.push({ value: label || '', bold: true, size: 10 });
+      if (c.p) contactLines.push({ value: c.p, indent: 0, size: 10, color: GRAY, gap: 16 });
+    });
+    if (contactLines.length) drawSection('EMERGENCY CONTACTS', contactLines);
+  }
+
+  // ── Medical ──
+  const medLines = [];
+  if (profile.al)   { medLines.push({ value: 'Allergies', bold: true, size: 9, color: GRAY, gap: 12 }); wrap(profile.al, reg, 10, COL_W).forEach(l => medLines.push({ value: l, size: 10 })); medLines.push({ value: '', gap: 6 }); }
+  if (profile.cond) { medLines.push({ value: 'Conditions', bold: true, size: 9, color: GRAY, gap: 12 }); wrap(profile.cond, reg, 10, COL_W).forEach(l => medLines.push({ value: l, size: 10 })); medLines.push({ value: '', gap: 6 }); }
+  if (profile.med)  { medLines.push({ value: 'Medications', bold: true, size: 9, color: GRAY, gap: 12 }); wrap(profile.med, reg, 10, COL_W).forEach(l => medLines.push({ value: l, size: 10 })); }
+  if (medLines.length) drawSection('MEDICAL', medLines);
+
+  // ── Physician ──
+  if (profile.doc) {
+    const docParts = profile.doc.split(/ — | · /);
+    const docLines = [{ value: docParts[0], bold: true, size: 10 }];
+    if (docParts[1]) docLines.push({ value: docParts[1], size: 10, color: GRAY });
+    drawSection('PRIMARY PHYSICIAN', docLines);
+  }
+
+  // ── Insurance ──
+  if (profile.ins?.prov || profile.ins?.mid) {
+    const insLines = [];
+    if (profile.ins.prov) insLines.push({ value: profile.ins.prov, bold: true, size: 10 });
+    if (profile.ins.mid)  insLines.push({ value: `Member ID: ${profile.ins.mid}`, size: 10, color: GRAY });
+    if (profile.ins.grp)  insLines.push({ value: `Group: ${profile.ins.grp}`, size: 10, color: GRAY });
+    if (profile.ins.ph)   insLines.push({ value: `Phone: ${profile.ins.ph}`, size: 10, color: GRAY });
+    drawSection('INSURANCE', insLines);
+  }
+
+  // ── Notes ──
+  if (profile.notes) {
+    const noteLines = wrap(profile.notes, reg, 10, COL_W).map(l => ({ value: l, size: 10 }));
+    drawSection('NOTES', noteLines);
+  }
+
+  // ── Footer ──
+  page.drawRectangle({ x: 0, y: 0, width: PAGE_W, height: 36, color: BLACK });
+  page.drawText('helper-id.com', { x: PAGE_W / 2 - bold.widthOfTextAtSize('helper-id.com', 9) / 2, y: 13, font: bold, size: 9, color: rgb(0.6, 0.6, 0.6) });
+
+  return pdfDoc.save();
+}
+
+// ============================================================
 // ---- Kit PDF Product (issue #82) ----
 // ============================================================
 
@@ -2840,6 +2979,9 @@ app.post('/one-time-submit', async (req, res) => {
     profileForm.flatten();
     const profBytes = await profilePdf.save();
 
+    // Share sheet PDF
+    const shareBytes = await generateSharePdf(profile);
+
     // Mark token used before sending — prevents double-send on retry
     await supabase.from('one_time_orders').update({ used: true }).eq('id', order.id);
 
@@ -2855,8 +2997,9 @@ app.post('/one-time-submit', async (req, res) => {
           <div style="padding:28px 24px;">
             <h2 style="font-size:1.3rem;margin-bottom:8px;">Your emergency kit is attached.</h2>
             <p style="color:#666;margin-bottom:16px;line-height:1.7;">
-              Two files are attached: your folded wallet card and your full emergency profile sheet.
-              Print both, cut out the wallet card, and keep copies somewhere accessible.
+              Three files are attached: your folded wallet card, your full emergency profile sheet,
+              and a phone-friendly share sheet. Print the first two. Save the share sheet to your
+              phone for quick reference when filling out medical or emergency contact forms.
             </p>
             <div style="background:#FDECEA;border:1px solid #FCA5A5;border-radius:8px;padding:14px 16px;font-size:0.85rem;color:#A82320;margin-bottom:24px;">
               <strong>Tip:</strong> Store a physical copy somewhere accessible — a wallet, fridge, or go-bag.
@@ -2887,6 +3030,12 @@ app.post('/one-time-submit', async (req, res) => {
         {
           content:     Buffer.from(profBytes).toString('base64'),
           filename:    'helper-id-emergency-profile.pdf',
+          type:        'application/pdf',
+          disposition: 'attachment',
+        },
+        {
+          content:     Buffer.from(shareBytes).toString('base64'),
+          filename:    'helper-id-share.pdf',
           type:        'application/pdf',
           disposition: 'attachment',
         },
