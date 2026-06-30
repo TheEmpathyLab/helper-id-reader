@@ -125,6 +125,21 @@
           <a href="pdf.html" class="hid-btn hid-btn-outline hid-btn-full">Create Your Free PDF →</a>
         </div>
 
+        <!-- ── EMERGENCY PDF KIT ── -->
+        <div class="product-card">
+          <span class="product-tier tier-diy">One-Time Purchase</span>
+          <div class="product-icon">🆘</div>
+          <div class="product-name">Emergency PDF Kit</div>
+          <div class="product-tagline">Fill out your information once. Receive a print-ready wallet card and full emergency profile by email.</div>
+          <div class="product-price">$5 <span class="sub">one-time</span></div>
+          <ul class="product-features">
+            <li>Folded wallet card PDF — ready to print and cut</li>
+            <li>Full emergency profile sheet PDF</li>
+            <li>No account or subscription required</li>
+          </ul>
+          <a href="#" data-stripe="kitPdf" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Get My Kit →</a>
+        </div>
+
         <!-- ── FULL MEMBERSHIP ── -->
         <div class="product-card featured">
           <span class="product-tier tier-full">Full Service — We Do It For You</span>
@@ -211,6 +226,7 @@
   <script src="config.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-stripe="kitPdf"]').forEach(el => el.href = HID_CONFIG.stripe.kitPdf);
       document.querySelectorAll('[data-stripe="digitalDownload"]').forEach(el => el.href = HID_CONFIG.stripe.digitalDownload);
       document.querySelectorAll('[data-stripe="nfcPack"]').forEach(el => el.href = HID_CONFIG.stripe.nfcPack);
       document.querySelectorAll('[data-stripe="fullMembership"]').forEach(el => el.href = HID_CONFIG.stripe.fullMembership);
