@@ -113,7 +113,7 @@
       <a href="products.html">Products</a>
       <a href="membership.html">Membership</a>
       <a href="reader.html">Read a Tag</a>
-      <a href="pdf.html">Free PDF</a>
+      <a href="products.html">Products</a>
       <a href="about.html">About</a>
     </nav>
     <a href="dashboard.html" class="hid-btn hid-btn-outline" style="font-size:0.85rem;padding:8px 16px;">Member Login</a>
@@ -159,24 +159,25 @@ The person in front of you is a Helper-ID member. Their medical information, eme
       <div class="products-header">
         <span class="hid-section-label">Choose Your Path</span>
         <h2>How do you want to be ready?</h2>
-        <p>Start free and do it yourself — or let us handle everything from setup to delivery.</p>
+        <p>Get your emergency information ready today — or let us handle everything from setup to delivery.</p>
       </div>
       <div class="product-grid">
 
-        <!-- ── FREE PDF ── -->
+        <!-- ── EMERGENCY PDF KIT ── -->
         <div class="product-card">
-          <span class="product-tier tier-diy">DIY — Self-Guided</span>
-          <div class="product-icon">📄</div>
-          <div class="product-name">Free PDF Profile</div>
-          <div class="product-tagline">Download, fill out, and manage your own emergency profile. You bring the tools.</div>
-          <div class="product-price free-price">Free</div>
+          <span class="product-tier tier-diy">One-Time Purchase</span>
+          <div class="product-icon">🆘</div>
+          <div class="product-name">Emergency PDF Kit</div>
+          <div class="product-tagline">Fill out your information once. Get three ready-to-use documents delivered to your inbox.</div>
+          <div class="product-price">$5 <span class="sub">one-time</span></div>
           <ul class="product-features">
-            <li>Pre-formatted emergency profile template</li>
-            <li>Print it, laminate it, keep it in your wallet</li>
-            <li>Works with any NFC tag you purchase yourself</li>
-            <li>No account, no subscription — ever</li>
+            <li class="highlight">Folded wallet card — print, cut, and carry</li>
+            <li class="highlight">Full emergency profile sheet — for the fridge or go-bag</li>
+            <li class="highlight">Phone-friendly share sheet — pull it up when filling out any medical or emergency contact form</li>
+            <li>Delivered by email as print-ready PDFs</li>
+            <li>No account or subscription required</li>
           </ul>
-          <a href="pdf.html" class="hid-btn hid-btn-outline hid-btn-full">Create Your Free PDF →</a>
+          <a href="#" data-stripe="kitPdf" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Get My Kit →</a>
         </div>
 
         <!-- ── FULL MEMBERSHIP ── -->
@@ -184,12 +185,12 @@ The person in front of you is a Helper-ID member. Their medical information, eme
           <span class="product-tier tier-full">Full Service — We Do It For You</span>
           <div class="product-icon">🤝</div>
           <div class="product-name">Full Membership</div>
-          <div class="product-tagline">We set it up, ship you the tags, and keep your profile live and ready — 24/7.</div>
+          <div class="product-tagline">We set it up, ship you an NFC card, and keep your profile live and ready — 24/7.</div>
           <div class="product-price">$55 <span class="sub">per year</span></div>
           <ul class="product-features">
             <li class="highlight">Live hosted profile — CODE + PIN and NFC access</li>
             <li class="highlight">First responders and other helpers can pull your profile anywhere, instantly</li>
-            <li>One NFC card and two NFC key tags shipped to your door</li>
+            <li>NFC card shipped to your door</li>
             <li>Member dashboard — update your profile anytime</li>
             <li>We handle setup, hosting, security, and support</li>
           </ul>
@@ -267,6 +268,7 @@ The person in front of you is a Helper-ID member. Their medical information, eme
   <script>
     // Wire Stripe links from config
     document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-stripe="kitPdf"]').forEach(el => el.href = HID_CONFIG.stripe.kitPdf);
       document.querySelectorAll('[data-stripe="digitalDownload"]').forEach(el => el.href = HID_CONFIG.stripe.digitalDownload);
       document.querySelectorAll('[data-stripe="nfcPack"]').forEach(el => el.href = HID_CONFIG.stripe.nfcPack);
       document.querySelectorAll('[data-stripe="fullMembership"]').forEach(el => el.href = HID_CONFIG.stripe.fullMembership);
