@@ -103,3 +103,39 @@ Provenance Label v1.0
 - Human Roles: Product framing, pricing decisions, delivery mechanism selection, token expiry decision, share-sheet use case identification, QA sign-off, Stripe and Supabase setup
 - AI Roles: Architecture recommendation, schema design, all server route code, all HTML pages, PDF layout engine, commit messages, issue creation and closure
 ```
+
+---
+
+### Update — 2026-07-01 — Homepage refresh and nav cleanup
+
+#### Additional decisions
+- "Free PDF" nav link removed from all pages sitewide — the product is no longer advertised anywhere in navigation.
+- Homepage product grid updated: free PDF card replaced with the $5 Emergency PDF Kit card showing all three outputs.
+- Membership copy corrected sitewide: "NFC tags" changed to "NFC card" to reflect what is actually shipped.
+- Body-content references to the free PDF (CTA buttons on `about.html`, `55-communities.html`, FAQ copy, `reader.html` footer link) left for a broader copy refresh pass — not removed yet.
+- Product-update re-generation email concept noted as deferred: when a meaningful kit improvement ships, email all prior buyers (`used = true` in `one_time_orders`) offering a free regeneration. Automate when buyer count justifies it; manual blast is sufficient at small scale.
+
+#### Additional artifacts
+- `index.html` — Free PDF card replaced with Emergency PDF Kit card; membership copy updated; "Free PDF" nav link replaced with "Products"; section subhead updated to remove "start free" framing.
+- `products.html`, `about.html`, `community-talk.html`, `55-communities.html`, `faq.html`, `trust.html`, `membership.html`, `reader.html`, `generator.html` — "Free PDF" nav link removed from all.
+
+#### Resolved this update
+- Homepage no longer references the deprecated free product.
+- All top navigation across the site is consistent — no Free PDF link anywhere.
+
+#### Revised next steps
+1. Body-content copy pass — update or remove remaining references to "free PDF" in CTAs (`about.html`, `55-communities.html`), FAQ answers, and `reader.html` footer.
+2. Add `pricing.kitPdf: '$5'` to `config.js` pricing block for consistency.
+3. End-to-end test kit purchase in production — confirm all three PDFs arrive correctly formatted.
+4. Review share PDF on an actual phone screen — confirm readability and text wrapping on long fields.
+
+#### Provenance label — continuation
+```
+Provenance Label v1.0
+- Human Contribution: 30%
+- AI Contribution: 70%
+- Collaboration Method: Shelton directed all product and copy decisions; Claude executed all code changes
+- AI Tool(s): Claude Sonnet 4.6 (Anthropic)
+- Human Roles: Identified nav cleanup need, directed NFC copy correction, approved product-update email concept, requested session review
+- AI Roles: Multi-file nav removal, homepage card swap, copy edits, session log maintenance
+```
