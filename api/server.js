@@ -2342,6 +2342,8 @@ app.post('/admin/stats', requireAdmin, async (req, res) => {
     { count: failedAttempts7d },
     { count: pdfSends7d },
     { count: pdfSends30d },
+    { count: kitOrdersTotal },
+    { count: kitOrders30d },
   ] = await Promise.all([
     supabase.from('members').select('*', { count: 'exact', head: true }),
     supabase.from('members').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -2360,14 +2362,18 @@ app.post('/admin/stats', requireAdmin, async (req, res) => {
       .gte('sent_at', new Date(Date.now() - 7  * 86400000).toISOString()),
     supabase.from('pdf_sends').select('*', { count: 'exact', head: true })
       .gte('sent_at', new Date(Date.now() - 30 * 86400000).toISOString()),
+    supabase.from('one_time_orders').select('*', { count: 'exact', head: true }),
+    supabase.from('one_time_orders').select('*', { count: 'exact', head: true })
+      .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()),
   ]);
 
   return res.json({
-    members: { total: totalMembers, active: activeMembers, pending: pendingMembers },
-    profiles: { active: activeProfiles },
-    lookups:  { last7d: lookups7d, last30d: lookups30d },
-    security: { failedAttempts7d },
-    pdfSends: { last7d: pdfSends7d, last30d: pdfSends30d },
+    members:   { total: totalMembers, active: activeMembers, pending: pendingMembers },
+    profiles:  { active: activeProfiles },
+    lookups:   { last7d: lookups7d, last30d: lookups30d },
+    security:  { failedAttempts7d },
+    pdfSends:  { last7d: pdfSends7d, last30d: pdfSends30d },
+    kitOrders: { total: kitOrdersTotal, last30d: kitOrders30d },
   });
 });
 

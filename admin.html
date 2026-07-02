@@ -372,6 +372,11 @@
           <div class="stat-value" id="stat-pdf7">—</div>
           <div class="stat-sub" id="stat-pdf30-sub">— last 30 days</div>
         </div>
+        <div class="stat-tile">
+          <div class="stat-label">Kit Sales (Total)</div>
+          <div class="stat-value" id="stat-kit-total">—</div>
+          <div class="stat-sub" id="stat-kit30-sub">— last 30 days</div>
+        </div>
       </div>
 
       <!-- Members -->
@@ -576,6 +581,8 @@
       document.getElementById('stat-failed').textContent      = s.security.failedAttempts7d ?? '—';
       document.getElementById('stat-pdf7').textContent        = s.pdfSends?.last7d ?? '—';
       document.getElementById('stat-pdf30-sub').textContent   = `${s.pdfSends?.last30d ?? 0} last 30 days`;
+      document.getElementById('stat-kit-total').textContent   = s.kitOrders?.total ?? '—';
+      document.getElementById('stat-kit30-sub').textContent   = `${s.kitOrders?.last30d ?? 0} last 30 days`;
     }
 
     // ============================================================
