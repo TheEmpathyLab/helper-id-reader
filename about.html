@@ -63,6 +63,15 @@
     .lab-inner p { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.75; margin-bottom: 16px; }
     .lab-inner a { color: var(--red); text-decoration: none; font-weight: 600; }
 
+    /* ---- Founder ---- */
+    .founder-section { padding: 56px 24px; border-top: 1.5px solid var(--border); }
+    .founder-inner { max-width: var(--max-width); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    .founder-inner h2 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 16px; }
+    .founder-inner p { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.75; margin-bottom: 14px; }
+    .founder-photo { border-radius: var(--radius-lg); overflow: hidden; height: 320px; }
+    .founder-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    @media(max-width:720px) { .founder-inner { grid-template-columns: 1fr; gap: 28px; } }
+
     /* ---- CTA ---- */
     .about-cta { padding: 56px 24px; text-align: center; background: #FAFAFA; border-top: 1.5px solid var(--border); }
     .about-cta h2 { font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 12px; }
@@ -169,6 +178,21 @@
       <p>By design, Helper-ID is intentionally built to function as a simple, functional, secure, and always reliable tool. The Helper community is the center.</p>
       <p>Helper-ID isn't here to sell your data or lock you into a system — it's here to give you, and your circle of care, a better way to be ready.</p>
       <p style="margin-top:24px;"><a href="mailto:hello@helper-id.com">hello@helper-id.com</a> &nbsp;·&nbsp; <a href="https://helper-id.com">helper-id.com</a></p>
+    </div>
+  </section>
+
+  <!-- Founder -->
+  <section class="founder-section">
+    <div class="founder-inner">
+      <div>
+        <span class="hid-section-label">About the Founder</span>
+        <h2>Shelton Davis</h2>
+        <p>Shelton is the founder of Empathy Lab, Inc. and the creator of Helper-ID. He built Helper-ID after noticing how many people — including people he loved — had no accessible emergency information on them and no simple way to create it.</p>
+        <p>His work is rooted in the belief that being prepared is an act of care — for yourself and for the people around you. Mr. Rogers said it best: look for the helpers. Shelton's goal is to make more of them.</p>
+      </div>
+      <div class="founder-photo">
+        <img src="images/shelton-headshot-bw.png" alt="Shelton Davis" />
+      </div>
     </div>
   </section>
 
