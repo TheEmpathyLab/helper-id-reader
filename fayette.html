@@ -16,15 +16,23 @@
   <link rel="stylesheet" href="hid-style.css" />
   <style>
     .comm-wrap {
-      max-width: 620px;
+      max-width: 1040px;
       margin: 0 auto;
       padding: 56px 24px 72px;
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 64px;
+      align-items: start;
     }
+    @media(max-width:760px) {
+      .comm-wrap { grid-template-columns: 1fr; gap: 40px; }
+    }
+    .comm-left { position: sticky; top: 32px; }
+    @media(max-width:760px) { .comm-left { position: static; } }
     .comm-wrap h1 {
       font-family: var(--font-display);
       font-size: 2.2rem;
       line-height: 1.2;
-      text-align: center;
       margin-bottom: 16px;
     }
     .comm-wrap h1 em { font-style: normal; color: var(--red); }
@@ -32,9 +40,7 @@
       color: var(--gray-dark);
       font-size: 1.05rem;
       line-height: 1.75;
-      text-align: center;
-      max-width: 520px;
-      margin: 0 auto 40px;
+      margin-bottom: 28px;
     }
     .comm-list {
       display: flex;
@@ -80,12 +86,15 @@
       .comm-link-btn { align-self: flex-end; }
     }
     .comm-signoff {
-      text-align: center;
       font-size: 0.95rem;
       color: var(--gray-dark);
       line-height: 1.7;
     }
     .comm-signoff strong { color: var(--black); }
+    .comm-signoff a {
+      color: var(--red);
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -99,10 +108,17 @@
 
   <div class="comm-wrap">
 
-    <h1>Thank you, <em>Fayette Senior Services.</em></h1>
-    <p class="comm-intro">
-      It was a pleasure spending time with your community. Below are the resources from our session, along with the Georgia Advance Directive form and a couple of ways to keep going if Helper-ID is a fit for you.
-    </p>
+    <div class="comm-left">
+      <h1>Thank you, <em>Fayette Senior Services.</em></h1>
+      <p class="comm-intro">
+        It was a pleasure spending time with your community. To the right are the resources from our session, along with a few extras Ms. Kisha passed along and a couple of ways to keep going if Helper-ID is a fit for you.
+      </p>
+      <p class="comm-signoff">
+        Thanks again for having me!<br />
+        <strong>Shelton Davis</strong> · Empathy Lab / Helper-ID<br />
+        <a href="mailto:shelton@empathylab.io">shelton@empathylab.io</a>
+      </p>
+    </div>
 
     <div class="comm-list">
       <div class="comm-link">
@@ -151,6 +167,39 @@
 
       <div class="comm-link">
         <span class="comm-link-left">
+          <span class="comm-link-icon">🚨</span>
+          <span class="comm-link-copy">
+            <strong>EMC — Helping Our Seniors</strong>
+            <span>Shared by Ms. Kisha</span>
+          </span>
+        </span>
+        <a class="hid-btn hid-btn-outline comm-link-btn" href="https://utility.org/helping-our-seniors/?utm_source=helper-id&utm_medium=community-page&utm_campaign=fayette" target="_blank" rel="noopener">View</a>
+      </div>
+
+      <div class="comm-link">
+        <span class="comm-link-left">
+          <span class="comm-link-icon">📱</span>
+          <span class="comm-link-copy">
+            <strong>Set Up Medical ID — iPhone</strong>
+            <span>Shared by Ms. Kisha</span>
+          </span>
+        </span>
+        <a class="hid-btn hid-btn-outline comm-link-btn" href="https://support.apple.com/guide/iphone/set-up-and-view-your-medical-id-iph08022b192/ios?utm_source=helper-id&utm_medium=community-page&utm_campaign=fayette" target="_blank" rel="noopener">View</a>
+      </div>
+
+      <div class="comm-link">
+        <span class="comm-link-left">
+          <span class="comm-link-icon">📱</span>
+          <span class="comm-link-copy">
+            <strong>Set Up Medical Info — Android</strong>
+            <span>Shared by Ms. Kisha</span>
+          </span>
+        </span>
+        <a class="hid-btn hid-btn-outline comm-link-btn" href="https://www.androidpolice.com/how-to-add-medical-information-android/?utm_source=helper-id&utm_medium=community-page&utm_campaign=fayette" target="_blank" rel="noopener">View</a>
+      </div>
+
+      <div class="comm-link">
+        <span class="comm-link-left">
           <span class="comm-link-icon">❤️</span>
           <span class="comm-link-copy">
             <strong>Helper-ID Membership</strong>
@@ -160,11 +209,6 @@
         <a class="hid-btn hid-btn-primary comm-link-btn" href="membership.html?utm_source=helper-id&utm_medium=community-page&utm_campaign=fayette#pricing" target="_blank" rel="noopener">See Plans</a>
       </div>
     </div>
-
-    <p class="comm-signoff">
-      Thanks again for having us,<br />
-      <strong>Shelton Davis</strong> · Empathy Lab / Helper-ID
-    </p>
 
   </div>
 
