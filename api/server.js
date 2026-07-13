@@ -2387,6 +2387,16 @@ app.post('/admin/pdf-sends', requireAdmin, async (req, res) => {
   return res.json({ sends: data || [] });
 });
 
+// ---- POST /admin/kit-orders ----
+app.post('/admin/kit-orders', requireAdmin, async (req, res) => {
+  const { data } = await supabase
+    .from('one_time_orders')
+    .select('id, email, used, expires_at, created_at')
+    .order('created_at', { ascending: false })
+    .limit(100);
+  return res.json({ orders: data || [] });
+});
+
 // ---- POST /admin/members ----
 // Full member list with profile status and flags.
 app.post('/admin/members', requireAdmin, async (req, res) => {

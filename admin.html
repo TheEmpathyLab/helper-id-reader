@@ -486,6 +486,29 @@
         </div>
       </div>
 
+      <!-- Kit Sales -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">Kit Sales</div>
+          <span class="admin-card-count" id="kit-orders-count"></span>
+        </div>
+        <div class="members-table-wrap">
+          <table id="kit-orders-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Purchased</th>
+                <th>Expires</th>
+              </tr>
+            </thead>
+            <tbody id="kit-orders-tbody">
+              <tr><td colspan="4"><div class="empty-state">Loading…</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -562,6 +585,7 @@
         show('screen-admin');
         loadTags();
         loadPdfSends();
+        loadKitOrders();
 
       } catch (err) {
         console.error('Admin load error:', err);
@@ -823,6 +847,37 @@
       } catch {
         document.getElementById('pdf-sends-tbody').innerHTML =
           '<tr><td colspan="3"><div class="empty-state">Failed to load.</div></td></tr>';
+      }
+    }
+
+    async function loadKitOrders() {
+      try {
+        const res  = await fetch(`${API}/admin/kit-orders`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        const orders = data.orders || [];
+        document.getElementById('kit-orders-count').textContent = `${orders.length} total`;
+        if (!orders.length) {
+          document.getElementById('kit-orders-tbody').innerHTML =
+            '<tr><td colspan="4"><div class="empty-state">No kit sales yet.</div></td></tr>';
+          return;
+        }
+        document.getElementById('kit-orders-tbody').innerHTML = orders.map(o => {
+          const expires = o.expires_at ? new Date(o.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+          return `<tr>
+            <td style="font-family:monospace;font-size:0.82rem;">${escHtml(o.email)}</td>
+            <td><span class="status-pill ${o.used ? 'pill-active' : 'pill-pending'}">${o.used ? 'Redeemed' : 'Pending'}</span></td>
+            <td style="color:var(--gray-mid);font-size:0.82rem;">${timeAgo(o.created_at)}</td>
+            <td style="color:var(--gray-mid);font-size:0.82rem;">${expires}</td>
+          </tr>`;
+        }).join('');
+      } catch {
+        document.getElementById('kit-orders-tbody').innerHTML =
+          '<tr><td colspan="4"><div class="empty-state">Failed to load.</div></td></tr>';
       }
     }
 
