@@ -495,10 +495,10 @@
           </p>
           <ul style="font-size:0.85rem;color:var(--gray-dark);line-height:1.8;margin:0 0 16px 18px;padding:0;">
             <li>Up to 4 profiles — one for each household member</li>
-            <li>NFC hardware for every profile</li>
+            <li>NFC card for every profile</li>
             <li>One account, one annual renewal</li>
           </ul>
-          <a id="upgrade-family-link" href="#" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Join — Family → ($99/yr)</a>
+          <button type="button" class="hid-btn hid-btn-primary hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
       </div>
@@ -694,6 +694,7 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="hid-waitlist.js"></script>
   <script>
     // ============================================================
     // State
@@ -819,9 +820,6 @@
       if (_member.plan !== 'household') {
         planView.style.display    = 'none';
         upgradeView.style.display = 'block';
-        if (window.HID_CONFIG) {
-          document.getElementById('upgrade-family-link').href = HID_CONFIG.stripe.familyMembership;
-        }
         return;
       }
 

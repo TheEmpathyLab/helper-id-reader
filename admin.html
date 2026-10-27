@@ -486,6 +486,29 @@
         </div>
       </div>
 
+      <!-- Membership Waitlist -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">Membership Waitlist</div>
+          <span class="admin-card-count" id="waitlist-count"></span>
+        </div>
+        <div class="members-table-wrap">
+          <table id="waitlist-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Page</th>
+                <th>Signed Up</th>
+              </tr>
+            </thead>
+            <tbody id="waitlist-tbody">
+              <tr><td colspan="4"><div class="empty-state">Loading…</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Kit Sales -->
       <div class="admin-card">
         <div class="admin-card-header">
@@ -498,12 +521,13 @@
               <tr>
                 <th>Email</th>
                 <th>Status</th>
+                <th>Membership Waitlist</th>
                 <th>Purchased</th>
                 <th>Expires</th>
               </tr>
             </thead>
             <tbody id="kit-orders-tbody">
-              <tr><td colspan="4"><div class="empty-state">Loading…</div></td></tr>
+              <tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr>
             </tbody>
           </table>
         </div>
@@ -586,6 +610,7 @@
         loadTags();
         loadPdfSends();
         loadKitOrders();
+        loadWaitlist();
 
       } catch (err) {
         console.error('Admin load error:', err);
@@ -850,6 +875,34 @@
       }
     }
 
+    async function loadWaitlist() {
+      try {
+        const res  = await fetch(`${API}/admin/waitlist`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session: _session }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        const signups = data.signups || [];
+        document.getElementById('waitlist-count').textContent = `${signups.length} total`;
+        if (!signups.length) {
+          document.getElementById('waitlist-tbody').innerHTML =
+            '<tr><td colspan="4"><div class="empty-state">No waitlist signups yet.</div></td></tr>';
+          return;
+        }
+        document.getElementById('waitlist-tbody').innerHTML = signups.map(w => `<tr>
+            <td style="font-family:monospace;font-size:0.82rem;">${escHtml(w.email)}</td>
+            <td>${w.plan === 'family' ? 'Family' : 'Individual'}</td>
+            <td style="color:var(--gray-mid);font-size:0.82rem;">${escHtml(w.source || '—')}</td>
+            <td style="color:var(--gray-mid);font-size:0.82rem;">${timeAgo(w.created_at)}</td>
+          </tr>`).join('');
+      } catch {
+        document.getElementById('waitlist-tbody').innerHTML =
+          '<tr><td colspan="4"><div class="empty-state">Failed to load.</div></td></tr>';
+      }
+    }
+
     async function loadKitOrders() {
       try {
         const res  = await fetch(`${API}/admin/kit-orders`, {
@@ -863,7 +916,7 @@
         document.getElementById('kit-orders-count').textContent = `${orders.length} total`;
         if (!orders.length) {
           document.getElementById('kit-orders-tbody').innerHTML =
-            '<tr><td colspan="4"><div class="empty-state">No kit sales yet.</div></td></tr>';
+            '<tr><td colspan="5"><div class="empty-state">No kit sales yet.</div></td></tr>';
           return;
         }
         document.getElementById('kit-orders-tbody').innerHTML = orders.map(o => {
@@ -871,13 +924,14 @@
           return `<tr>
             <td style="font-family:monospace;font-size:0.82rem;">${escHtml(o.email)}</td>
             <td><span class="status-pill ${o.used ? 'pill-active' : 'pill-pending'}">${o.used ? 'Redeemed' : 'Pending'}</span></td>
+            <td>${o.membership_interest ? 'Yes' : '—'}</td>
             <td style="color:var(--gray-mid);font-size:0.82rem;">${timeAgo(o.created_at)}</td>
             <td style="color:var(--gray-mid);font-size:0.82rem;">${expires}</td>
           </tr>`;
         }).join('');
       } catch {
         document.getElementById('kit-orders-tbody').innerHTML =
-          '<tr><td colspan="4"><div class="empty-state">Failed to load.</div></td></tr>';
+          '<tr><td colspan="5"><div class="empty-state">Failed to load.</div></td></tr>';
       }
     }
 

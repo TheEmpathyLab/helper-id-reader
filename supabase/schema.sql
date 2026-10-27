@@ -418,3 +418,24 @@ alter table leads       enable row level security;
 --      SUPABASE_URL=<your project url>
 --      SUPABASE_SERVICE_ROLE_KEY=<your service role key>
 -- ============================================================
+
+-- ============================================================
+-- one_time_orders.membership_interest — added 2026-10-27
+-- PDF Kit buyers opt in on fill.html to hear when memberships launch.
+-- ============================================================
+--   alter table one_time_orders add column membership_interest boolean not null default false;
+
+-- ============================================================
+-- membership_waitlist table — added 2026-10-27 (issue #92)
+-- Email signups from the "Coming Soon / Get on the List" membership buttons.
+-- One row per email; re-signing up updates the plan.
+-- ============================================================
+--   create table membership_waitlist (
+--     id         uuid primary key default gen_random_uuid(),
+--     email      text not null unique,
+--     plan       text not null check (plan in ('individual', 'family')),
+--     source     text,
+--     created_at timestamptz not null default now()
+--   );
+--   alter table membership_waitlist enable row level security;
+--   -- No permissive policies — all access via service role (server.js).

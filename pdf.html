@@ -106,7 +106,7 @@
         ✅ On its way! Check your inbox — your emergency profile PDF is attached.
       </div>
 
-      <!-- NFC upsell -->
+      <!-- NFC upsell — hidden while memberships are paused (#92)
       <div class="hid-card">
         <div class="hid-card-title">Want this on a physical NFC tag?</div>
         <p style="font-size:var(--text-sm);color:var(--gray-dark);margin-bottom:var(--space-6);line-height:1.6;">
@@ -137,6 +137,7 @@
 
         </div>
       </div>
+      -->
 
     </div>
 
@@ -152,13 +153,6 @@
 
   <script src="config.js"></script>
   <script src="hid-form-fields.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-stripe="digitalDownload"]').forEach(el => el.href = HID_CONFIG.stripe.digitalDownload);
-      document.querySelectorAll('[data-stripe="nfcPack"]').forEach(el => el.href = HID_CONFIG.stripe.nfcPack);
-      document.querySelectorAll('[data-stripe="fullMembership"]').forEach(el => el.href = HID_CONFIG.stripe.fullMembership);
-    });
-  </script>
   <script>
     renderForm('form-fields');
 

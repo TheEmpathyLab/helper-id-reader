@@ -192,13 +192,14 @@ The person in front of you is a Helper-ID member. Their medical information, eme
           <div class="product-price">$55 <span class="sub">per year</span></div>
           <ul class="product-features">
             <li class="highlight">One hosted emergency profile</li>
-            <li>NFC card + two NFC key tags shipped to you</li>
+            <li>NFC card shipped to you</li>
+            <li>NFC key tags available as an add-on</li>
             <li>CODE + PIN and NFC access</li>
             <li>Emergency contacts, medical info, care instructions</li>
             <li class="highlight">Photo on your profile</li>
             <li>Access log and member dashboard</li>
           </ul>
-          <a href="#" data-stripe="individualMembership" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Join — Individual →</a>
+          <button type="button" class="hid-btn hid-btn-primary hid-btn-full" data-waitlist="individual">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
         <!-- ── FAMILY MEMBERSHIP ── -->
@@ -211,11 +212,11 @@ The person in front of you is a Helper-ID member. Their medical information, eme
           <ul class="product-features">
             <li class="highlight">Everything in Individual</li>
             <li class="highlight">Up to 4 profiles — one for each household member</li>
-            <li>NFC hardware for every profile</li>
+            <li>NFC card for every profile</li>
             <li>One account, one annual renewal</li>
             <li>Ideal for families, caregivers, and anyone with complex medical needs</li>
           </ul>
-          <a href="#" data-stripe="familyMembership" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Join — Family →</a>
+          <button type="button" class="hid-btn hid-btn-outline hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
       </div>
@@ -256,12 +257,11 @@ The person in front of you is a Helper-ID member. Their medical information, eme
   </footer>
 
   <script src="config.js"></script>
+  <script src="hid-waitlist.js"></script>
   <script>
     // Wire Stripe links from config
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('[data-stripe="kitPdf"]').forEach(el => el.href = HID_CONFIG.stripe.kitPdf);
-      document.querySelectorAll('[data-stripe="individualMembership"]').forEach(el => el.href = HID_CONFIG.stripe.individualMembership);
-      document.querySelectorAll('[data-stripe="familyMembership"]').forEach(el => el.href = HID_CONFIG.stripe.familyMembership);
     });
 
     function heroLookup() {

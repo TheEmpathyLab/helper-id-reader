@@ -117,6 +117,14 @@ const lookupLimiter = rateLimit({
   message:         { error: 'Too many attempts. Please try again in 15 minutes.' },
 });
 
+const waitlistLimiter = rateLimit({
+  windowMs:        60 * 60 * 1000,
+  max:             5,
+  standardHeaders: true,
+  legacyHeaders:   false,
+  message:         { error: 'Too many attempts. Please try again later.' },
+});
+
 // Code-based lockout (in-memory): after 10 failed PINs on a given code,
 // lock that code for 15 minutes regardless of IP.
 // This catches distributed brute-force across multiple IPs.
@@ -2387,11 +2395,21 @@ app.post('/admin/pdf-sends', requireAdmin, async (req, res) => {
   return res.json({ sends: data || [] });
 });
 
+// ---- POST /admin/waitlist ----
+app.post('/admin/waitlist', requireAdmin, async (req, res) => {
+  const { data } = await supabase
+    .from('membership_waitlist')
+    .select('id, email, plan, source, created_at')
+    .order('created_at', { ascending: false })
+    .limit(500);
+  return res.json({ signups: data || [] });
+});
+
 // ---- POST /admin/kit-orders ----
 app.post('/admin/kit-orders', requireAdmin, async (req, res) => {
   const { data } = await supabase
     .from('one_time_orders')
-    .select('id, email, used, expires_at, created_at')
+    .select('id, email, used, membership_interest, expires_at, created_at')
     .order('created_at', { ascending: false })
     .limit(100);
   return res.json({ orders: data || [] });
@@ -2915,7 +2933,7 @@ app.get('/kit-token-status', async (req, res) => {
 
 // POST /one-time-submit — validate token, generate both PDFs, email bundle, mark used
 app.post('/one-time-submit', async (req, res) => {
-  const { token, profile } = req.body;
+  const { token, profile, membershipInterest } = req.body;
   if (!token || !profile) return res.status(400).json({ error: 'Missing required fields' });
 
   const { data: order } = await supabase
@@ -2999,7 +3017,7 @@ app.post('/one-time-submit', async (req, res) => {
     const shareBytes = await generateSharePdf(profile);
 
     // Mark token used before sending — prevents double-send on retry
-    await supabase.from('one_time_orders').update({ used: true }).eq('id', order.id);
+    await supabase.from('one_time_orders').update({ used: true, membership_interest: membershipInterest === true }).eq('id', order.id);
 
     await sgMail.send({
       to:   order.email,
@@ -3063,6 +3081,23 @@ app.post('/one-time-submit', async (req, res) => {
     console.error('/one-time-submit:', err.message);
     return res.status(500).json({ error: 'Failed to generate PDFs. Please try again.' });
   }
+});
+
+// POST /waitlist — public signup for paused memberships
+app.post('/waitlist', waitlistLimiter, async (req, res) => {
+  const { email, plan, source } = req.body;
+  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Please enter a valid email address.' });
+  if (!['individual', 'family'].includes(plan)) return res.status(400).json({ error: 'Invalid plan.' });
+
+  const { error } = await supabase.from('membership_waitlist').upsert(
+    { email: email.toLowerCase().trim(), plan, source: typeof source === 'string' ? source.slice(0, 64) : null },
+    { onConflict: 'email' }
+  );
+  if (error) {
+    console.error('/waitlist:', error.message);
+    return res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+  return res.json({ ok: true });
 });
 
 // POST /resend-token — buyer requests a new form link by email

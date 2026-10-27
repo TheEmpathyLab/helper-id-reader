@@ -114,6 +114,10 @@
           <h3>Done! Check your email.</h3>
           <p>Your PDFs are on their way. Print them, fold the wallet card, and keep a copy somewhere accessible.</p>
         </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;cursor:pointer;font-size:var(--text-sm);color:var(--gray-dark);line-height:1.5;">
+          <input type="checkbox" id="membershipInterest" style="margin-top:3px;flex-shrink:0;" />
+          Yes, let me know when Helper-ID memberships launch — a hosted profile anyone can reach by tapping your card or entering your CODE + PIN.
+        </label>
         <div id="submit-err"></div>
         <button class="hid-btn hid-btn-primary" id="submit-btn" onclick="submitForm()">Send My PDFs →</button>
         <p class="submit-note">We'll email your print-ready PDFs immediately after you submit.</p>
@@ -183,7 +187,7 @@
       const res = await fetch(`${API}/one-time-submit`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ token, profile }),
+        body:    JSON.stringify({ token, profile, membershipInterest: document.getElementById('membershipInterest').checked }),
       });
 
       const data = await res.json().catch(() => ({}));

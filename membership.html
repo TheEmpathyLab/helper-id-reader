@@ -215,8 +215,8 @@
         <div class="included-item">
           <span class="included-check">✓</span>
           <div class="included-text">
-            <strong>NFC hardware shipped to you</strong>
-            An NFC card and two NFC key tags, ready to carry.
+            <strong>NFC card shipped to you</strong>
+            An NFC card, ready to carry. NFC key tags available as an add-on.
           </div>
         </div>
       </div>
@@ -259,13 +259,14 @@
           <div class="product-price">$55 <span class="sub">per year</span></div>
           <ul class="product-features">
             <li class="highlight">One hosted emergency profile</li>
-            <li>NFC card + two NFC key tags shipped to you</li>
+            <li>NFC card shipped to you</li>
+            <li>NFC key tags available as an add-on</li>
             <li>CODE + PIN and NFC access</li>
             <li>Emergency contacts, medical info, care instructions</li>
             <li class="highlight">Photo on your profile</li>
             <li>Access log and member dashboard</li>
           </ul>
-          <a href="#" data-stripe="individualMembership" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Join — Individual →</a>
+          <button type="button" class="hid-btn hid-btn-outline hid-btn-full" data-waitlist="individual">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
         <!-- Family -->
@@ -278,11 +279,11 @@
           <ul class="product-features">
             <li class="highlight">Everything in Individual</li>
             <li class="highlight">Up to 4 profiles — one for each household member</li>
-            <li>NFC hardware for every profile</li>
+            <li>NFC card for every profile</li>
             <li>One account, one annual renewal</li>
             <li>Ideal for families, caregivers, and anyone with complex medical needs</li>
           </ul>
-          <a href="#" data-stripe="familyMembership" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Join — Family →</a>
+          <button type="button" class="hid-btn hid-btn-primary hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
       </div>
@@ -299,7 +300,7 @@
         <div class="step-item">
           <div class="step-num">1</div>
           <h4>Get your kit</h4>
-          <p>Complete checkout and your NFC card and key tags ship to your door within a few days.</p>
+          <p>Complete checkout and your NFC card ships to your door within a few days.</p>
         </div>
         <div class="step-item">
           <div class="step-num">2</div>
@@ -324,7 +325,7 @@
     </div>
   </section>
 
-  <!-- CTA -->
+  <!-- CTA — hidden while memberships are paused (#92)
   <section class="member-cta">
     <h2>Join Helper-ID</h2>
     <p>Your profile is live the moment you finish setup. 30-day money-back guarantee.</p>
@@ -332,15 +333,16 @@
       <div class="cta-tier">
         <div class="cta-tier-label">Individual</div>
         <div class="cta-tier-price">$55 <span class="sub">/ year</span></div>
-        <a href="#" data-stripe="individualMembership" target="_blank" class="hid-btn hid-btn-primary">Join — Individual →</a>
+        <button type="button" class="hid-btn hid-btn-primary" data-waitlist="individual">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
       </div>
       <div class="cta-tier">
         <div class="cta-tier-label">Family / Household</div>
         <div class="cta-tier-price">$99 <span class="sub">/ year</span></div>
-        <a href="#" data-stripe="familyMembership" target="_blank" class="hid-btn hid-btn-outline" style="color:white;border-color:white;">Join — Family →</a>
+        <button type="button" class="hid-btn hid-btn-outline" style="color:white;border-color:white;" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
       </div>
     </div>
   </section>
+  -->
 
   <footer class="hid-footer">
     <div class="hid-footer-logo">
@@ -351,11 +353,10 @@
   </footer>
 
   <script src="config.js"></script>
+  <script src="hid-waitlist.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('[data-stripe="kitPdf"]').forEach(el => el.href = HID_CONFIG.stripe.kitPdf);
-      document.querySelectorAll('[data-stripe="individualMembership"]').forEach(el => el.href = HID_CONFIG.stripe.individualMembership);
-      document.querySelectorAll('[data-stripe="familyMembership"]').forEach(el => el.href = HID_CONFIG.stripe.familyMembership);
     });
   </script>
 </body>
