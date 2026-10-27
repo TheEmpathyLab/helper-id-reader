@@ -2677,11 +2677,11 @@ function getDripEmail(step) {
           </p>
         </div>
         <p style="color:#444;line-height:1.7;margin-bottom:24px;">
-          When you're ready to make the upgrade, your information carries over automatically.
+          Memberships are opening soon. Get on the list and we'll email you the moment they're ready.
         </p>
-        <a href="https://helper-id.com"
+        <a href="https://helper-id.com/membership.html?utm_source=helper-id&utm_medium=email&utm_campaign=drip-3-waitlist#pricing"
            style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
-          See Helper-ID Plans →
+          Get on the Membership List →
         </a>
         <p style="margin-top:20px;font-size:0.8rem;color:#999;line-height:1.6;">
           No pressure — your free profile stays yours either way. This is the last email
