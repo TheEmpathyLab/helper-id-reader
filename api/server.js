@@ -698,13 +698,6 @@ app.post('/email-pdf', async (req, res) => {
               <strong>Tip:</strong> Store a physical copy somewhere accessible — a wallet, fridge, or go-bag.
               An inbox is the last place a first responder would look.
             </div>
-            <p style="font-size:0.85rem;color:#666;line-height:1.7;margin-bottom:16px;">
-              Want your profile on an NFC tag so anyone can tap it with their phone?
-            </p>
-            <a href="https://helper-id.com"
-               style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
-              See Helper-ID Plans →
-            </a>
           </div>
           <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
             <p style="color:#999;font-size:0.75rem;margin:0;">
@@ -3039,13 +3032,6 @@ app.post('/one-time-submit', async (req, res) => {
               <strong>Tip:</strong> Store a physical copy somewhere accessible — a wallet, fridge, or go-bag.
               An inbox is the last place a first responder would look.
             </div>
-            <p style="font-size:0.85rem;color:#666;line-height:1.7;">
-              Want your profile on an NFC tag so anyone can tap it with their phone?
-            </p>
-            <a href="${SITE_URL}"
-               style="display:inline-block;background:#D0312D;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.95rem;">
-              See Helper-ID Plans →
-            </a>
           </div>
           <div style="background:#1A1A1A;padding:16px 24px;text-align:center;">
             <p style="color:#999;font-size:0.75rem;margin:0;">
