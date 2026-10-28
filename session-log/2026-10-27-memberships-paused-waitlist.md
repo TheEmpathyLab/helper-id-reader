@@ -109,3 +109,37 @@ Provenance Label v1.0
 - Human Roles: Product and pricing decisions, button copy and stacked layout direction, choosing the free waitlist signup and the drip email treatment, running SQL migrations, QA, approvals
 - AI Roles: Site-wide search for membership and key tag references, button and copy changes across 7 pages, waitlist popup script and styles, server endpoints and rate limiting, admin tables, schema migration notes, email template edits, GitHub issue, commits and pushes, this review
 ```
+
+---
+
+### Update — 2026-10-27 — Session log housekeeping
+
+#### Additional decisions
+- `session-log/` is the only home for session reviews. `SESSION_REVIEW_INSTRUCTIONS.md` now says so, matching `CLAUDE.md`.
+
+#### Additional artifacts
+- Moved the four May reviews that had landed in `sessions/` into `session-log/`. The `sessions/` folder no longer exists:
+  - `2026-05-02-drip-cron-trust-proxy`
+  - `2026-05-11-pin-input-alphanumeric-fix`
+  - `2026-05-15-pin-email-flow-audit`
+  - `2026-05-17-keychain-addon-deferred`
+
+#### Resolved this update
+- **"How is the NFC key tag add-on sold?"** already has a scoped answer in [2026-05-17-keychain-addon-deferred.md](2026-05-17-keychain-addon-deferred.md):
+  - 3 key tags for $25. The price was not formally locked.
+  - Sold through a dynamic Stripe Checkout Session (`/create-checkout`) at membership checkout. Option A was chosen there; the post-purchase upsell was ruled out.
+  - Still open from that review: the price and how Shelton gets notified of key tag orders.
+
+#### Revised next steps
+3. Build the key tag add-on per the 2026-05-17 plan when memberships reopen. Confirm the $25 for 3 price and the fulfillment notification first. Done when a membership checkout can include key tags in one transaction.
+
+#### Provenance label — continuation
+```
+Provenance Label v1.0
+- Human Contribution: 20%
+- AI Contribution: 80%
+- Collaboration Method: Shelton approved consolidating the session folders; Claude found the split, moved the files, updated the instructions, and linked the earlier key tag decision.
+- AI Tool(s): Claude Opus 5.5 (Anthropic)
+- Human Roles: Approval, direction to keep history orderly
+- AI Roles: Audit of session folders, file moves, instructions update, cross-reference to prior decision
+```

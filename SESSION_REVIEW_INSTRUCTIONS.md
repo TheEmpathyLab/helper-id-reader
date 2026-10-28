@@ -16,7 +16,7 @@ Every session review is a Markdown file committed to the repo. It is institution
 
 - **Format:** Markdown only. Never DOCX, never PDF, never plain text.
 - **Filename:** `YYYY-MM-DD-{short-slug}.md` — e.g. `2026-03-17-architecture-decisions.md`
-- **Location:** Commit to `sessions/` folder in the repo root.
+- **Location:** Commit to the `session-log/` folder in the repo root. This is the only home for session reviews.
 - **Length:** Comprehensive but not verbose. Every section earns its place.
 - **Tense:** Past tense for what was decided. Present tense for what is true now. Future tense only for next steps.
 - **No filler:** No "in this session we discussed..." preamble. Start with substance.
@@ -223,10 +223,10 @@ If a past session review contradicts something proposed in the current session, 
 
 ---
 
-## Naming convention for the sessions folder
+## Naming convention for the session-log folder
 
 ```
-sessions/
+session-log/
   2026-03-17-architecture-decisions.md
   2026-03-24-supabase-setup.md
   2026-04-01-nfc-integration-review.md
