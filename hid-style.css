@@ -735,6 +735,30 @@ body {
   .hid-step:last-child { border-bottom: none; }
 }
 
+/* ---- Phone nav ---- */
+.hid-nav-toggle { display: none; }
+
+@media (max-width: 860px) {
+  .hid-header > .hid-btn { margin-left: auto; margin-right: var(--space-2); }
+  .hid-nav-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; flex-shrink: 0;
+    background: none; border: 1.5px solid var(--border); border-radius: 6px;
+    font-size: 1.2rem; color: var(--black); cursor: pointer;
+  }
+  .hid-nav {
+    display: none;
+    position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; align-items: stretch; gap: 0;
+    background: var(--white);
+    padding: var(--space-2) var(--space-4) var(--space-4);
+    border-bottom: 2px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .hid-header.nav-open .hid-nav { display: flex; }
+  .hid-nav a { font-size: var(--text-base); padding: 12px; }
+}
+
 /* ---- Modal ---- */
 .hid-modal {
   position: fixed;
