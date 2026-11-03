@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why I'm Building Helper-ID — Helper Notes</title>
+  <meta name="description" content="In April 2020 my mom arrived at an emergency room with almost no emergency information. This is why I'm building Helper-ID." />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Why I'm Building Helper-ID" />
+  <meta property="og:description" content="In April 2020 my mom arrived at an emergency room with almost no emergency information. This is why I'm building Helper-ID." />
+  <meta property="og:url" content="https://helper-id.com/helper-notes-why-im-building-helper-id.html" />
+  <meta property="og:image" content="https://helper-id.com/images/about-research.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-588PV5KMPT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-588PV5KMPT');
+  </script>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <link rel="stylesheet" href="hid-style.css" />
+  <style>
+    .note { max-width: 680px; margin: 0 auto; padding: 56px 24px 24px; }
+    .note-back { font-size: 0.85rem; color: var(--gray-mid); text-decoration: none; }
+    .note-back:hover { color: var(--red); }
+    .note h1 { font-family: var(--font-display); font-size: 2.4rem; line-height: 1.15; color: var(--black); margin: 18px 0 12px; }
+    .note-byline { font-size: 0.88rem; color: var(--gray-mid); padding-bottom: 28px; margin-bottom: 32px; border-bottom: 1.5px solid var(--border); }
+    .note-body p, .note-body li { font-size: 1.05rem; line-height: 1.75; color: var(--gray-dark); }
+    .note-body p { margin-bottom: 20px; }
+    .note-body h2 { font-family: var(--font-display); font-size: 1.6rem; color: var(--black); margin: 44px 0 14px; }
+    .note-body ol, .note-body ul { margin: 0 0 22px 22px; }
+    .note-body li { margin-bottom: 8px; }
+    .note-body li strong { color: var(--black); }
+    .note-body a { color: var(--red); }
+    .note-call { font-family: var(--font-display); font-size: 1.25rem; color: var(--black); padding-left: 18px; border-left: 3px solid var(--red); }
+    .note-sign { margin-top: 32px; }
+    .note-sign strong { display: block; color: var(--black); font-size: 1.05rem; }
+    .note-sign span { font-size: 0.9rem; color: var(--gray-mid); }
+    .note-cta { max-width: 680px; margin: 40px auto 64px; padding: 0 24px; }
+    .note-cta-box { border: 2.5px solid var(--red); border-radius: var(--radius-lg); padding: 28px 24px; text-align: center; }
+    .note-cta-box h3 { font-family: var(--font-display); font-size: 1.4rem; color: var(--black); margin-bottom: 8px; }
+    .note-cta-box p { font-size: 0.92rem; color: var(--gray-dark); line-height: 1.6; margin-bottom: 18px; }
+    @media (max-width: 600px) { .note h1 { font-size: 1.9rem; } }
+  </style>
+</head>
+<body>
+
+  <header class="hid-header">
+    <a href="index.html" class="hid-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span class="hid-logo-text">Helper<span>-ID</span></span>
+    </a>
+    <nav class="hid-nav">
+      <a href="products.html">Products</a>
+      <a href="membership.html">Membership</a>
+      <a href="reader.html">Read a Tag</a>
+      <a href="helper-notes.html" class="active">Helper Notes</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="dashboard.html" class="hid-btn hid-btn-outline" style="font-size:0.85rem;padding:8px 16px;">Member Login</a>
+    <button type="button" class="hid-nav-toggle" aria-label="Menu" aria-expanded="false" onclick="this.setAttribute('aria-expanded', this.closest('.hid-header').classList.toggle('nav-open'))">☰</button>
+  </header>
+
+  <article class="note">
+    <a href="helper-notes.html" class="note-back">← Helper Notes</a>
+    <h1>Why I'm Building Helper-ID</h1>
+    <div class="note-byline">Shelton Davis &nbsp;·&nbsp; November 3, 2026</div>
+
+    <div class="note-body">
+      <p>In April of 2020 I got a call from a close family friend while I was walking with my kids around the block between pandemic home schooling lessons. My son was in kindergarten and my daughter was in 4th grade, so mid-lesson walks were mandatory for everyone's sanity. COVID-19 was separating kids from schools, workers from jobs, and individuals from families. I rarely talk to this family friend, so I knew it was not good. I was about to be separated from someone.</p>
+
+      <p class="note-call">"We finally found your phone number, Shai..."</p>
+
+      <p class="note-call">"...your mom is sick and you need to come out here quickly. We don't know how much time she has left."</p>
+
+      <p>My wife walked with our kids while I talked, coordinated, and learned as much as I could. She was seriously sick, but it wasn't COVID-19 to their knowledge. That night, I booked a flight from Atlanta to Los Angeles, found a rental car at LAX, and pleaded my way into a military-guarded and quarantined emergency room in Joshua Tree where my mom's fragile body labored to breathe.</p>
+
+      <p>She arrived with little to no emergency information, so I had to rummage through her tiny home to find any paperwork I could. Doctor's records, medication, powers of attorney, anything. I discovered a pre-paid cremation service, but almost everything else had to be pieced together while she was moved to hospice up the hill.</p>
+
+      <p>Two days later on April 23, 2020, my mother, my best friend, the only superhero I've ever known, returned to the stars. While I am still grateful that she is no longer suffering, I wish my ultimate goodbye to her could have been easier. Easier on me, on her brother, on our dear friends that found her, on her 94-year-old father. Her information was scattered, unfinished, and missing. While we did our best to meet her requests, we had little time and few resources to call on during the pandemic.</p>
+
+      <p>This moment is etched into the core of my being. I wanted to help, but didn't know where to look. I wanted to help, but couldn't find what I needed. The more I shared my story, the more I heard similar stories everywhere. So many people, including people I love, had no accessible emergency information on them, and no simple way to create it.</p>
+
+      <h2>Years of listening</h2>
+
+      <p>Helper-ID didn't start as a product idea. Its premise was yet another version of what I've been hearing for years. We can be better prepared and we are not.</p>
+
+      <p>Through Empathy Lab, I've spent nearly a decade working where design, behavior, and technology meet, helping organizations build more human tools and services. Over and over, I listened to people who were doing their best to care for others and kept running into the same roadblocks.</p>
+
+      <p>A clear pattern emerged. When something went wrong (a health emergency, a crisis, a moment of disorientation), the systems meant to support us often failed. People didn't have the right information when they needed it most. Helpers were willing, but disconnected. Important details lived in too many places, or nowhere at all.</p>
+
+      <p>I spent several years talking to Americans entering retirement and heard similar stories. No matter how well off they were, they had cobbled together systems for emergencies. One had ancient notecards with contact information stuffed into their junk drawer, another had an Excel spreadsheet with information, and many of them simply had nothing. For those who had emergency information in place, I would ask a few simple questions about what they had.</p>
+
+      <ol>
+        <li>Does your emergency contact know they are YOUR emergency contact?</li>
+        <li>What does your emergency contact know about you now?</li>
+        <li>Is your information up to date?</li>
+        <li>Do you frequently travel with your emergency contact?</li>
+      </ol>
+
+      <p>The answers were rarely great. Many hadn't told their emergency contact and thus shared no information with them. Some only had their significant other as their emergency contact. Others had emergency contacts that were thousands of miles away. It was a mess.</p>
+
+      <p>I kept asking myself, "This isn't a difficult problem. Why haven't we solved this?"</p>
+
+      <p>There are solutions, yes. They are private platform solutions or profit-geared information sharing solutions. The solution we need must be built for people who want to help.</p>
+
+      <p>Helper-ID is my answer.</p>
+
+      <h2>Who the helpers are</h2>
+
+      <p>When I say "helpers," I don't mean professionals in uniform, although we're grateful for them. I mean family members, friends, neighbors, teachers, caregivers, and even strangers. I mean the person who stops.</p>
+
+      <p>If you've ever found yourself kneeling beside someone, wondering who to call or what they might be allergic to, you already know what I'm talking about. You were the helper. You just didn't have what you needed.</p>
+
+      <h2>What I believe</h2>
+
+      <p>A few beliefs guide every decision I make with Helper-ID.</p>
+
+      <ul>
+        <li><strong>People over platforms.</strong> A caring community of helpers comes from investing in people first, then building tools to support them.</li>
+        <li><strong>Privacy over profit.</strong> Your information is yours. Helper-ID is a messenger that gets it into the right hands at the right time. It is not a product built to sell your profile.</li>
+        <li><strong>Helpers over bystanders.</strong> When each of us is ready to care for ourselves and each other, we move from uninformed bystanders to an informed community of helpers.</li>
+        <li><strong>Preparedness over perfection.</strong> You don't need a perfect plan. A little more preparation today means more good days together tomorrow.</li>
+      </ul>
+
+      <p>My years in corporations and start-ups have shown me that there are truly two directions to lead a company in. One path is for shareholders. The other path is for the people. I will always get in "good trouble," as John Lewis called it, for the people.</p>
+
+      <h2>Why Helper Notes</h2>
+
+      <p>Fred Rogers remembered his mother telling him, when things were scary, to "look for the helpers." I've carried that idea with me for a long time. Helper Notes is where I'll share what I'm learning about being one: how to choose your emergency contacts, why it still matters to carry information on paper, what paramedics actually look for, and more.</p>
+
+      <p>For now, it's just me writing. Over time, I want to open these pages to other helpers: nurses, paramedics, caregivers, parents, and anyone who has stood in that moment and learned something worth passing on. If you have a story, perspective, or idea — let's talk (<a href="mailto:hello@helper-id.com">hello@helper-id.com</a>)!</p>
+
+      <h2>Prepare today, enjoy more tomorrows</h2>
+
+      <p>I believe being prepared is an act of care, for yourself and for the people around you. My goal is simple: to make more helpers, and to make sure that when they show up, they have what they need.</p>
+
+      <p>Thank you for being one.</p>
+
+      <div class="note-sign">
+        <strong>Shelton Davis</strong>
+        <span>Founder, Helper-ID</span>
+      </div>
+    </div>
+  </article>
+
+  <section class="note-cta">
+    <div class="note-cta-box">
+      <h3>Get your emergency information ready.</h3>
+      <p>The Emergency PDF Kit turns your emergency contacts, medical information, and care instructions into a wallet card, a fridge sheet, and a phone-friendly copy. $5, one time.</p>
+      <a href="products.html?utm_source=helper-notes&amp;utm_medium=article&amp;utm_campaign=why-im-building-helper-id" class="hid-btn hid-btn-primary">Get the PDF Kit →</a>
+    </div>
+  </section>
+
+  <footer class="hid-footer">
+    <div class="hid-footer-logo">
+      <div class="hid-logo-mark">HID</div>
+      <span>Helper-ID</span>
+    </div>
+    <p>Emergency identification for your community. &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="trust.html">Privacy &amp; Terms</a> &nbsp;·&nbsp; <a href="faq.html">FAQ</a></p>
+  </footer>
+
+</body>
+</html>
