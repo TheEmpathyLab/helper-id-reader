@@ -37,8 +37,9 @@
     }
     .product-card:hover { box-shadow: var(--shadow-lg); }
     .product-card.featured { border-color: var(--red); border-width: 2.5px; }
+    .product-card.soon { border-color: var(--gray-mid); border-width: 2.5px; }
     .product-card.featured::before {
-      content: '★ Full Service';
+      content: '★ Available Now';
       position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
       background: var(--red); color: white;
       font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
@@ -55,10 +56,10 @@
       border-radius: 999px;
       display: inline-block;
     }
-    .tier-diy { background: var(--gray-light); color: var(--gray-mid); }
+    .tier-diy { background: var(--red-light); color: var(--red-dark); }
     .tier-full { background: var(--red-light); color: var(--red-dark); }
     .tier-individual { background: var(--gray-light); color: var(--gray-dark); }
-    .tier-family { background: var(--red-light); color: var(--red-dark); }
+    .tier-family { background: var(--gray-light); color: var(--gray-dark); }
     .product-icon { font-size: 2.4rem; margin-bottom: 12px; }
     .product-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
     .product-tagline { font-size: 0.85rem; color: var(--gray-dark); margin-bottom: 14px; line-height: 1.5; }
@@ -113,7 +114,7 @@
       <div class="product-grid">
 
         <!-- ── EMERGENCY PDF KIT ── -->
-        <div class="product-card">
+        <div class="product-card featured">
           <span class="product-tier tier-diy">One-Time Purchase</span>
           <div class="product-icon">🆘</div>
           <div class="product-name">Emergency PDF Kit</div>
@@ -126,11 +127,11 @@
             <li>Delivered by email as print-ready PDFs</li>
             <li>No account or subscription required</li>
           </ul>
-          <a href="#" data-stripe="kitPdf" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Get My Kit →</a>
+          <a href="#" data-stripe="kitPdf" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get My Kit →</a>
         </div>
 
         <!-- ── INDIVIDUAL MEMBERSHIP ── -->
-        <div class="product-card featured">
+        <div class="product-card soon">
           <span class="product-tier tier-individual">Individual</span>
           <div class="product-icon">🪪</div>
           <div class="product-name">Individual Membership</div>
@@ -145,11 +146,11 @@
             <li class="highlight">Photo on your profile</li>
             <li>Access log and member dashboard</li>
           </ul>
-          <button type="button" class="hid-btn hid-btn-primary hid-btn-full" data-waitlist="individual">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
+          <button type="button" class="hid-btn hid-btn-secondary hid-btn-full" data-waitlist="individual">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
         <!-- ── FAMILY MEMBERSHIP ── -->
-        <div class="product-card">
+        <div class="product-card soon">
           <span class="product-tier tier-family">Family / Household</span>
           <div class="product-icon">🤝</div>
           <div class="product-name">Family Membership</div>
@@ -162,7 +163,7 @@
             <li>One account, one annual renewal</li>
             <li>Ideal for families, caregivers, and anyone with complex medical needs</li>
           </ul>
-          <button type="button" class="hid-btn hid-btn-outline hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
+          <button type="button" class="hid-btn hid-btn-secondary hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
       </div>

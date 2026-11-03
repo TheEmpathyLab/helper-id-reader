@@ -40,6 +40,12 @@
     }
     .included-check { color: var(--red); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
     .included-text strong { display: block; font-weight: 600; color: var(--black); margin-bottom: 2px; font-size: 0.92rem; }
+    .included-group { margin-bottom: 40px; }
+    .included-group:last-child { margin-bottom: 0; }
+    .included-group-head { margin-bottom: 8px; }
+    .included-group-head .product-tier { margin-bottom: 8px; }
+    .included-group-head h3 { font-size: 1.05rem; font-weight: 700; color: var(--black); }
+    .included-group.soon .included-check { color: var(--gray-mid); }
 
     /* ---- Pricing (tier comparison) ---- */
     .pricing-section { background: #FAFAFA; border-top: 1.5px solid var(--border); padding: 56px 24px; }
@@ -56,8 +62,9 @@
     }
     .product-card:hover { box-shadow: var(--shadow-lg); }
     .product-card.featured { border-color: var(--red); border-width: 2.5px; }
+    .product-card.soon { border-color: var(--gray-mid); border-width: 2.5px; }
     .product-card.featured::before {
-      content: '★ Most Popular';
+      content: '★ Available Now';
       position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
       background: var(--red); color: white;
       font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
@@ -68,8 +75,8 @@
       margin-bottom: 16px; padding: 4px 10px; border-radius: 999px; display: inline-block;
     }
     .tier-individual { background: var(--gray-light); color: var(--gray-dark); }
-    .tier-family { background: var(--red-light); color: var(--red-dark); }
-    .tier-diy { background: var(--gray-light); color: var(--gray-mid); }
+    .tier-family { background: var(--gray-light); color: var(--gray-dark); }
+    .tier-diy { background: var(--red-light); color: var(--red-dark); }
     .product-icon { font-size: 2.4rem; margin-bottom: 12px; }
     .product-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
     .product-tagline { font-size: 0.85rem; color: var(--gray-dark); margin-bottom: 14px; line-height: 1.5; }
@@ -147,7 +154,56 @@
     <div class="included-inner">
       <span class="hid-section-label">What You Get</span>
       <h2>Everything you need to be ready.</h2>
-      <p>A Helper-ID membership is a complete emergency information system — not just a card, not just an app. It's a live, hosted profile that anyone can access the moment you need help.</p>
+      <p>Start with the Emergency PDF Kit today. Memberships, coming soon, turn the same information into a live profile anyone can reach with a tap.</p>
+      <div class="included-group">
+        <div class="included-group-head"><span class="product-tier tier-diy">Available Now</span><h3>Emergency PDF Kit — $5</h3></div>
+      <div class="included-grid">
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Emergency contacts</strong>
+            Name, relationship, and phone number for the people you trust most.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Medical information</strong>
+            Allergies, medications, conditions, blood type, and primary physician.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Care instructions</strong>
+            Advance directives and anything else a helper needs to know.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Insurance details</strong>
+            Optional — Medicare, Medicaid, or private insurance.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>Three print-ready PDFs</strong>
+            A folded wallet card, a full profile sheet for the fridge or go-bag, and a phone-friendly share sheet.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
+            <strong>No account needed</strong>
+            One-time purchase. Delivered to your inbox.
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="included-group soon">
+        <div class="included-group-head"><span class="product-tier tier-individual">Coming Soon</span><h3>Individual &amp; Family Membership — everything in the kit, plus:</h3></div>
       <div class="included-grid">
         <div class="included-item">
           <span class="included-check">✓</span>
@@ -173,36 +229,8 @@
         <div class="included-item">
           <span class="included-check">✓</span>
           <div class="included-text">
-            <strong>Emergency contacts</strong>
-            Name, relationship, and phone number for the people you trust most.
-          </div>
-        </div>
-        <div class="included-item">
-          <span class="included-check">✓</span>
-          <div class="included-text">
-            <strong>Medical information</strong>
-            Allergies, medications, conditions, blood type, and primary physician.
-          </div>
-        </div>
-        <div class="included-item">
-          <span class="included-check">✓</span>
-          <div class="included-text">
-            <strong>Care instructions</strong>
-            Advance directives and anything else a helper needs to know.
-          </div>
-        </div>
-        <div class="included-item">
-          <span class="included-check">✓</span>
-          <div class="included-text">
             <strong>Photo on your profile</strong>
             Helps helpers identify you quickly — especially in stressful situations.
-          </div>
-        </div>
-        <div class="included-item">
-          <span class="included-check">✓</span>
-          <div class="included-text">
-            <strong>Access log</strong>
-            See every time your profile is viewed, from your member dashboard.
           </div>
         </div>
         <div class="included-item">
@@ -215,10 +243,18 @@
         <div class="included-item">
           <span class="included-check">✓</span>
           <div class="included-text">
+            <strong>Access log</strong>
+            See every time your profile is viewed, from your member dashboard.
+          </div>
+        </div>
+        <div class="included-item">
+          <span class="included-check">✓</span>
+          <div class="included-text">
             <strong>NFC card shipped to you</strong>
             An NFC card, ready to carry. NFC key tags available as an add-on.
           </div>
         </div>
+      </div>
       </div>
     </div>
   </section>
@@ -234,7 +270,7 @@
       <div class="product-grid">
 
         <!-- Emergency PDF Kit -->
-        <div class="product-card">
+        <div class="product-card featured">
           <span class="product-tier tier-diy">One-Time Purchase</span>
           <div class="product-icon">🆘</div>
           <div class="product-name">Emergency PDF Kit</div>
@@ -247,11 +283,11 @@
             <li>Delivered by email as print-ready PDFs</li>
             <li>No account or subscription required</li>
           </ul>
-          <a href="#" data-stripe="kitPdf" target="_blank" class="hid-btn hid-btn-outline hid-btn-full">Get My Kit →</a>
+          <a href="#" data-stripe="kitPdf" target="_blank" class="hid-btn hid-btn-primary hid-btn-full">Get My Kit →</a>
         </div>
 
         <!-- Individual -->
-        <div class="product-card">
+        <div class="product-card soon">
           <span class="product-tier tier-individual">Individual</span>
           <div class="product-icon">🪪</div>
           <div class="product-name">Individual Membership</div>
@@ -266,11 +302,11 @@
             <li class="highlight">Photo on your profile</li>
             <li>Access log and member dashboard</li>
           </ul>
-          <button type="button" class="hid-btn hid-btn-outline hid-btn-full" data-waitlist="individual">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
+          <button type="button" class="hid-btn hid-btn-secondary hid-btn-full" data-waitlist="individual">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
         <!-- Family -->
-        <div class="product-card featured">
+        <div class="product-card soon">
           <span class="product-tier tier-family">Family / Household</span>
           <div class="product-icon">🤝</div>
           <div class="product-name">Family Membership</div>
@@ -283,7 +319,7 @@
             <li>One account, one annual renewal</li>
             <li>Ideal for families, caregivers, and anyone with complex medical needs</li>
           </ul>
-          <button type="button" class="hid-btn hid-btn-primary hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
+          <button type="button" class="hid-btn hid-btn-secondary hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
       </div>
@@ -293,24 +329,24 @@
   <!-- How it works -->
   <section class="steps-section">
     <div class="steps-inner">
-      <span class="hid-section-label">Getting Started</span>
+      <span class="hid-section-label">Memberships — Coming Soon</span>
       <h2>Three steps to covered.</h2>
-      <p>Most members finish setup in a day. Your profile goes live the moment you save it — the hardware catches up a few days later.</p>
+      <p>Here's how Individual and Family memberships will work when they open. Join the waitlist and we'll tell you the day they launch. Need something today? The Emergency PDF Kit is available now.</p>
       <div class="step-list">
         <div class="step-item">
           <div class="step-num">1</div>
-          <h4>Get your kit</h4>
-          <p>Complete checkout and your NFC card ships to your door within a few days.</p>
+          <h4>Get your NFC card</h4>
+          <p>When memberships open, complete checkout and your NFC card ships to your door within a few days.</p>
         </div>
         <div class="step-item">
           <div class="step-num">2</div>
           <h4>Set up your profile</h4>
-          <p>Log in to your member dashboard and add emergency contacts, medical information, and care instructions.</p>
+          <p>Log in to your member dashboard and add your emergency contacts, medical information, and care instructions.</p>
         </div>
         <div class="step-item">
           <div class="step-num">3</div>
           <h4>You're covered</h4>
-          <p>Your profile is live 24/7. Anyone can tap your tag or enter your CODE + PIN to get your information instantly.</p>
+          <p>Your profile will be live 24/7. Anyone can tap your tag or enter your CODE + PIN to see your information instantly.</p>
         </div>
       </div>
     </div>
