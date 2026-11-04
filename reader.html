@@ -769,12 +769,14 @@
       btn.textContent = 'Looking up…';
       btn.disabled = true;
 
+      let stage = 'connect';
       try {
         const res  = await fetch('/api/lookup', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ code, pin }),
         });
+        stage = 'read';
         const data = await res.json();
 
         if (!res.ok) {
@@ -785,7 +787,7 @@
           return;
         }
 
-        // Normalize and render
+        stage = 'display';
         const profile = normalizeSupabaseProfile(data.profile);
         document.getElementById('entry-screen').style.display = 'none';
         document.getElementById('emg-banner').style.display   = 'block';
@@ -793,7 +795,11 @@
         renderProfile(profile);
 
       } catch (e) {
-        errEl.textContent = 'Network error. Please try again.';
+        // Stage + error name tell us which browsers fail where; never includes profile data.
+        errEl.textContent = (stage === 'connect'
+          ? "Couldn't reach Helper-ID. Check your connection, or try another browser. Use the paper card if you need it now."
+          : "Couldn't display this profile. Try another browser, or use the paper card.")
+          + ' (' + stage + ': ' + (e && e.name || 'error') + ')';
         errEl.style.display = 'block';
         btn.textContent = 'Access Profile';
         btn.disabled = false;
