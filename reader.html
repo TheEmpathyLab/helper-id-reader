@@ -776,7 +776,7 @@
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ code, pin }),
         });
-        stage = 'read';
+        stage = 'read ' + res.status;
         const data = await res.json();
 
         if (!res.ok) {
