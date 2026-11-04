@@ -25,6 +25,22 @@
     .products-hero h1 { font-family: var(--font-display); font-size: 2.4rem; line-height: 1.15; margin-bottom: 14px; }
     .products-hero p { font-size: 1rem; color: var(--gray-dark); }
     .products-section { padding: 0 24px 64px; }
+    .kit-preview { padding: 0 24px 64px; }
+    .kit-preview-inner { max-width: 760px; margin: 0 auto; }
+    .kit-preview-head { text-align: center; margin-bottom: 28px; }
+    .kit-preview-head h2 { font-family: var(--font-display); font-size: 1.9rem; color: var(--black); margin-bottom: 8px; }
+    .kit-preview-head p { font-size: 0.95rem; color: var(--gray-dark); line-height: 1.6; }
+    .kit-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .kit-preview-item { background: var(--gray-light); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
+    .kit-preview-item.wide { grid-column: 1 / -1; }
+    .kit-preview-item a { display: block; flex: 1; display: flex; align-items: center; }
+    .kit-preview-item img { width: 100%; height: auto; display: block; }
+    .kit-preview-cap { padding: 14px 18px 18px; background: var(--white); border: 1.5px solid var(--border); border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+    .kit-preview-cap strong { display: block; font-size: 0.95rem; color: var(--black); margin-bottom: 3px; }
+    .kit-preview-cap span { font-size: 0.85rem; color: var(--gray-dark); line-height: 1.5; }
+    .kit-preview-cta { text-align: center; margin-top: 28px; }
+    .kit-preview-note { font-size: 0.78rem; color: var(--gray-mid); margin-top: 10px; }
+    @media (max-width: 600px) { .kit-preview-grid { grid-template-columns: 1fr; } }
     .products-inner { max-width: 760px; margin: 0 auto; }
     .product-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
     .product-card {
@@ -168,6 +184,35 @@
           <button type="button" class="hid-btn hid-btn-secondary hid-btn-full" data-waitlist="family">Coming Soon<span class="hid-btn-sub">Get on the List</span></button>
         </div>
 
+      </div>
+    </div>
+  </section>
+
+
+  <section class="kit-preview" id="kit-preview">
+    <div class="kit-preview-inner">
+      <div class="kit-preview-head">
+        <span class="hid-section-label">See What You Get</span>
+        <h2>What's in the $5 kit.</h2>
+        <p>Fill out one form. Three documents arrive in your inbox, filled in with your information.</p>
+      </div>
+      <div class="kit-preview-grid">
+        <div class="kit-preview-item wide">
+          <a href="images/kit-sample-wallet-card.jpg" target="_blank"><img src="images/kit-sample-wallet-card.jpg" alt="Sample Helper-ID wallet card, both sides, filled in for Jordan Rivera" loading="lazy" width="1100" height="668" /></a>
+          <div class="kit-preview-cap"><strong>Folded wallet card</strong><span>Print, cut, fold, and carry. Name and emergency contacts on one side; conditions, medications, and insurance on the other.</span></div>
+        </div>
+        <div class="kit-preview-item">
+          <a href="images/kit-sample-profile-sheet.jpg" target="_blank"><img src="images/kit-sample-profile-sheet.jpg" alt="Sample Helper-ID full emergency profile sheet" loading="lazy" width="800" height="1037" /></a>
+          <div class="kit-preview-cap"><strong>Full emergency profile sheet</strong><span>One page with everything. For the fridge or the go-bag.</span></div>
+        </div>
+        <div class="kit-preview-item">
+          <a href="images/kit-sample-share-sheet.jpg" target="_blank"><img src="images/kit-sample-share-sheet.jpg" alt="Sample Helper-ID share sheet shown on a phone" loading="lazy" width="700" height="1196" /></a>
+          <div class="kit-preview-cap"><strong>Phone-friendly share sheet</strong><span>Save it to your phone. Pull it up for doctor's offices, school forms, and gym sign-ups.</span></div>
+        </div>
+      </div>
+      <div class="kit-preview-cta">
+        <a href="#" data-stripe="kitPdf" target="_blank" class="hid-btn hid-btn-primary hid-btn-lg">Get My Kit — $5 →</a>
+        <div class="kit-preview-note">Samples use a made-up person. Your kit is filled in with your information.</div>
       </div>
     </div>
   </section>
