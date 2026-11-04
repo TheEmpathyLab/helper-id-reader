@@ -1,0 +1,18 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /design-system.html
+Disallow: /generator.html
+Disallow: /writer.html
+Disallow: /setup.html
+Disallow: /activate.html
+Disallow: /confirm.html
+Disallow: /kit-confirm.html
+Disallow: /fill.html
+Disallow: /resend.html
+Disallow: /t.html
+Disallow: /session-log/
+Disallow: /docs/
+Disallow: /kit_design/
+
+Sitemap: https://helper-id.com/sitemap.xml
