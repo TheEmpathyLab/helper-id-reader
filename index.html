@@ -323,9 +323,8 @@
         return;
       }
       err.style.display = 'none';
-      const params = new URLSearchParams({ code });
-      if (pin) params.set('pin', pin);
-      window.location.href = 'reader.html?' + params.toString();
+      localStorage.setItem('hid_lookup', JSON.stringify({ code, pin, t: Date.now() }));
+      window.location.href = 'reader.html';
     }
   </script>
   <script src="hid-attribution.js"></script>

@@ -4,14 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Helper-ID — Emergency Information</title>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-588PV5KMPT"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-588PV5KMPT');
-  </script>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="favicon.png" />
   <link rel="stylesheet" href="hid-style.css" />
@@ -713,16 +705,21 @@
         });
     })();
 
-    // Auto-submit CODE+PIN if passed as URL params (from setup.html success screen)
+    // CODE+PIN arrive via a one-time localStorage handoff (index, setup, dashboard) so the
+    // PIN never appears in a URL, browser history or request logs. localStorage, not
+    // sessionStorage, because dashboard opens the reader in a new tab. ?code= only prefills.
     (function autoLookup() {
       const params = new URLSearchParams(window.location.search);
-      const code   = params.get('code');
-      const pin    = params.get('pin');
-      // Skip if token lookup is handling this page load
-      if (!code || window.location.hash || params.get('token')) return;
+      if (window.location.hash || params.get('token')) return;
+      let handoff = null;
+      try { handoff = JSON.parse(localStorage.getItem('hid_lookup')); } catch (_) {}
+      localStorage.removeItem('hid_lookup');
+      if (handoff && !(Date.now() - handoff.t < 60000)) handoff = null;
+      const code = (handoff && handoff.code) || params.get('code');
+      if (!code) return;
       document.getElementById('cp-code').value = code;
-      if (pin) {
-        document.getElementById('cp-pin').value = pin;
+      if (handoff && handoff.pin) {
+        document.getElementById('cp-pin').value = handoff.pin;
         lookupProfile();
       }
     })();

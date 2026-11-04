@@ -10,7 +10,7 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-588PV5KMPT');
+    gtag('config', 'G-588PV5KMPT', { page_location: location.origin + location.pathname }); // URL carries a secret token
   </script>
   <link rel="stylesheet" href="hid-style.css" />
   <style>
@@ -994,6 +994,7 @@
       document.getElementById('dep-cred-pin').style.color  = 'var(--gray-mid)';
       document.getElementById('dep-cred-pin').style.fontSize = '0.85rem';
       document.getElementById('dep-view-link').style.display = 'none';
+      document.getElementById('dep-view-link').onclick = null;
       document.getElementById('dep-view-link').href = profile.nfc_token
         ? `reader.html?token=${encodeURIComponent(profile.nfc_token)}`
         : `reader.html?code=${encodeURIComponent(profile.code)}`;
@@ -1238,7 +1239,8 @@
           pinEl.style.fontSize = '1.2rem';
 
           const viewLink = document.getElementById('dep-view-link');
-          viewLink.href         = `reader.html?code=${encodeURIComponent(profile.code)}&pin=${encodeURIComponent(pin)}`;
+          viewLink.href         = 'reader.html';
+          viewLink.onclick      = () => localStorage.setItem('hid_lookup', JSON.stringify({ code: profile.code, pin, t: Date.now() }));
           viewLink.style.display = 'inline-flex';
         }
       } catch (err) {
