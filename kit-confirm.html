@@ -10,6 +10,11 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-588PV5KMPT');
+    const kitSession = new URLSearchParams(location.search).get('session_id');
+    if (kitSession && kitSession.startsWith('cs_')) gtag('event', 'purchase', {
+      transaction_id: kitSession, currency: 'USD', value: 5,
+      items: [{ item_id: 'kit', item_name: 'Emergency PDF Kit', price: 5, quantity: 1 }],
+    });
   </script>
   <link rel="stylesheet" href="hid-style.css" />
   <style>

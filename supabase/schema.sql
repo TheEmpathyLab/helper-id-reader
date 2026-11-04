@@ -439,3 +439,11 @@ alter table leads       enable row level security;
 --   );
 --   alter table membership_waitlist enable row level security;
 --   -- No permissive policies — all access via service role (server.js).
+
+-- ============================================================
+-- one_time_orders.source — added 2026-11-04 (issue #100)
+-- Where a PDF Kit buyer came from, passed through Stripe as
+-- client_reference_id by hid-attribution.js. Format:
+-- {utm source_medium_campaign | ref_{host} | direct}--{page or note}
+-- ============================================================
+--   alter table one_time_orders add column source text;

@@ -1189,7 +1189,7 @@ async function handleKitCheckout(session) {
 
   const { error } = await supabase
     .from('one_time_orders')
-    .insert({ email: email.toLowerCase().trim(), token, stripe_session_id: session.id, expires_at: expiresAt });
+    .insert({ email: email.toLowerCase().trim(), token, stripe_session_id: session.id, expires_at: expiresAt, source: session.client_reference_id || null });
 
   if (error) {
     console.error('Kit webhook: failed to insert order:', error.message);
@@ -2402,7 +2402,7 @@ app.post('/admin/waitlist', requireAdmin, async (req, res) => {
 app.post('/admin/kit-orders', requireAdmin, async (req, res) => {
   const { data } = await supabase
     .from('one_time_orders')
-    .select('id, email, used, membership_interest, expires_at, created_at')
+    .select('id, email, used, membership_interest, source, expires_at, created_at')
     .order('created_at', { ascending: false })
     .limit(100);
   return res.json({ orders: data || [] });

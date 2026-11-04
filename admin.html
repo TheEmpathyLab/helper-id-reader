@@ -522,12 +522,13 @@
                 <th>Email</th>
                 <th>Status</th>
                 <th>Membership Waitlist</th>
+                <th>Source</th>
                 <th>Purchased</th>
                 <th>Expires</th>
               </tr>
             </thead>
             <tbody id="kit-orders-tbody">
-              <tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr>
+              <tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr>
             </tbody>
           </table>
         </div>
@@ -916,7 +917,7 @@
         document.getElementById('kit-orders-count').textContent = `${orders.length} total`;
         if (!orders.length) {
           document.getElementById('kit-orders-tbody').innerHTML =
-            '<tr><td colspan="5"><div class="empty-state">No kit sales yet.</div></td></tr>';
+            '<tr><td colspan="6"><div class="empty-state">No kit sales yet.</div></td></tr>';
           return;
         }
         document.getElementById('kit-orders-tbody').innerHTML = orders.map(o => {
@@ -925,13 +926,14 @@
             <td style="font-family:monospace;font-size:0.82rem;">${escHtml(o.email)}</td>
             <td><span class="status-pill ${o.used ? 'pill-active' : 'pill-pending'}">${o.used ? 'Redeemed' : 'Pending'}</span></td>
             <td>${o.membership_interest ? 'Yes' : '—'}</td>
+            <td style="font-family:monospace;font-size:0.78rem;">${escHtml(o.source || '—')}</td>
             <td style="color:var(--gray-mid);font-size:0.82rem;">${timeAgo(o.created_at)}</td>
             <td style="color:var(--gray-mid);font-size:0.82rem;">${expires}</td>
           </tr>`;
         }).join('');
       } catch {
         document.getElementById('kit-orders-tbody').innerHTML =
-          '<tr><td colspan="5"><div class="empty-state">Failed to load.</div></td></tr>';
+          '<tr><td colspan="6"><div class="empty-state">Failed to load.</div></td></tr>';
       }
     }
 
