@@ -10,3 +10,7 @@ node_modules/
 
 # Migration assets — not for version control
 api/scripts/headshots/
+
+# Session and agenda notes: local only, never committed or served
+session-log/
+agenda-notes.md
