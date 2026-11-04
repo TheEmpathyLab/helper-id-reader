@@ -29,7 +29,7 @@ api/
                       Overwrite and push to update the design — no code changes needed.
   package.json      — Node dependencies (pdf-lib, SendGrid, Supabase, Stripe, bcryptjs, etc.)
 docs/               — Design assets and reference PDFs. NOT deployed to server.
-session-log/        — Session reviews. One file per session.
+session-log/        — Session reviews. One file per session. Local only: gitignored, never committed.
 supabase/
   schema.sql        — Authoritative DB schema. All migrations documented here as comments.
 .github/workflows/  — GitHub Actions (drip cron, future security checks)
@@ -110,7 +110,7 @@ When there's no issue number (fixes, infra), lead with a short imperative phrase
 
 ## Session reviews
 
-At the end of every working session, Shelton will ask for a session review. Follow the format defined in `SESSION_REVIEW_INSTRUCTIONS.md` exactly. Write the file to `session-log/YYYY-MM-DD-{slug}.md` and commit it.
+At the end of every working session, Shelton will ask for a session review. Follow the format defined in `SESSION_REVIEW_INSTRUCTIONS.md` exactly. Write the file to `session-log/YYYY-MM-DD-{slug}.md`. Session notes are local only: `session-log/` is gitignored, so don't commit or push them. When Shelton says "commit" after a review, commit only the code changes.
 
 If work continues after a review is written, append a continuation block — never rewrite the original.
 

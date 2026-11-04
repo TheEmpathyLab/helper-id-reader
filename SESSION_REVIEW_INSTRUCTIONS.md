@@ -8,7 +8,7 @@
 
 A session review is a **decision log**, not a meeting summary. It captures what was decided, why, what was deferred, and what comes next — in a format that can be re-fed into a future Claude session as working context without re-hashing solved problems.
 
-Every session review is a Markdown file committed to the repo. It is institutional memory. It replaces the knowledge that would otherwise leave with the person who held it.
+Every session review is a Markdown file kept locally in `session-log/` (gitignored, never committed or published). It is institutional memory. It replaces the knowledge that would otherwise leave with the person who held it.
 
 ---
 
@@ -16,7 +16,7 @@ Every session review is a Markdown file committed to the repo. It is institution
 
 - **Format:** Markdown only. Never DOCX, never PDF, never plain text.
 - **Filename:** `YYYY-MM-DD-{short-slug}.md` — e.g. `2026-03-17-architecture-decisions.md`
-- **Location:** Commit to the `session-log/` folder in the repo root. This is the only home for session reviews.
+- **Location:** The `session-log/` folder in the repo root. This is the only home for session reviews. It is gitignored: never commit or push it.
 - **Length:** Comprehensive but not verbose. Every section earns its place.
 - **Tense:** Past tense for what was decided. Present tense for what is true now. Future tense only for next steps.
 - **No filler:** No "in this session we discussed..." preamble. Start with substance.
@@ -34,7 +34,7 @@ Every session review must include all of the following sections, in this order.
 ```markdown
 # Helper-ID — {Session Title}
 **Session date:** YYYY-MM-DD  
-**Status:** Decision log — ready for repo commit  
+**Status:** Decision log (local only)  
 **Next session entry point:** {one sentence describing where to pick up}
 ```
 
@@ -232,7 +232,7 @@ session-log/
   2026-04-01-nfc-integration-review.md
 ```
 
-One file per working session. Dated. Slugged to the primary topic. Committed at the end of every session before closing.
+One file per working session. Dated. Slugged to the primary topic. Written at the end of every session; kept local, not committed.
 
 ---
 
