@@ -1,7 +1,7 @@
 # Helper-ID — Kit Sample Previews, Template Gaps, Purchase Tracking
 **Session date:** 2026-11-04
 **Status:** Decision log — ready for repo commit
-**Next session entry point:** Start #101: write the tracked-links register and make the first link, for the LinkedIn post sharing the "Why I'm Building Helper-ID" note.
+**Next session entry point:** After the LinkedIn post goes live (2026-11-05, 9am), reshare it from the Helper-ID page, then check GA and the admin Source column for `linkedin_social_why-note`.
 
 Continues [2026-11-03-pdf-kit-featured-free-channels.md](2026-11-03-pdf-kit-featured-free-channels.md).
 
@@ -93,4 +93,50 @@ Provenance Label v1.0
 - AI Tool(s): Claude Opus 5.5 (Anthropic)
 - Human Roles: Priorities, approvals, dashboard setup (Supabase, Stripe, GA), live QA
 - AI Roles: Image generation, HTML/CSS/JS, server and admin changes, issue writing, documentation
+```
+
+---
+
+### Update — 2026-11-04 — SEO basics, Search Console, LinkedIn post
+
+#### Additional decisions
+- Each Helper Note launch follows #102 as a repeatable system: site SEO, then Search Console, then a LinkedIn post, then measurement. "Why I'm Building Helper-ID" is the first run.
+- LinkedIn post format: a native post from Shelton's personal profile, a tall (1080×1350) quote card image, the tracked link in the post, and a closing question. Not a LinkedIn Article, so the story isn't split across two copies.
+- Every piece gets its own provenance label. The post doesn't reuse the article's label, because its human/AI split is different.
+- `robots.txt` keeps utility pages, `session-log/`, `docs/` and `kit_design/` out of search results. They stay reachable by direct link.
+
+#### Additional artifacts
+- `sitemap.xml` (11 public pages, lastmod from git) and `robots.txt`.
+- Canonical tags on the 11 public pages.
+- `BlogPosting` structured data on the note.
+- 1200×627 preview image `images/og-why-im-building-helper-id.jpg` (Shelton's photo plus title; the subtitle line is Claude's wording).
+- "Read Shelton's story" link on `about.html`. Commit `da0a98c`.
+- Google Search Console: domain property for helper-id.com verified with a TXT record at **Namecheap**, `sitemap.xml` submitted, indexing requested for the note.
+- LinkedIn quote card `docs/linkedin/linkedin-quote-card-why-im-building-helper-id.jpg` ("We finally found your phone number, Shai..."). Commit `924beb0`.
+- LinkedIn post drafted in PL Writer (`doc_8l-20CcaFaaP3B-f`). Labeled [PL-000039](https://registry.provenancelabel.org/PL-000039): 4% human, 96% AI, 17 minutes. Article label is [PL-000037](https://registry.provenancelabel.org/PL-000037), 64% human. Both recorded on #102. Scheduled for 2026-11-05 at 9am, using tracked link `utm_source=linkedin&utm_medium=social&utm_campaign=why-note`.
+
+#### Resolved this update
+- #102 site items and Search Console setup are done (checked off on the issue).
+
+#### Lesson: check DNS before giving DNS steps
+Claude saw `server: cloudflare` in helper-id.com's response headers, assumed Cloudflare ran the DNS, and gave Cloudflare steps. That header comes from DigitalOcean App Platform's CDN. `dig NS helper-id.com` shows the DNS is at Namecheap (`registrar-servers.com`). Separately, the TXT record first went onto the PL domain by mistake; Shelton moved it, and a check confirmed the PL domain was left clean. **Next time:** run `dig NS` before giving DNS instructions, and confirm the record on the authoritative server (`dig TXT helper-id.com @dns1.registrar-servers.com`).
+
+#### Lesson: the label counts characters, not direction
+The post came out 96% AI, even though Shelton directed its structure and made the edits. The body was Claude's inserted draft, Shelton's own preamble was cut, and the tracked link pasted from Claude counted as AI. Claude laid out three honest options (post as is, rewrite a few lines first, or cite only the article's label). Shelton scheduled the post. Add this to the PL Writer editing-phase reflection: when the writer directs an AI-drafted short piece, the label shows almost no human contribution.
+
+#### Revised next steps
+1. 2026-11-05: Shelton replies to comments in the first hour after 9am, then reshares from the Helper-ID / Empathy Lab page.
+2. Later in the week: check GA, the admin Source column and Search Console for the note. Then turn #102 into a checklist for every future note.
+3. #101: tracked-links register and the remaining untagged email links. The LinkedIn link already exists; record it there.
+4. Carried over: kit photos (#95), template fixes (#96–#99), voice-over (#93), #92 QA.
+
+#### Provenance label — continuation
+```
+Provenance Label v1.0
+- Human Contribution: 30%
+- AI Contribution: 70%
+- Collaboration Method: Shelton set up Search Console and DNS, chose the quote card, edited and scheduled the LinkedIn post, and chose how to handle its label. Claude built the SEO files, preview image and quote card, drafted and reviewed the post, guided the Search Console setup, and wrote this update.
+- AI Tool(s): Claude Opus 5.5 (Anthropic)
+- Human Roles: Account setup (Search Console, Namecheap), image choice, post edits and scheduling, provenance decision
+- AI Roles: SEO implementation, image design, post drafting and review, setup guidance, documentation
 ```
