@@ -138,3 +138,33 @@ Provenance Label v1.0
 - Human Roles: Copy, naming, design choices, writing and editing the note, QA on device
 - AI Roles: Risk explanation, HTML/CSS, draft and edit suggestions, publishing, documentation
 ```
+
+---
+
+### Update — 2026-11-03 — PL Writer editing-phase reflection
+
+#### Additional decisions
+- The Helper Note workflow (scaffold → Shelton fills → AI suggests edits, Shelton writes them → publish) is the model to bring into PL Writer. Editing should be a recorded phase, not just inserting AI text.
+
+#### Additional artifacts
+- **PL Writer reflection note:** `2026-11-03-plw-editing-phase-reflection.md`, written to the Claude scratchpad, not to any repo. Shelton is carrying it to the PL repo by hand. It covers:
+  - The four phases. Only the scaffold insert shows on PL-000037 (36% AI).
+  - What the label missed: 3 review rounds, about 30 suggestions, a fact check, and a privacy flag.
+  - Friction: suggestions lived in the chat, and nothing tracks which were accepted or declined.
+  - Product ideas: suggestions anchored to text with an applied / dismissed / inserted outcome, an editing line on the label, role tags, a scaffold mode with required prompts, and typography help.
+- The suggestion counts in the note come from Claude's replies in this session. Shelton should confirm them before sharing.
+
+#### Revised next steps
+1. Shelton moves the reflection note into the PL repo and opens it there as a PL Writer product thread. The scratchpad copy is temporary.
+2. The other next steps above are unchanged. Purchase tracking is still the HID entry point.
+
+#### Provenance label — continuation
+```
+Provenance Label v1.0
+- Human Contribution: 25%
+- AI Contribution: 75%
+- Collaboration Method: Shelton framed the problem (PL Writer should be more than copy-and-paste) and asked for a reflection. Claude wrote it from the session record.
+- AI Tool(s): Claude Opus 5.5 (Anthropic)
+- Human Roles: Framing, product direction
+- AI Roles: Session recall, analysis, drafting
+```
