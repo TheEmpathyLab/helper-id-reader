@@ -14,3 +14,6 @@ api/scripts/headshots/
 # Session and agenda notes: local only, never committed or served
 session-log/
 agenda-notes.md
+
+# InDesign source for the one-pager: local only
+kit_design/260618-HID-OnePager.indd
