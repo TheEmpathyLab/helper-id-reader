@@ -44,8 +44,6 @@
     .hero-form-card p { font-size: 0.83rem; color: var(--gray-dark); margin-bottom: 18px; line-height: 1.5; }
     .hero-form-card .hid-input { margin-bottom: 10px; font-size: 1rem; }
     #hero-error { display:none; margin-top:8px; font-size:0.82rem; color:var(--red); }
-    .hero-divider { display: flex; align-items: center; gap: 10px; margin: 20px 0; color: var(--gray-mid); font-size: 0.78rem; }
-    .hero-divider::before, .hero-divider::after { content:''; flex:1; height:1px; background:var(--border); }
     .products-section { border-top: 1.5px solid var(--border); padding: 56px 24px; }
     @media(max-width:720px) {
       .hero { grid-template-columns:1fr; gap:32px; }
@@ -134,7 +132,6 @@
     <nav class="hid-nav">
       <a href="products.html">Products</a>
       <a href="membership.html">Membership</a>
-      <a href="reader.html">Read a Tag</a>
       <a href="helper-notes.html">Helper Notes</a>
       <a href="about.html">About</a>
     </nav>
@@ -170,8 +167,6 @@
       </button>
       <p><i><br>Want a demonstration?<br>Enter Code: 323232 / PIN: 323232</i></p>
       <div id="hero-error">Invalid CODE or PIN format. Please try again.</div>
-      <div class="hero-divider">or</div>
-      <a href="reader.html" class="hid-btn hid-btn-outline hid-btn-full" style="font-size:0.85rem;">Open Tag Reader</a>
     </div>
 
   </section>

@@ -3,6 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <script>
+    // Profile viewer only (NFC tag, CODE+PIN handoff, ?code=, #profile). With none of those, send visitors to the home page form.
+    (function () {
+      const q = new URLSearchParams(location.search);
+      if (!location.hash && !q.get('token') && !q.get('code') && !localStorage.getItem('hid_lookup')) location.replace('index.html');
+    })();
+  </script>
   <title>Helper-ID — Emergency Information</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="favicon.png" />
@@ -342,7 +350,6 @@
     <nav class="hid-nav">
       <a href="products.html">Products</a>
       <a href="membership.html">Membership</a>
-      <a href="reader.html" class="active">Read a Tag</a>
       <a href="helper-notes.html">Helper Notes</a>
       <a href="about.html">About</a>
     </nav>
